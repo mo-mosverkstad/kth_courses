@@ -1,0 +1,54 @@
+def gcd(factor1: int, factor2: int) -> int:
+    '''
+    gcd of two numbers using Euclid's algorithm
+    '''
+    while factor2 != 0:
+        factor1, factor2 = factor2, factor1 % factor2
+    return factor1
+
+def power_modulo(base: int, exponent: int, modulo: int) -> int:
+    '''
+    Modular exponentiation
+    base ** exponent % modulo
+    '''
+    result = 1
+    base = base % modulo
+    while exponent > 0:
+        if exponent & 1:
+            result = (result * base) % modulo
+        base = (base * base) % modulo
+        exponent >>= 1
+    return result
+
+def integer_sqrt(number: int) -> int:
+    '''
+    Square root of number, handles large big int numbers
+    '''
+    if number < 0:
+        raise ValueError(f"integer_sqrt of negative number {number}")
+    if number < 2:
+        return number
+    root = 1 << ((number.bit_length() + 1) // 2)
+    while True:
+        next_root = (root + number // root) // 2
+        if next_root >= root:
+            return root
+        root = next_root
+
+
+def prime_list(bound: int) -> list[int]:
+    '''
+    Generate a prime list up to a given integer bound
+    '''
+    if bound < 2:
+        return []
+
+    composite = [False] * (bound + 1)
+    composite[0] = composite[1] = True
+
+    for number in range(2, integer_sqrt(bound) + 1):
+        if not composite[number]:
+            marks = len(range(number * number, bound + 1, number))
+            composite[number * number::number] = [True] * marks
+
+    return [number for number in range(2, bound + 1) if not composite[number]]

@@ -1,0 +1,17 @@
+# Intermediate C/C++ build files must not be tracked
+*.so
+*.o
+
+# Python __pycache__ must not be tracked
+__pycache__/
+
+# Remove LaTeX build files
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+
+# Built PDFs must not be tracked
+*.pdf

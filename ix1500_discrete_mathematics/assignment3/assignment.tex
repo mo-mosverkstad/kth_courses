@@ -1,0 +1,907 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath}
+\usepackage{cancel}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\usepackage{graphicx}
+\usepackage{float}
+
+\usepackage{geometry}
+\geometry{
+    a4paper,
+    margin=2.5cm
+}
+
+\usepackage{booktabs}
+\usepackage{array}
+
+\usepackage{xcolor}
+\usepackage{listings}
+
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{graphicx}
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    showstringspaces=false
+}
+
+\title{
+    \textbf{IX1500 Discrete Mathematics}\\
+    Project 2
+}
+
+\author{
+    Mo Wang\\
+    \texttt{mowang@kth.se}
+}
+
+\date{September 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+This report concerns the Quadratic Sieve algorithm, an integer factorization algorithm based on modular arithmetic and quadratic remainders. Mathematical concepts as a fundament to the algorithm as well as its underlying subalgorithms such as Tonelli-Shanks algorithm are explained. This includes generation of smooth numbers, the construction of a factor base, and the use of linear algebra to find a congruence of squares. Additionally, a working prototype is also used to illustrate the algorithm, as well as the strengths, limitations, and practical applications are discussed.
+
+\end{abstract}
+
+\section*{Introduction}
+
+This report concerns Quadratic Sieve algorithm which is an integer factorization algorithm for factoring large integers. Integer factorization is an important computational problem for different applications in number theory and cryptography. The Quadratic Sieve approaches the factorization problem by searching for a congruence between two squares, which can then be used to obtain a non-trivial factor of the original integer. For Quadratic Sieves, a factor base are constructed for series of quadratic differences and smooth values are also searched. Linear algebra is used at last to find suitable relations between these values. The correctness of the method can be explained through the resulting congruence of squares. A prototype for demonstrating the method on relatively small composite numbers is also implemented.
+
+\section*{Problem}
+% 1. Problem Definition: Clearly define the problem and explain its significance.
+
+The problem scope of the Quadratic Sieve concerns the factorization of a composite number into non-trivial factors. This is important for different applications in number theory and cryptography. In terms of cryptography, the difficulty of factoring large number serves as a base for cryptographic security. 
+
+Given a composite integer $N$, the factorization problem is to find integers $p$ and $q$ such that
+
+\[
+N = pq
+\]
+
+where $1 < p,q < N$. For a sufficiently large composite number, finding such factors can become computationally difficult. Simple algorithms such as trial-division that tests all prime numbers can quickly become a bottleneck since the algorithm has to check the prime number $2$ and all odd numbers since all prime numbers except $2$ are odd, up to $\sqrt{N}$.
+
+The Quadratic Sieve solves this problem by searching for a congruence of squares modulo $N$,
+
+\[
+x^2 \equiv y^2 \pmod{N}
+\]
+
+where $x \not\equiv \pm y \pmod{N}$. By solving the modular equation into the given congruence between $x$ and $y$, a non-trivial factor of $N$ can be obtained through the greatest common divisor,
+
+\[
+\gcd(x-y,N) \quad \text{or} \quad \gcd(x+y,N)
+\]
+
+In order to efficiently find the suitable values $x$ and $y$, the algorithm generates quadratic differences and searches for smooth values that can be represented using only small prime factors with even exponents. In this case, a pair of $x$ and $y$ can be found, whereas gcd can be calculated. This avoid searching through all $\lfloor \sqrt{N}/2 \rfloor + 1$ candidate numbers during factorization.
+
+\section*{Mathematical Background}
+% 2. Mathematical Background: Introduce the mathematical concepts, definitions, and theorems needed to understand the problem.
+
+The Quadratic Sieve algorithm relies on several concepts in both number theory and linear algebra. Linear algebra is included in the algorithm since it has a clean property of batch-solving multiple linear expression.
+
+\subsection*{Modular Arithmetic}
+
+The most important backbone concept that the Quadratic Sieves algorithm relies on is modular arithmetics. For two integers $a$ and $b$, the congruence 
+
+\[
+a \equiv b \pmod{N}
+\]
+
+means that the residue for the division $a/N$ is the same as for $b/N$. It also means that $N$ divides their diverence
+
+\[
+N \mid (a-b)
+\]
+
+In this case, the expression can also be transformed into a linear equation without special mathematical symbols:
+
+\[
+a - b = N \times k
+\]
+
+\subsection*{Quadratic Residues}
+
+An integer $a$ is a quadratic residue modulo $N$ if an integer $x$ exists and fulfills
+
+\[
+x^2 \equiv a \pmod{N}
+\]
+
+In another words, this can also be rephrased that if $a$ is an quadratic residue modulo $N$, the previous equation produces at least a solution $x$.
+
+If an integer $a$ is not a quadratic residue, it is called instead a quadratic non-residue modulo $N$.
+
+Quadratic residues are important for Quadratic Sieve algorithm since  the algorithm checks every quadratic difference $x^2 - N$ to be divisable by a prime number $p$. This problem can be rewritten as $x^2 \equiv N \pmod{p}$, whereas similar rewrite is mentioned above in Modular Arithmetic. Solving such modular equation requires Tonelli-Shanks algorithm, which will be investigated in detail later.
+
+\subsection*{Euler's criterion}
+
+Euler's criterion is an important property to check if a given integer number $a$ is a quadratic residue modulo an odd prime $p$. The property is useful in Tonelli-Shanks algorithm. 
+
+For $a \not\equiv 0 \pmod p$, it states that
+\[
+a^{(p-1)/2} \equiv
+\begin{cases}
+1 \pmod p & \text{if } a \text{ is a quadratic residue}\\
+-1 \pmod p & \text{otherwise, } a \text{ is not a quadratic residue}
+\end{cases}
+\]
+
+Using this property, whether an integer $a$ has a square root modulo $p$ can be tested, in order to determine if a modular square root exists.
+
+This property can be simply proven by applying Fermat's little theorem
+
+\[
+x^{p-1} \equiv 1 \pmod p
+\]
+
+which can be rewritten using conjugate rule:
+\[
+a^{p-1} - 1 = (a^{(p-1)/2} - 1)(a^{(p-1)/2} + 1) \equiv 0 \pmod p
+\]
+
+Since $p$ is prime, this implies
+\[
+a^{(p-1)/2} \equiv 1 \pmod p
+\qquad\text{or}\qquad
+a^{(p-1)/2} \equiv -1 \pmod p
+\]
+
+If $a$ is a quadratic residue modulo $p$, this means that $y$ fulfilling $a \equiv y^2 \pmod p$ can be rewritten as
+
+\[
+a^{(p-1)/2}
+\equiv
+(y^2)^{(p-1)/2}
+=
+y^{p-1}
+\equiv 1 \pmod p
+\]
+where the last congruence applies Fermat's little theorem.
+
+Consequently, the reversed also applies. Given $a^{(p-1)/2} \equiv 1\pmod p$, $a$ can be derived as a quadratic residue. Constructing a polynomial $f(x)=x^{(p-1)/2}-1$, it has the degree $(p-1)/2$ and can have at most $(p-1)/2$ roots modulo the prime $p$. Since every non-zero quadratic residue  $a$ satisfies
+\[
+a^{(p-1)/2}\equiv 1\pmod p
+\]
+there are exactly $(p-1)/2$ distinct nonzero quadratic residues modulo $p$, since
+\[
+1^2,2^2,\ldots,\left(\frac{p-1}{2}\right)^2
+\]
+are all distinct modulo $p$ and these nonzero quadratic residues are exactly the roots of $f(x)$.
+\[
+a^{(p-1)/2}\equiv 1\pmod p
+\]
+if and only if $a$ is a quadratic residue modulo $p$.
+Combining this result with
+\[
+a^{(p-1)/2}\equiv \pm1\pmod p
+\]
+Euler's criterion can be obtained.
+
+
+\subsection*{Smooth Numbers}
+
+Another important concept is smooth number. A number is called smooth, or specifically $B$-smooth, if all its prime factors are smooth, which is essentially less than or equal to $B$. For instance, the number $2^3\times 3 \times 5 = 120$ is $5$-smooth since its prime factors after prime factorization are less than the bound $5$. However, a number $5 * 23 = 115$ is not $5$-smooth since it contains a prime factor $23$ which is over the bound.
+
+Smooth numbers are important for Quadratic Sieve algorithm because each element of the exponent vector corresponds to a ordered factored prime base starting from $2$, for instance the base ($2$, $3$, $5$, $7$, $11$, $\cdots$). Prime exponent vectors for smooth quadratic differences $x^2 - N$ must not be arbitrary large, otherwise computational performance will be affected. This means that a bound for the prime numbers must be set to limit the length of prime exponent vectors.
+
+\subsection*{Factor Base and Exponent Vector}
+
+A factor base is a basis concept suitable for linear algebra. In this specific vector space, each number can be represented as an exponent vector where each element is an exponent corresponding to each prime base in a factor base. Notice that each number has a unique exponent vector due to The Fundamental Theorem of Arithmetic.
+
+Suppose that a basis can be written as:
+
+\[
+\mathcal{B}=\{p_1,p_2,\ldots,p_k\}
+\]
+
+then a smooth number in basis $\mathcal{B}$ can be written as, considering the number can be represented as ($e_0$, $e_1$, $e_2$, $\cdots$, $e_k$) in vector-form:
+
+$$
+n = (-1)^{e_0}p_1^{e_1}p_2^{e_2}\cdots p_k^{e_k}
+$$
+
+Notice how $e_0$ correspond to the sign, where an even sign produces positive number, while odd sign for negative number.
+
+For instance, a number $n_1 = 24$ can be written as the exponent vector $v_1 = (3, 1, 0)$ over the factor base $\mathcal{B}=\{2, 3, 5\}$.
+
+Factor bases are however not bases for linear general vector spaces. In a conventional linear vector space, applying a linear combination implies scaling vectors via scalar multiplication and combining them via vector addition. However, in this particular case, applying a linear combination to the exponent vectors corresponds to exponentiation and multiplication of the underlying prime bases instead. Operators for exponent vectors are one level lower than operators for equivalent numbers, meaning that an addition of two exponent vectors correspond to a multiplication of two numbers.
+
+Since the parity of each exponent is sufficient to determine if a product of numbers in exponent vector form, these vectors can be considered existing in the Galois field 2 $\mathbb{F}_2$. Exponent vectors over $\mathbb{F}_2$ may not be unique for each number, but facilitates computation for searching perfect squares.
+
+\subsection*{Linear Algebra over $\mathbb{F}_2$}
+
+Despite that factor bases are not linear bases for linear vector spaces, the exponent vectors can still be used in linear algebra. Multiplication of two integer numbers can be represented as addition between two exponent vectors.
+
+Exponent vectors over Galois Field $\mathbb{F}_2$ becomes interesting for calculating perfect squares.
+
+Considering an integer $n$, having the prime factorization:
+
+$$
+n = (-1)^{e_0} p_1^{e_1}p_2^{e_2}\cdots p_k^{e_k}
+$$
+
+Its corresponding exponent vector on $\mathbb{F}_2$ is
+
+$$
+(e_0\bmod 2, e_1\bmod 2, e_2\bmod 2,\ldots, e_k\bmod 2)
+$$
+
+If $n$ is a perfect square, its exponent vector on $\mathbb{F}_2$ is of all zeros, since zero corresponds to an even exponent. If all prime exponents are odd, the number can be considered as a perfect square.
+
+Finding a product that is a perfect square from a set of numbers $\{n_1, n_2, n_3, \ldots, n_k\}$ can be solved using linear algebra. The integer numbers $\{n_1, n_2, n_3, \ldots, n_k\}$ can be written as a set of prime exponent vectors on $\mathbb{F}_2$. These vectors can be formed into a matrix 
+
+\[
+A =
+\begin{pmatrix}
+e_{11} & e_{12} & \cdots & e_{1k} \\
+e_{21} & e_{22} & \cdots & e_{2k} \\
+\vdots & \vdots & \ddots & \vdots \\
+e_{m1} & e_{m2} & \cdots & e_{mk}
+\end{pmatrix}
+\pmod{2}
+\]
+
+where $m$ is number of prime exponents used for the numbers. To specify which integers should be multiplied together, a selection vector
+
+\[
+\mathbf{x} =
+\begin{pmatrix}
+x_1 \\
+x_2 \\
+\vdots \\
+x_m
+\end{pmatrix},
+\qquad x_i \in \mathbb{F}_2 = \{0,1\}
+\]
+
+can be introduced. The value $n_i = 1$ indicates that the number in position $i$ is included in the product, while $n_i = 0$ indicate that the number is absent from the product. As mentioned before, since multiplying two integer numbers is equivalent for adding two corresponding prime exponent vectors, multiplying the transpose of the matrix $A$ by the selection vector gives the result in prime exponent vector:
+
+\[
+A^T \mathbf{x}
+\]
+
+For computing a perfect product square, the matrix product must be zero vector, if all prime exponent vectors belong to $\mathbb{F}_2$.
+
+\[
+A^T \mathbf{x} = 0
+\]
+
+This system can be later solved using Gaussian elimination over $\mathbb{F}_2$. Since the only elements of $\mathbb{F}_2$ are $0$ and $1$, addition is performed modulo $2$. In particular, this means that
+
+\[
+0+0=0,\qquad
+0+1=1,\qquad
+1+0=1,\qquad
+1+1=0
+\]
+
+This means that addition in $\mathbb{F}_2$ is equivalent to the XOR operation. Gaussian elimination over $\mathbb{F}_2$ can therefore be implemented efficiently using XOR operations instead of the usual arithmetic operations.
+
+\subsection*{Tonelli-Shanks Algorithm}
+
+Finally, Tonelli-Shanks is a separate algorithm that is used in the Quadratic Sieves to check which numbers having quadratic residues. The purpose of this algorithm is used to find a solution to the quadratic residue equation
+
+\[
+x^2 \equiv a \pmod{p}
+\]
+
+when $p$ is an odd prime and $a$ is a quadratic residue modulo $p$. Such modular square roots can be used when determining which values in the sieving interval can produce factors belonging to the factor base.
+
+The Tonelli-Shanks algorithm works by first decomposing $p-1$ into factors, one odd part $Q$ and $S$ as an exponent to $2$
+
+\[
+p-1 = Q \times 2^S
+\]
+
+where $Q$ is odd. It then finds a quadratic non-residue $z$ modulo $p$ and uses repeated modular exponentiation to construct a square root of $a$.
+
+The algorithm begins with two checks:
+
+\begin{enumerate}
+    \item If $a$ is congruent to $0$, the root is trivial and is $x=0$ for $a \equiv 0 \pmod p$. The root can be returned immediately.
+    \item The value $a$ can also be checked if a quadratic residue modulo $p$ exists using Euler's criterion:
+    \[
+        a^{(p-1)/2} \equiv 1 \pmod p
+    \]
+    If $a^{(p-1)/2}$ is modular to $-1$ with prime $p$, no root can be found and the algorithm can be exited immediately.
+\end{enumerate}
+
+Afterwards, the algorithm begins by setting up initial variables that are used for the iterations of the algorithm.
+
+\begin{enumerate}
+    \item A minimal quadratic non-residue $z$ modulo $p$ is found should be found, or with other words:
+    \[
+        z^{(p-1)/2} \equiv -1 \pmod p
+    \]
+    \item The initial guess of the root $R$ is initialized to
+    \[
+        R=a^{(Q+1)/2} \pmod p
+    \]
+    \item The error multiplier $t$ is initialized to
+    \[
+        t=a^Q \pmod p
+    \]
+    \item The tracking exponent $M$ is also initialized to the same value as $S$:
+    \[
+        M=S
+    \]
+    \item Lastly, the so-called "Fudge factor" $c$ is initialized as:
+    \[
+        c=z^Q \pmod p
+    \]
+\end{enumerate}
+
+
+The algorithm is an approaching algorithm where it loops though iterations until the desired root to the quadratic modular equation is found. When $t$ is modular with $1$ modular to the odd prime $p$, in other words $t \equiv 1 \pmod p$, the loop can be stopped.
+
+For each iteration in the algorithm, the following steps are performed.
+\begin{enumerate}
+ 
+    \item The smallest integer $i$ is found for the modular equation:
+    \[
+        t^{2^i} \equiv 1 \pmod p
+    \]
+
+    \item Afterwards, an intermediate factor $b$ is set to:
+    \[
+        b=c^{2^{M-i-1}} \pmod p
+    \]
+
+    \item The variables $R$, $t$, $c$ and $m$ are updates accordingly:
+    \[
+        \begin{aligned}
+            R &= Rb \pmod p\\
+            t &= tb^2 \pmod p\\
+            c &= b^2 \pmod p\\
+            M &= i
+        \end{aligned}
+    \]
+
+\end{enumerate}
+
+The algorithm therefore returns one of the two possible square roots of $a$ modulo $p$. The other root is given by $p-R$, since
+
+$$
+(-R)^2 \equiv R^2 \equiv a \pmod p
+$$
+
+In Quadratic Sieve, the modular square roots are used to identify the position of the sieving interval that is divisable by a prime factor in the factor base. Instead of trial-dividing every number in the sieving interval for each prime, the Tonelli-Shanks algorithm is used for calculating modular square root once for each prime and quickly identify the corresponding positions, which makes sieving more efficient.
+
+\section*{Algorithm}
+%3. Algorithm: Explain the algorithm or computational method used to solve the problem. Pseudocode may be used to clarify the main steps.
+
+The primary intent of the algorithm is to find two non-trivial factors $a$ and $b$ whereas their product composes the integer $N$.
+\[
+    N = a \times b
+\]
+However, the integers $a$ and $b$ may not be useful. The expression can be rewriten by substituting the two variables into $a=x+y$ and $b=x-y$, where $x$ and $y$ are two new integer variables. Using the $x$ and $y$ representation, values of $a$ and $b$ can be uniquely identified and vice versa. The same product decomposition equation for number $N$ can be instead written as:
+\[
+    N = (x + y) \times (x - y) = x^2 - y^2
+\]
+Once the numbers $x$ and $y$ are found, the factors are given as $x+y$ and $x-y$
+
+Quadratic Sieve algorithm bases on the idea of Fermat's method, but introduces multiple algorithmic enhancements. Considering the number $N$ is being multiplied with $k$ where $k>1$ such that:
+\[
+    k \times N = (x + y) \times (x - y) = x^2 - y^2
+\]
+or
+\[
+    x^2 \equiv y^2 \pmod N
+\]
+If the integer values $x$ and $y$ are obtained, one factor can be obtained by $a = \gcd(N, x+y)$, while the other is $b = N/a$.
+
+Instead of searching directly for $x$ and $y$, the Quadratic Sieve defines the polynomial $Q$ below as:
+\[
+    Q(x) = x^2 - N
+\]
+
+For values of $x$ close to the integer square root $\lfloor \sqrt{N} \rfloor$, the value of $Q(x)$ is relatively small and therefore more possible to factor into small prime factors. In this case, the algorithm selects a \emph{factor base} given below:
+\[
+    \mathcal{B}={p_1,p_2,\ldots,p_m}
+\]
+consisting of small primes up to a specific bound. Recall that a value $Q(x)$ is  A value $Q(x)$ is called \emph{$\mathcal{B}$-smooth} if all of its consistent prime factors belong to the factor base.
+
+For every $x$ in a selected sieving interval larger than $\lfloor \sqrt{N} \rfloor$, the algorithm evaluates all $Q(x)$ integer values, and filter out the $Q(x)$ values that are not $\mathcal{B}$-smooth.
+
+A tiny example for visualizing the sieving interval can be constructed below, given that $N = 123$, and $\lfloor \sqrt{N} \rfloor = 11$. The quadratic polynomial used by the sieve is:
+\[
+    Q(x)=x^2-N=x^2-123
+\]
+
+The sieve interval can be written as:
+\[
+\begin{array}{c|c|l}
+    x  & Q(x) = x^2 - 123 & \text{Factorization} \\ \hline
+    11 & 121 - 123 = -2    & (-1) \times 2 \\
+    12 & 144 - 123 = 21    & 3 \times 7 \\
+    13 & 169 - 123 = 46    & 2 \times 23 \\
+    14 & 196 - 123 = 73    & 73 \\
+    15 & 225 - 123 = 102   & 2 \times 3 \times 17 \\
+    16 & 256 - 123 = 133   & 7 \times 19 \\
+    17 & 289 - 123 = 166   & 2 \times 83 \\
+    18 & 324 - 123 = 201   & 3 \times 67 \\
+    19 & 361 - 123 = 238   & 2 \times 7 \times 17 \\
+    20 & 400 - 123 = 277   & 277
+\end{array}
+\]
+
+For this example, a factor base can be choosen as:
+\[
+    \mathcal{B}=\{2,3,5,7\}
+\]
+
+Using the prime factorization in the array, only $x=11$ and $x=12$ are smooth, whereas other numbers are non-smooth since they contain prime factors larger than the given bound $7$.
+
+However, manually sieving using prime factorization can be tedious and inefficient for large numbers, since this factorization algorithm recursively requires prime factorization. Trial division with all integers $Q(x)$ with each prime number in the factor base $\mathcal{B}$ isn't either the most efficient solution. In this case, the \emph{Tonelli--Shanks algorithm} can be used to sieve out the given $Q(x)$ that are divisible with each prime number.
+
+For each prime $p$ in the factor base, the algorithm determines the values of $x$ for which
+\[
+Q(x)\equiv0\pmod p
+\]
+or moreover rewritten as:
+\[
+\begin{aligned}
+    x^2 - N &\equiv 0 &\pmod{p}\\
+    x^2 &\equiv N &\pmod{p}
+\end{aligned}
+\]
+
+If $r$ is a solution to this congruence, then all values
+\[
+x\equiv r\pmod p
+\]
+and
+\[
+x\equiv -r\pmod p
+\]
+are candidates for being divisible by $p$.
+
+By obtaining the roots from the modular equation, the positions of these roots can be marked in the sieving inteveral. Values that receive enough marks are candidates for being $\mathcal{B}$-smooth and are subsequently factored explicitly. The sieve adds the prime factor $p$ to the corresponding positions. Repeating this process for all primes in the factor base makes it possible to efficiently identify values of $Q(x)$ that are likely to be smooth.
+
+For every smooth value, its factorization over the factor base is given for instance as:
+\[
+Q(x)=p_1^{e_1}p_2^{e_2}\cdots p_k^{e_k}
+\]
+for the base $\mathcal{B}=\{e_1,e_2,\ldots,e_k\}$. The prime exponent can be written as $(p_1, p_2, \ldots, p_k)$ The parity of each exponent can be extracted out and form an exponent vector over Galois Field $\mathbb{F}_2$.
+
+With the parity exponent vectors, using linear algebra, a selection vector
+\[
+\mathbf{x} =
+\begin{pmatrix}
+x_1 \\
+x_2 \\
+\vdots \\
+x_m
+\end{pmatrix},
+\qquad x_i \in \mathbb{F}_2 = \{0,1\}
+\]
+can be calculated specifying which integer values of $Q(x)$ composes into a product that forms a perfect square. This can be done by solving the equation system 
+\[
+A^T \mathbf{x} = 0
+\]
+using Gaussian elimination over $\mathbb{F}_2$
+\[
+\mathbf v(x)=(e_1\bmod2,e_2\bmod2,\ldots,e_m\bmod2)
+\]
+
+The matrix $A$ can be formed by the smooth integer numbers in prime exponent vectors $\{n_1, n_2, n_3, \ldots, n_k\}$ over the given sieve interval. The rows of the matrices are the prime exponent vectors.
+\[
+A =
+\begin{pmatrix}
+e_{11} & e_{12} & \cdots & e_{1k} \\
+e_{21} & e_{22} & \cdots & e_{2k} \\
+\vdots & \vdots & \ddots & \vdots \\
+e_{m1} & e_{m2} & \cdots & e_{mk}
+\end{pmatrix}
+\pmod{2}
+\]
+
+Notice that the number of columns of $A$ must be larger than the number of rows. The reason is that the linear equation system $A^T \mathbf{x} = 0$, has only a trivial solution vector $\mathbf{x} = \mathbf{0}$, meaning that none of the smooth numbers are selected.
+
+For a non-zero solution to exist, the columns of $A$ must be linearly dependent. Since the columns are vectors in $\mathbb{F}_2^m$, there can be at most $m$ linearly independent columns. Therefore, choosing more smooth values of $Q(x)$ than the number of primes in the factor base
+\[
+k>m
+\]
+guarantees that the columns of $A$ are linearly dependent. In this case, a non-trivial solution exist to
+\[
+A\mathbf{x}=\mathbf{0}
+\]
+
+When the selected integer values of the sieving interval can be calculated, the product decomposition equation earlier using modulo
+\[
+x^2 \equiv y^2 \pmod N
+\]
+can be written as
+\[
+    \left(\prod_{i=1}^{k} x_i\right)^2
+    \equiv
+    \prod_{i=1}^{k} Q(x_i)
+    \equiv y^2
+    \pmod N
+\]
+
+Using $a = gcd(N, x+y)$, one potential non-trivial factor can be solved out. Another factor can be subsequently solved out by division $b = N/a$.
+
+The main computational advantage of the Quadratic Sieve is the sieving step using Tonelli-Shanks algorithm. Instead of attempting to factor each value $Q(x) = x^2-N$, the algorithm uses the small primes in the factor base to identify many smooth values and sieve the non-smooth factors out. The subsequent linear algebra combines these relations into the required congruence of squares.
+
+\section*{Correctness}
+% 4. Correctness: Explain why the algorithm produces a correct result. Where appropriate, provide a proof or justification of correctness.
+
+The correctness of the Quadratic Sieve algorithm stems mostly from the congruence of squares equation. The smooth integer numbers $Q(x)$ of the given sieving interval makes it easier to find multiple $Q(x)$ where product of them produce perfect squares, since an unbounded prime base makes the matrix unnecessary huge and inefficient. 
+
+Considering that for each selected value $x_i$, the quadratic polynomial gives $Q(x_i) = x_i^2 - N$, whereas its modular relation to $N$ can be written as
+\[
+Q(x_i) = x_i^2 - N\equiv x_i^2 \pmod N
+\]
+
+The product of the selected smooth integer values that produces a perfect square $\prod_{i\in S} Q(x_i)$ can be calculated as:
+\[
+    \prod_{i\in S} Q(x_i) \equiv \prod_{i\in S} x_i^2 = \left(\prod_{i\in S}x_i\right)^2
+\pmod N
+\]
+where $S$ is the selected smooth integer values $Q(x)$ in the sieving interval.
+
+\subsection*{Perfect product square}
+The product of selected $Q(x_i)$ values is intended to be a perfect square, since the Gauss elimination over $\mathbb{F}_2$ finds a selection vector of selected smooth $Q(x_i)$ values to be a perfect square. 
+
+Every $\mathcal{B}$-smooth value has a prime  factorization of the form
+\[
+Q(x_i)=(-1)^{e_{i0}}p_1^{e_{i1}}p_2^{e_{i2}}\ldots p_m^{e_{im}}
+\]
+where the prime base $\mathcal{B}$ is given as $\mathcal{B} = \{p_1, p_2, \ldots, p_m\}$ and the prime exponent vector for smooth number $i$ of the sieving interval as $(e_{i0}, e_{i1}, e_{i2}, \ldots, e_{im})$.
+
+The exponent vectors on $\mathbb{F}_2$ are used since only the parity of the exponents is relevant when determining whether the product is a perfect square. A non-zero selection vector must in this case satisfy
+\[
+\mathbf{A}^T\mathbf{x}=\mathbf{0}
+\]
+The zero vector means that the sum of every selected exponent parity is even. This means that every prime number in the prime base occurs with an even total exponent, which means it is a perfect square. The sign exponent is also included in the vector, meaning the resulting product is positive as well. In this case, there exist an integer
+\[
+\prod_{i\in S}Q(x_i)=y^2
+\]
+
+Given that the product of the selected $Q(x_i)$ values, $\prod_{i\in S} Q(x_i)$, is a perfect square, the value $x=\prod_{i\in S}x_i$ and $y^2=\prod_{i\in S} Q(x_i)$, can be inserted into the modular equation $x^2 \equiv y^2 \pmod N$.
+
+\subsection*{Quadratic congruence}
+When both numbers $x$ and $y$ are obtained, the both factors to $N$ in the equation $x^2 \equiv y^2 \pmod N$ can easily be determined using greatest common divisor
+\[
+a = \gcd(N, x+y)
+\]
+while the other one through division $b = N/a$. The modular equation $x^2 \equiv y^2 \pmod N$ can be rewritten as
+\[
+(x+y)(x-y) = k \times N
+\]
+for some integer $k$.
+
+This means that the factors $a$ and $b$ of $N$ are related to the two factors $x+y$ and $x-y$. The greatest common divisor can be used to determine which factors are shared between $N$ and $x+y$. Because of using greatest common divisor, the factors in $x+y$ that contributes to $k$ can be automatically removed, since only the factors that shares between $N$ and $x+y$ are kept.
+
+Since $a$ divides both $N$ and $x+y$, it is necessarily a divisor of $N$. If the congruence is non-trivial, meaning that $x\not\equiv \pm y\pmod N$, then $a$ can be a non-trivial factor satisfying $1<a<N$.
+
+The remaining factor can then be obtained directly from the original number $N$ by division.
+
+\subsection*{Trivial factors being produced}
+However, there are two cases where the algorithm may not produce a non-trivial factor. 
+
+\begin{enumerate}
+    \item First, the Gauss elimination may only produce the trivial zero selection vector if the amount of smooth $Q(n)$ in sieving interval is too small. In this case, larger sieving interal may mitigate the problem.
+    \item Second, a non-trivial selection vector can produce a congruence where the gcd is $1$ or $N$. In this case, another linear dependency can be selected and the process repeated.
+\end{enumerate}
+
+Therefore, the Quadratic Sieve is considered to be correct that every factor returned by the final gcd calculation is a divisor of $N$. However, in some cases, the algorithm may fail to produce non-trivial factors, where $1$ and $N$ are produced.
+
+\section*{Worked example by hand}
+% 5. Worked Example: Provide at least one non-trivial example and demonstrate the algorithm step by step.
+
+Consider a small non-trivial example $N=1057$ to be factorized. The square root of the number can be calculated as $\lceil \sqrt{1057} \rceil = 33$. This means that the sieving interval starts at $x=33$. Additionally, the bound for the factor base is calculated to $17$.
+
+The algorithm begins by calculating the sieving base. A prime factor that isn't used in any of the sieving interval for the specific number can be discarded. This means that all prime numbers of the sieving prime base must have an arbitrary number $x$ to the modular equation $x^2 \equiv p \pmod N$. By applying the Euler's criterion on all the prime numbers up to $17$, the sieving base can be calculated as below:
+
+\[\mathbb{B} = \{2, 3, 11, 13\}\]
+
+As the sieving base is calculated, the non-smooth values are discarded from the sieving interval. By discarding the values from the sieving interval, the values must first be identified using Tonelli-Shanks algorithm for solving the modular equation $x^2 \equiv N \pmod p$ and then marked. Since the Tonelli-Shanks algorithm only works for odd prime $p$, the lowest number is $3$.
+
+For $p=3$, the solution to the modular equation $x^2 \equiv 1057 \equiv 1 \pmod 3$ is $x \equiv 1$. The other base solution $x \equiv 2$ can be obtained by taking its negative modulo $p$. This means that all $x \equiv 1$ and $x \equiv 2$ should be marked for divisible by $3$, while the rest $x \equiv 0$ is not marked. In this case, Tonelli-Shanks algorithm will not be extended, since it is not the main focus of the algorithm.
+
+The similar step works for the rest primes $11$ and $13$ as well.
+
+After calculating the Tonelli-Shanks algorithm and marking the prime divisibility, the non-smooth numbers that cannot be divided by any of the prime numbers are discarded. The full interval can be shown below.
+
+The interval is calculated from $x=33$ to $x=53$ with $20$ numbers, since it is not a large number. The bound number and the sieving factor base bound are chosen a bit arbitrary, since there is no golden rule for it. If the number is too small, only trivial factors will be produced. Otherwise, the computation might be too big. The sieving interval with only smooth numbers can be shown below:
+\[
+\begin{aligned}
+x&=33, & Q(x)&=32, & \operatorname{factor}(Q(x))&=2^{5}\\
+x&=34, & Q(x)&=99, & \operatorname{factor}(Q(x))&=3^{2}\times11\\
+x&=37, & Q(x)&=312, & \operatorname{factor}(Q(x))&=2^{3}\times3\times13\\
+x&=41, & Q(x)&=624, & \operatorname{factor}(Q(x))&=2^{4}\times3\times13\\
+x&=43, & Q(x)&=792, & \operatorname{factor}(Q(x))&=2^{3}\times3^{2}\times11\\
+x&=45, & Q(x)&=968, & \operatorname{factor}(Q(x))&=2^{3}\times11^{2}\\
+x&=47, & Q(x)&=1152, & \operatorname{factor}(Q(x))&=2^{7}\times3^{2}
+\end{aligned}
+\]
+
+The factors can be assembled into a matrix $A$ where the columns correspond to the prime numbers of the sieving prime base in rising order from left to right and the rows corresponding each smooth $Q(x)$ value in rising order from top to down. Using the matrix $A$, the integer numbers $Q(x)$ that produces a product of a perfect square can be identified.
+\[
+A = \left(
+\begin{array}{*{4}{c}}
+5 & 0 & 0 & 0 \\
+0 & 2 & 1 & 0 \\
+3 & 1 & 0 & 1 \\
+4 & 1 & 0 & 1 \\
+3 & 2 & 1 & 0 \\
+3 & 0 & 2 & 0 \\
+7 & 2 & 0 & 0 \\
+\end{array}
+\right)
+\]
+A more useful matrix can be built where each element is modular to $\mathbb{F}_2$.
+\[
+A = \left(
+\begin{array}{*{4}{c}}
+1 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+1 & 1 & 0 & 1 \\
+0 & 1 & 0 & 1 \\
+1 & 0 & 1 & 0 \\
+1 & 0 & 0 & 0 \\
+1 & 0 & 0 & 0 \\
+\end{array}
+\right)
+\]
+By solving the Gauss elimination for $\mathbf{A}^T*\mathbf{x} = \mathbf{0}$, where $x$ denotes the selection vector in $\mathbb{R}^7$, the linear combinations of the solution can be determined. Since the matrix is over the Galois field $\mathbb{F}_2$, the only difference is that all addition operation becomes XOR operations written in $\oplus$. 
+
+\begin{align*}
+&\left[
+\begin{array}{cccccc|c}
+1 & 0 & 1 & 0 & 1 & 1 & 1 \\
+0 & 0 & 1 & 1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 1 & 0 & 0 & 0 
+\end{array}
+\right]
+\xrightarrow{\substack{R_1 \leftarrow R_1 \oplus R_2 \\ R_4 \leftarrow R_4 \oplus R_2}}
+\left[
+\begin{array}{cccccc|c}
+1 & 0 & 0 & 1 & 1 & 1 & 1 \\
+0 & 0 & 1 & 1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 1 & 0 & 0 \\
+\cancel{0} & \cancel{0} & \cancel{1} & \cancel{1} & \cancel{0} & \cancel{0} & \cancel{0}
+\end{array}
+\right] \\[1.5em]
+&\xrightarrow{\text{Remove zero row}}
+\left[
+\begin{array}{cccccc|c}
+1 & 0 & 0 & 1 & 1 & 1 & 1 \\
+0 & 0 & 1 & 1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0
+\end{array}
+\right]
+\xrightarrow{R_2 \leftrightarrow R_3}
+\left[
+\begin{array}{cccccc|c}
+1 & 0 & 0 & 1 & 1 & 1 & 1 \\
+0 & 1 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0
+\end{array}
+\right]
+\end{align*}
+
+From the last Gauss-elimination matrix in reduced row echelon form, the relationship $x_i$ can be states as following, considering that each $x_i$ value correspond to $i$-th element of the solution vector $x$.
+\[
+\begin{aligned}
+x_0 \oplus x_3 \oplus x_4 \oplus x_5 \oplus x_6 &= 0 \\
+x_1 \oplus x_4                                  &= 0 \\
+x_2 \oplus x_3                                  &= 0
+\end{aligned}
+\]
+Rearranging the equation shows
+\[
+\begin{aligned}
+x_0 &= x_3 \oplus x_4 \oplus x_5 \oplus x_6 \\
+x_1 &= x_4 \\
+x_2 &= x_3 \\
+x_3 &= x_3 \\
+x_4 &= x_4 \\
+x_5 &= x_5 \\
+x_6 &= x_6
+\end{aligned}
+\]
+since $x \oplus y = 0$ implies $x = y$, otherwise $x \oplus y = 1$.
+
+Rearranging the equation shows
+\[
+\begin{aligned}
+x_0 &= x_3 \oplus x_4 \oplus x_5 \oplus x_6 \\
+x_1 &= x_4 \\
+x_2 &= x_3 \\
+x_3 &= x_3 \\
+x_4 &= x_4 \\
+x_5 &= x_5 \\
+x_6 &= x_6
+\end{aligned}
+\]
+since $x \oplus y = 0$ implies $x = y$, otherwise $x \oplus y = 1$.
+
+Lastly, from the calculated relationships above, the linear dependencies can be written as:
+\[
+\mathbf{x} = 
+c_1 \begin{pmatrix} 1 \\ 0 \\ 1 \\ 1 \\ 0 \\ 0 \\ 0 \end{pmatrix} \oplus
+c_2 \begin{pmatrix} 1 \\ 1 \\ 0 \\ 0 \\ 1 \\ 0 \\ 0 \end{pmatrix} \oplus
+c_3 \begin{pmatrix} 1 \\ 0 \\ 0 \\ 0 \\ 0 \\ 1 \\ 0 \end{pmatrix} \oplus
+c_4 \begin{pmatrix} 1 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 1 \end{pmatrix}
+\]
+
+Gauss elimination produces the dependency vectors:
+\[
+\mathbf{x}_1 = \begin{pmatrix} 1 \\ 0 \\ 1 \\ 1 \\ 0 \\ 0 \\ 0 \end{pmatrix}, \quad
+\mathbf{x}_2 = \begin{pmatrix} 1 \\ 1 \\ 0 \\ 0 \\ 1 \\ 0 \\ 0 \end{pmatrix}, \quad
+\mathbf{x}_3 = \begin{pmatrix} 1 \\ 0 \\ 0 \\ 0 \\ 0 \\ 1 \\ 0 \end{pmatrix}, \quad
+\mathbf{x}_4 = \begin{pmatrix} 1 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 1 \end{pmatrix}
+\]
+
+
+For instance, the vector $(1, 1, 0, 0, 1, 0, 0)^T$ correspond to the $x$ values $33$, $34$, and $43$. The corresponding $Q(x)$ are $32$, $99$, and $729$.
+
+\[
+x = 33 \times 34 \times 43 = 48246
+\]
+
+\[
+y = \sqrt{32 \times 99 \times 729} = \sqrt{2509056} = 1584
+\]
+
+By reducing the both $x$ and $y$ values modulo \(N=1057\), the following can be obtained
+
+\[
+\begin{aligned}
+x&\equiv681\pmod{1057}\\
+y&\equiv527\pmod{1057}
+\end{aligned}
+\]
+
+Since $x^2\equiv y^2\pmod N$, the GCD of $x-y$ and $N$ can be calculated and a non-trivial factor can be found as following:
+
+\[
+\begin{aligned}
+b = \gcd(x-y,N)&=\gcd(681-527,1057)\\
+&=\gcd(154,1057)\\
+&=7
+\end{aligned}
+\]
+
+The other factor can be obtained through division
+\[
+a = 1057/7 = 151
+\]
+
+As a result, the number $1057$ can be factorized into $1057 = 7 \times 151$.
+
+\section*{Implementation and experiment}
+% 6. Implementation and Experiment: Implement a small version of the algorithm and demonstrate it on suitable test cases. The implementation should support and illustrate the theoretical discussion rather than replace it. (for A grade only)
+
+A prototype of the algorithm is implemented in Python without external libraries. The purpose is to reconstruct the algorithm as well as confirming the theory. This also overlays the required algorithms and arithmetical functionalities that are required to build the algorithm.
+
+\subsection*{Algorithm implementation structure}
+
+The implementation is split into four different files that follow the structure of the theoretical discussion.
+
+The program structure consists of multiple program files, grouped by category below:
+\begin{lstlisting}
+- Utility files:
+  - util.py
+  - matrix_util.py
+- tonelli_shanks.py
+- quadratic_sieve.py (main file)
+\end{lstlisting}
+The following files are found separately as submission.
+
+\begin{itemize}
+    \item \texttt{util.py} contains the number-theoretic helper function. This file includes \texttt{gcd} using Euclid's algorithm, \texttt{power\_modulo} for modular exponentiation by repeated squaring, \texttt{integer\_sqrt} for an exact integer square root by Newton iteration, and \texttt{prime\_list} using the sieve of Eratosthenes algorithm. The reason that \texttt{integer\_sqrt} must be implemented is that \texttt{math.sqrt} operates on floating point number with limited precision and resolution.
+    \item \texttt{tonelli\_shanks.py} implements the Tonelli--Shanks algorithm as a single function \newline \texttt{tonelli\_shanks(residue, prime)} which returns a solution of $x^2\equiv a \pmod p$, or \texttt{None} when no solution exists.
+    \item \texttt{matrix\_util.py} contains the linear algebra utility functions over Galois Field $\mathbb{F}_2$, especially in terms of Gauss elimination.
+    \item \texttt{quadratic\_sieve.py} is the main file and contains the three phases \texttt{sieve\_factor\_base} which generates a sieving factor base, \texttt{sieve\_interval} that applies Tonelli--Shanks algorithm on the sieving interval and the main \texttt{quadratic\_sieve} function that integrates the mentioned two functions and apply a Gauss elimination over $\mathbb{F}_2$ where the solution is returned.
+\end{itemize}
+
+In terms of code implementation, most of the theory can be translated into code by converting most of the manual steps into programming logic. However, several additional code features are applied for faster calculating the number without altering the theoretical behavior.
+
+For instance, the factor base is not simply the list of primes below the bound. The function \texttt{sieve\_factor\_base} keeps $p=2$ unconditionally and applies Euler's criterion to every odd prime,
+\[
+N^{(p-1)/2} \bmod p = 1
+\]
+discarding $p$ when the test fails. Since a prime for which $N$ is a quadratic non-residue can never divide any $Q(x)$, including it will only increase another redundant column of zeros to the matrix. This reduces the matrix size, which makes them faster.
+
+Additionally, the exponent vectors are not stored as lists but as bigints using Python's native \texttt{int}. The reason is that each element in the matrix can either be $0$ or $1$, it can be mapped cleanly into a bit. Multiple elements can be packed into one \texttt{int} and since \texttt{int} doesn't have a fixed capacity limit, unlike \texttt{uint32\_t} in C or C++ that can only hold $32$ bits, this means that a bigint essentially works as an immutable list of bits.
+The function \texttt{prime\_to\_integer\_vector} sets bit $i$ of an integer when the exponent of $p_i$ is odd. Since addition in $\mathbb{F}_2$ is the XOR operation, a row operation becomes a single \texttt{\^} operation between two \texttt{int}s without any loops.
+
+Finally, the function \texttt{gf2\_gauss\_elimination} solves $\textbf{A}^T\textbf{x} = \textbf{0}$ is column-based gauss-elimination for the matrix $\textbf{A}^T$ than a conventional row-based method. First, it stores a hashmap from the lowest set bit to the pivot row that owns it, and reduces each incoming column in $\textbf{A}^T$ against the existing pivots until a new pivot bit is found or the vector becomes zero. During the pivot marking, a vector that reduces to zero is a linear dependency recorded for which relations are being combined.
+
+\subsection*{Suitable test case demonstration}
+
+As a suitable case, the number $N = 12620903$ is factorized with bound $40$. The factor base returned by \texttt{sieve\_factor\_base} is
+\[
+\mathcal{B}=\{2,\;7,\;11,\;13,\;17,\;19,\;29,\;31\}
+\]
+with nine smooth integer values of $Q(x)$ in the sieving interval produced by \texttt{sieve\_interval} with sieving width $4000$
+\[
+x \in \{3554,\;3571,\;3611,\;3858,\;4143,\;4521,\;5305,\;7043,\;7088\}
+\]
+By solving the linear dependencies from the linear algebra step for finding a selection vector to $\textbf{A}^T\textbf{x} = \textbf{0}$ using linear algebra with function \texttt{gf2\_gauss\_elimination}. The elimination finds three dependencies listed below
+
+\[
+\begin{array}{l|r|r|l}
+\text{selected }x \text{ values} & y & \gcd(|x-y|,N) \\ \hline
+\{3554, 3571, 4143\} & 1514864 & 1514864 & N \quad \text{(trivial)} \\
+\{3611, 3858, 5305\} & 9830525 & 9830525 & N \quad \text{(trivial)} \\
+\{3554, 3571, 3858, 7043, 7088\} & 12588218 & 8725705 & 6301 \\
+\end{array}
+\]
+
+The example case above also illustrates the first unfruitful cases. The first two dependencies produce trivial values, which are not useful and are therefore removed. However, the third produces a meaningful non-trivial factor $6301$. Once it can be identified, one factor is found and the other one can be calculated as $12620903/6301 = 2003$.
+
+Restraining the bound with the same number, the sieving interval must be widened in order to produce a meaningful factor:
+
+\[
+\begin{array}{c|c|c}
+\text{width} & |\mathcal{B}| & \text{result} \\ \hline
+1000 & 8 & \text{trivial factor} \\
+2000 & 8 & \text{trivial factor} \\
+3000 & 8 & \text{trivial factor} \\
+4000 & 8 & 6301 \\
+\end{array}
+\]
+
+\section*{Discussion}
+% 7. Discussion: Discuss the strengths and limitations of the approach and, where relevant, mention practical applications.
+
+As a conclusion, the Quadratic Sieve algorithm provides efficient integer factorization by combining modular arithmetic, smooth number generation, and linear algebra. Instead of directly searching for divisors of a composite number, the algorithm finds a congruence of squares modulo the composite number to be factorized, which allows multiple values to be collected and processed together using linear algebra than direct division.
+
+One main strength of Quadratic Sieve is its use of smooth numbers. By selecting $x$ values beginning from the square root of the "to-be-factorized" number, the values for $Q(x)$ becomes smaller, which increases the possibility of small prime factorization from the factor base. Additionally, sieving process restrict the number of primes without having to perform complete prime factorization on every value individually. A small set of factor base means also smaller matrices.
+
+However, the factor base introduces a trade-off between the number of smooth relations that can be found and the computational cost of processing them. A larger factor base provides higher possibility of finding a smooth congruence of square modulo, but the dimensions of the exponent matrix also increases, alongside with computation. A smaller factor base might reduce the cost, but require a larger sieving interval to collect enough smooth relations.
+
+Another strength is the use of linear algebra over $\mathbb{F}_2$ to find a product among $Q(x)$ that is a perfect square into a system of linear equations. In this case, Gauss elimination can be applied to identify the numbers. This can be particularly useful because the algorithm can process several smooth number together. However, the matrix is sparse and the resulting matrix can grow unnecessary large when the number of $Q(x)$ grow for larger factorization numbers.
+
+Despite the given advantages, the Quadratic Sieve algorithn still has its limitations. Its performance depends heavily on finding enough smooth values within the sieving interval. If the sieving factor base is too small or the sieving interval too narrow, the algorithm may fail collect useful $Q(x)$ values to find a non-trivial selection vector. Even such selection vector exists, the algorithm may fail to produce non-trivial factors.
+
+Additionally, if $N$ is a perfect square, the value $Q(x)$ produces $Q(x)=0$, and the factorization loop in \texttt{sieve\_interval} does not terminate since dividing zero by a prime leaves zero. As a mitigation, a perfect square must be detected beforehand.
+
+If $N$ is a prime, then no non-trivial factors exist and the program correctly returns no factor, but only after exhausting the whole interval. A primality test before sieving could significantly reduce wasted work.
+
+Finally, in terms of practical applications, integer factorization is highly relevant in number theory. Computational number theory would highly benefit from Quadratic Sieves since it relies on studying the properties and structure of integers, such as divisors, prime factors, and arithmetic functions. Primality and arithmetic algorithm can also benefit from efficient factorization, since they relies on divisors and Euler's totient function.
+
+\begin{thebibliography}{9}
+
+\bibitem{boiers}
+Lars-Christer Böiers,
+\textit{Diskret matematik},
+2nd ed.,
+Studentlitteratur AB, 2003.
+ISBN: 9789144031026.
+
+\bibitem{lectures}
+IX1500 Discrete Mathematics, lecture notes F10--F12.´
+
+https://tundeayodele.medium.com/heres-how-quadratic-sieve-factorization-works-1c878bc94f81
+
+\end{thebibliography}
+
+\end{document}
