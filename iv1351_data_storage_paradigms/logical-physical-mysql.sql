@@ -1,4 +1,4 @@
--- Requires MySQL 8.0.16 or later (CHECK constraints are enforced from that version).
+-- Requires MySQL >= 8.0.16 (CHECK constraints)
 
 -- course layout tables
 
@@ -128,8 +128,8 @@ CREATE TABLE employee_skill (
 CREATE TABLE employee_salary (
     salary_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
     salary NUMERIC(12,2) NOT NULL,
-    valid_from DATETIME(6) NOT NULL,
-    valid_to DATETIME(6),
+    valid_from DATE NOT NULL,
+    valid_to DATE,
     employee_id INT NOT NULL,
 
     FOREIGN KEY (employee_id) REFERENCES employee(employee_id) ON UPDATE CASCADE ON DELETE CASCADE,

@@ -25,10 +25,10 @@ CREATE TABLE course_layout_version (
 );
 
 CREATE TABLE course_instance (
-    course_instance_id       INT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    num_students             INT NOT NULL,
-    study_period             VARCHAR(2) NOT NULL,
-    study_year               INT NOT NULL,
+    course_instance_id INT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    num_students INT NOT NULL,
+    study_period VARCHAR(2) NOT NULL,
+    study_year INT NOT NULL,
     course_layout_version_id INT NOT NULL,
 
     FOREIGN KEY (course_layout_version_id) REFERENCES course_layout_version(course_layout_version_id) ON UPDATE CASCADE,
@@ -127,9 +127,8 @@ CREATE TABLE employee_skill (
 CREATE TABLE employee_salary (
     salary_id   INT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY ,
     salary      NUMERIC(12,2) NOT NULL,
-    -- PostgreSQL allows at most 6 fractional digits (same as MySQL DATETIME(6))
-    valid_from  TIMESTAMP(6) NOT NULL,
-    valid_to    TIMESTAMP(6),
+    valid_from  DATE NOT NULL,
+    valid_to    DATE,
     employee_id INT NOT NULL,
 
     FOREIGN KEY (employee_id) REFERENCES employee(employee_id) ON UPDATE CASCADE ON DELETE CASCADE,
