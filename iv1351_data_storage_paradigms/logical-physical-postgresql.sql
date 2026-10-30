@@ -19,7 +19,8 @@ CREATE TABLE course_layout_version (
 
     FOREIGN KEY (course_layout_id) REFERENCES course_layout(id) ON UPDATE CASCADE,
     UNIQUE (course_layout_id, version),
-    CHECK (min_students > 0)
+    CHECK (min_students > 0),
+    CHECK (max_students >= min_students)
 );
 
 CREATE TABLE course_instance (
@@ -132,12 +133,10 @@ CREATE TABLE employee_salary (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     salary NUMERIC(12,2) NOT NULL,
     valid_from DATE NOT NULL,
-    valid_to DATE,
     employee_id INT NOT NULL,
 
     FOREIGN KEY (employee_id) REFERENCES employee(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    UNIQUE (employee_id, valid_from),
-    CHECK (valid_from < valid_to)
+    UNIQUE (employee_id, valid_from)
 );
 
 -- Allocation rule
