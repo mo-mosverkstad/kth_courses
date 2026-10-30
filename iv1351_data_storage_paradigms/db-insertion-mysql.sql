@@ -25,14 +25,14 @@ INSERT INTO course_layout_version (
     max_students,
     ects_credits,
     version,
-    course_id
+    course_layout_id
 )
 SELECT
     v.min_students,
     v.max_students,
     v.ects_credits,
     1 AS version,
-    cl.course_id
+    cl.id
 FROM (
     SELECT 'IX1500' AS course_code, 1 AS min_students, 120 AS max_students, 7.5 AS ects_credits
     UNION ALL SELECT 'IV1351', 1, 100, 7.5
@@ -59,16 +59,19 @@ INNER JOIN course_layout AS cl
 
 
 INSERT INTO course_instance (
+    instance_id,
     num_students,
     study_period,
     study_year,
     course_layout_version_id
 )
 SELECT
+    -- e.g. '2025-50011': year, '-5', 3-digit course id, period number
+    CONCAT(v.study_year, '-5', LPAD(CAST(cl.id AS CHAR(3)), 3, '0'), RIGHT(v.study_period, 1)),
     v.num_students,
     v.study_period,
     v.study_year,
-    clv.course_layout_version_id
+    clv.id
 FROM (
     SELECT 'IX1500' AS course_code, 110 AS num_students, 'P1' AS study_period, 2025 AS study_year
     UNION ALL SELECT 'IV1351', 90, 'P2', 2025
@@ -123,5 +126,5 @@ FROM (
 INNER JOIN course_layout AS cl
     ON cl.course_code = v.course_code
 INNER JOIN course_layout_version AS clv
-    ON clv.course_id = cl.course_id
+    ON clv.course_layout_id = cl.id
     AND clv.version = 1;
