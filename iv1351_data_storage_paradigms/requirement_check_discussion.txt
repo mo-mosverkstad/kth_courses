@@ -1,0 +1,49 @@
+This version (saved 16:25) meets the Task 1 requirements for the model. That covers both the mandatory part and the two higher-grade model requirements. Only one small item is left, and it's optional.
+
+## Fixed since the last review
+
+- **`teaching_allocation`:** `allocation_hours INT NOT NULL` is back. A note says the hours are stored raw and multiplied by the factor in queries.
+- **`planned_activity`:** the UNIQUE note now reads `UNIQUE(course_instance_id, teaching_activity_id)`, and the note says planned hours are stored raw.
+- **`derived_activity_formula`:** `teaching_activity_id` is UNIQUE, so the 1 to 0..1 relation is enforced.
+- **`employee`:** `supervisor_id` is nullable, with the note "top employee has no supervisor". The self-relation is correctly drawn 0..1.
+- **Notes:**
+  - The salary note now says "valid_from (inclusive) is valid until the employee's next valid_from".
+  - The course layout note now says `max_students >= min_students`.
+- **`employee_salary.id` and `allocation_rule.id`:** the redundant `UNIQUE` is gone.
+
+## Optional
+
+`academic_period.start_date` and `end_date` are still nullable. Making them NOT NULL is safer, since cost queries use them to pick the right salary. Otherwise, add a note saying the dates may be unknown for future periods.
+
+## Requirement check
+
+| Requirement | Where in the model |
+|---|---|
+| Course layout: code, name, HP, min/max students | `course`, versioned `course_layout` |
+| Course instance: ID, period, year, students | `course_instance`, `academic_period`, `period` |
+| Extensible teaching activities with multiplication factor | `teaching_activity` |
+| Planned hours per activity, derived exam/admin hours | `planned_activity`, `derived_activity_formula` |
+| Departments with a manager who is an employee | `department.manager_employee_id` (deferred FK) |
+| Employees: department, skills, contact details, salary, job title, supervisor | `employee`, `employee_skill`, `person_address`, `person_phone_number`, `employee_salary`, `job_title`, `supervisor_id` |
+| Many-to-many allocations with hours | `teaching_allocation` |
+| Max 4 course instances per period | `allocation_rule.max_courses` + note |
+| Higher grade: all data in the database | factors, formula constants, max-4 rule and period dates are stored |
+| Higher grade: versioning | `course_layout.version`, salary history by `valid_from` |
+
+Against the assessment criteria:
+- crow's foot cardinalities are correct
+- the model is in 3NF
+- naming is consistent (`id` for PKs, `<table>_id` or a role name for FKs)
+- constants live in tables (`period`)
+- derived data is computed rather than stored
+- rules that aren't visible in the diagram are explained in notes
+
+**For the Discussion chapter:**
+- **Free-text properties:** `address_property` and `phone_number_property` are free text. The criteria prefer lookup tables for constants, so explain the choice.
+- **Fixed formula inputs:** the formula table only supports students and HP as inputs.
+- **What isn't versioned:** factors, formulas and `course_name` have no version history.
+- **Report topics:** the two required higher-grade discussions, storing all data in the database and keeping multiple versions.
+
+## Next step
+
+Both create scripts and the insert script still follow the old design. I can rewrite them to match this diagram exactly, then re-test them in PostgreSQL and MySQL. The insert script would then fill all tables, which Task 1 requires.
