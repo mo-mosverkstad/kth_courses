@@ -1,36 +1,54 @@
 -- course layout tables
 
-CREATE TABLE course_layout (
+CREATE TABLE course (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     course_code VARCHAR(10) NOT NULL UNIQUE,
     course_name VARCHAR(128) NOT NULL
 );
 
-CREATE TABLE course_layout_version (
+CREATE TABLE course_layout (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     min_students INT NOT NULL,
     max_students INT,
-    ects_credits FLOAT(10) NOT NULL,
+    hp NUMERIC(4,1) NOT NULL,
     version INT NOT NULL,
-    course_layout_id INT NOT NULL,
+    course_id INT NOT NULL,
 
-    FOREIGN KEY (course_layout_id) REFERENCES course_layout(id) ON UPDATE CASCADE,
-    UNIQUE (course_layout_id, version),
+    FOREIGN KEY (course_id) REFERENCES course(id) ON UPDATE CASCADE,
+    UNIQUE (course_id, version),
     CHECK (min_students > 0),
     CHECK (max_students >= min_students)
+);
+
+CREATE TABLE period (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    period_name VARCHAR(16) NOT NULL UNIQUE
+);
+
+CREATE TABLE academic_period (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    academic_year INT NOT NULL,
+    period_id INT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+
+    FOREIGN KEY (period_id) REFERENCES period(id) ON UPDATE CASCADE,
+    UNIQUE (academic_year, period_id),
+    CHECK (academic_year > 1970),
+    CHECK (start_date < end_date)
 );
 
 CREATE TABLE course_instance (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     instance_id VARCHAR(16) NOT NULL UNIQUE,
+    course_layout_id INT NOT NULL,
+    academic_period_id INT NOT NULL,
     num_students INT NOT NULL,
-    study_period ENUM('P1', 'P2', 'P3', 'P4') NOT NULL,
-    study_year INT NOT NULL,
-    course_layout_version_id INT NOT NULL,
 
-    FOREIGN KEY (course_layout_version_id) REFERENCES course_layout_version(id) ON UPDATE CASCADE,
-    UNIQUE (course_layout_version_id, study_year, study_period),
-    CHECK (study_year > 1970)
+    FOREIGN KEY (course_layout_id) REFERENCES course_layout(id) ON UPDATE CASCADE,
+    FOREIGN KEY (academic_period_id) REFERENCES academic_period(id) ON UPDATE CASCADE,
+    UNIQUE (course_layout_id, academic_period_id),
+    CHECK (num_students >= 0)
 );
 
 -- People, employees and departments
@@ -59,7 +77,7 @@ CREATE TABLE employee (
     department_id INT NOT NULL,
     person_id INT NOT NULL UNIQUE,
     job_title_id INT NOT NULL,
-    supervisor_id INT NOT NULL,
+    supervisor_id INT,
 
     FOREIGN KEY (department_id) REFERENCES department(id) ON UPDATE CASCADE,
     FOREIGN KEY (person_id) REFERENCES person(id) ON UPDATE CASCADE,
@@ -90,7 +108,7 @@ CREATE TABLE address (
 CREATE TABLE person_address (
     address_id INT NOT NULL,
     person_id INT NOT NULL,
-    address_property VARCHAR(128) NOT NULL,
+    address_property VARCHAR(128),
 
     PRIMARY KEY (address_id, person_id),
     FOREIGN KEY (address_id) REFERENCES address(id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -105,11 +123,11 @@ CREATE TABLE phone_number (
 CREATE TABLE person_phone_number (
     phone_number_id INT NOT NULL,
     person_id INT NOT NULL,
-    phone_number_property VARCHAR(128) NOT NULL,
+    phone_number_property VARCHAR(128),
 
     PRIMARY KEY (phone_number_id, person_id),
-    FOREIGN KEY (phone_number_id) REFERENCES phone_number(id) ON UPDATE CASCADE,
-    FOREIGN KEY (person_id) REFERENCES person(id) ON UPDATE CASCADE
+    FOREIGN KEY (phone_number_id) REFERENCES phone_number(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (person_id) REFERENCES person(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE skill (
@@ -145,45 +163,33 @@ CREATE TABLE allocation_rule (
 
 -- Activity and formula
 
-CREATE TABLE activity (
+CREATE TABLE teaching_activity (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    activity_name VARCHAR(128) NOT NULL UNIQUE
+    activity_name VARCHAR(128) NOT NULL UNIQUE,
+    multiplication_factor NUMERIC(4,2) NOT NULL
 );
 
-CREATE TABLE linear_formula (
+CREATE TABLE derived_activity_formula (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    activity_id INT NOT NULL UNIQUE,
-    constant_term FLOAT(10) NOT NULL DEFAULT 0,
+    teaching_activity_id INT NOT NULL UNIQUE,
+    base_hours NUMERIC(6,2) NOT NULL DEFAULT 0,
+    hours_per_student NUMERIC(6,3) NOT NULL,
+    hours_per_hp NUMERIC(6,2) NOT NULL,
 
-    FOREIGN KEY (activity_id) REFERENCES activity(id) ON UPDATE CASCADE ON DELETE CASCADE
-);
-
-CREATE TABLE calculation_input (
-    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(128) NOT NULL UNIQUE
-);
-
-CREATE TABLE coefficient (
-    linear_formula_id INT NOT NULL,
-    calculation_input_id INT NOT NULL,
-    coefficient_number FLOAT(10) NOT NULL,
-
-    PRIMARY KEY (linear_formula_id, calculation_input_id),
-    FOREIGN KEY (linear_formula_id) REFERENCES linear_formula(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (calculation_input_id) REFERENCES calculation_input(id) ON UPDATE CASCADE
+    FOREIGN KEY (teaching_activity_id) REFERENCES teaching_activity(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 -- Planned activity and allocations
 
 CREATE TABLE planned_activity (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    planned_hours INT NOT NULL,
+    planned_hours INT,
+    teaching_activity_id INT NOT NULL,
     course_instance_id INT NOT NULL,
-    activity_id INT NOT NULL,
 
+    FOREIGN KEY (teaching_activity_id) REFERENCES teaching_activity(id) ON UPDATE CASCADE,
     FOREIGN KEY (course_instance_id) REFERENCES course_instance(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (activity_id) REFERENCES activity(id) ON UPDATE CASCADE,
-    UNIQUE (course_instance_id, activity_id)
+    UNIQUE (course_instance_id, teaching_activity_id)
 );
 
 CREATE TABLE teaching_allocation (
