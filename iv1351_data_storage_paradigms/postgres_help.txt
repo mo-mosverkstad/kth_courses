@@ -1,0 +1,11 @@
+Connect to PostgreSQL using:
+
+sudo -u postgres psql
+
+Insert a script (use default username and password)
+psql -U postgres -d course_database -f /path/to/your/script.sql
+
+Insert a script (use sudo username and password):
+sudo -u postgres psql -d course_database -f db-insertion-postgresql.sql
+sudo -u postgres psql -d course_database -v ON_ERROR_STOP=1 < logical-physical-postgresql.sql
+sudo -u postgres psql -d course_database -v ON_ERROR_STOP=1 < db-insertion-postgresql.sql
