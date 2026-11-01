@@ -1,0 +1,66 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#000000"/>
+
+  <!-- Back document -->
+  <path d="M203.5 24 H487 V396 H458 V69 Q458 53 442 53 H203.5 Z"
+        fill="#B7B7BA"/>
+
+  <!-- Middle document -->
+  <path d="M158 69 H442 V441.5 H411.5 V158
+           L354 100 H158 Z"
+        fill="#D1D1D5"/>
+
+  <!-- Front document -->
+  <path d="M112 116 H347 V151
+           Q347 164 360 164 H395.5 V512 H112 Z"
+        fill="#EFF0F1"/>
+
+  <!-- Folded corner -->
+  <path d="M347 116 L395.5 164 H359
+           Q347 164 347 151 Z"
+        fill="#B7AAB6"/>
+  <path d="M347 116 L395.5 158.5"
+        fill="none" stroke="#000" stroke-width="16"
+        stroke-linejoin="round"/>
+  <path d="M395.5 158.5 V164"
+        fill="none" stroke="#000" stroke-width="16"/>
+
+  <!-- Document text lines -->
+  <g fill="none" stroke="#000" stroke-width="16"
+     stroke-linecap="round">
+    <path d="M147 151.5 H291.5"/>
+    <path d="M147 201.5 H360"/>
+    <path d="M234 252 H360"/>
+    <path d="M276 302 H360"/>
+    <path d="M292 352 H360"/>
+    <path d="M290.5 402 H360"/>
+    <path d="M271 452.5 H360"/>
+  </g>
+
+  <!-- Clock outer ring -->
+  <circle cx="140" cy="373" r="124"
+          fill="#000"/>
+  <circle cx="140" cy="373" r="110"
+          fill="none" stroke="#80C8FF" stroke-width="12"/>
+  <circle cx="140" cy="373" r="95"
+          fill="#EFF0F1" stroke="#000" stroke-width="16"/>
+
+  <!-- Clock markers -->
+  <g stroke="#000" stroke-width="16" stroke-linecap="round">
+    <path d="M140 296.5 V305"/>
+    <path d="M140 440.5 V449"/>
+    <path d="M63 373 H71"/>
+    <path d="M208 373 H216"/>
+    <path d="M85 317 L92 324"/>
+    <path d="M188 422 L195 429"/>
+    <path d="M85 429 L92 422"/>
+    <path d="M188 324 L195 317"/>
+  </g>
+
+  <!-- Clock hands -->
+  <path d="M140 336.5 V373 L164.5 387"
+        fill="none" stroke="#000"
+        stroke-width="16" stroke-linecap="round"
+        stroke-linejoin="round"/>
+</svg>
