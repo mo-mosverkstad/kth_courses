@@ -11,6 +11,7 @@
 \usepackage{fancyvrb}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{url} % *** added for the repository link in the Result chapter ***
 % Style for SQL / PL/pgSQL code listings
 \lstdefinestyle{sql}{
   language=SQL,
@@ -151,86 +152,50 @@ The logical-physical database design diagram is ultimately important since it pr
 
 \section{Method}
 
-\textbf{This chapter tells \textit{how} you solved the task.}
+% \textbf{This chapter tells \textit{how} you solved the task.}
+% Explain how you worked when solving the tasks and how you evaluated that your solution met the requirements. \textit{Do not explain your solution and do not refer to code}, that belongs to the \textit{Result} chapter. More specific instructions for the content can be found under each task on the Project page in Canvas.
 
-Explain how you worked when solving the tasks and how you evaluated that your solution met the requirements. \textit{Do not explain your solution and do not refer to code}, that belongs to the \textit{Result} chapter. More specific instructions for the content can be found under each task on the Project page in Canvas.
+The task was divided into 3 smaller tasks: drawing the conceptual diagram, sketching the logical-physical ER-diagram and translating the diagram into SQL scripts. The solution of the task can be almost considered as iterative process with different steps: modelling, implementation, comparison against requirements and evaluation. Each time evaluation revealed a flaw, both the diagram and SQL scripts were changed in order to keep consistence between the logical-physical diagram and the SQL statements.
 
-\section{Result}
+\subsection{Tools}
 
-\textbf{This chapter explains \textit{the result} of what you did.}
+For solving the task, the following tools were used:
 
-\textbf{The report must show that you have done the work yourself and that you have understood what you have done}, both of these goals are met by carefully explaining your solution here in the result chapter, and proving that it meets the requirements. \textit{State each requirement that is met} and explain \textit{how you met it}. Also include links to your code in your Git repository, and include also diagrams, see Figure \ref{fig:diag}, and other figures to illustrate your reasoning. All figures must be referenced in the text. Ask yourself if the solution is clearly explained, and if the reader will understand the application. What would you yourself want to know if you read about the application, is that included in the report? More specific instructions for the content can be found under each task on the Project page in Canvas. 
+Astah was used as diagram editor for both the conceptual model and the logical-physical model. Both model diagrams were drawn in crow foot (IE) notation. Afterwards, both diagrams were exported as SVG files and included in this report. For logical-physical model, SQL CREATE-statements was generated using SQL-export tool in Astah, which is located in \texttt{ER-diagrams>Export SQL}. The generated SQL diagrams contained most of the important information, including table names, attribute names, attribute domain. However, some constraints and properties, which were written in the logical-physical model, must be translated and added into SQL creation-script manually.
 
-\begin{figure}[h!]
-  \begin{center}
-    \includesvg[width=\textwidth]{diagrams/conceptual}
-    \caption{conceptual diagram}
-    \label{fig:diag}
-  \end{center}
-\end{figure}
+As the main database management system for developing SQL scripts, PostgreSQL 16 was used. It runs on Ubuntu in Windows Subsystem for Linux (WSL), and all scripts were executed with the command line client \texttt{psql}. The scripts for creating SQL tables and inserting the data were written as external \texttt{.sql} files. Additionally, for creating the database from the ground up, the bash file \texttt{build.bash} were also written and contains all necessary commands for executing SQL scripts.
 
-\begin{figure}[h!]
-  \begin{center}
-    \includesvg[width=\textwidth]{diagrams/logical-physical}
-    \caption{Logical-physical ER-diagram}
-    \label{fig:diag}
-  \end{center}
-\end{figure}
+Additionally, MySQL 8.0 was also used to create and test an equivalent second version of the create and insert scripts.
 
-\begin{lstlisting}[style=sql]
-CREATE OR REPLACE FUNCTION validate_4_instances_each_study_period()
-RETURNS TRIGGER AS $$
-DECLARE
-    new_instance_id INTEGER;
-    new_academic_period_id INTEGER;
-    current_value INTEGER;
-    max_value INTEGER;
-BEGIN
-    -- extract instance_id and academic_period_id
-    SELECT course_instance.id, course_instance.academic_period_id
-    INTO new_instance_id, new_academic_period_id
-    FROM planned_activity
-    INNER JOIN course_instance ON course_instance.id = planned_activity.course_instance_id
-    WHERE planned_activity.id = NEW.planned_activity_id;
+For general development, Visual Studio Code was used to write the SQL script and this report, while Git and GitHub were used for version control for exported SVG diagrams from Astah as well. The report was written and typeset with \LaTeX.
 
-    -- count the number of teaching_allocation from given employee and academic period
-    SELECT COUNT(DISTINCT course_instance.id)
-    INTO current_value
-    FROM teaching_allocation
-    INNER JOIN planned_activity ON planned_activity.id = teaching_allocation.planned_activity_id
-    INNER JOIN course_instance ON course_instance.id = planned_activity.course_instance_id
-    WHERE teaching_allocation.employee_id = NEW.employee_id
-      AND course_instance.academic_period_id = new_academic_period_id
-      AND course_instance.id <> new_instance_id;
+The sample insertion data was created using an online data generator (generatedata.com) and adapted afterwards to teh database. The person, address and phone number sample data could be generated using the online tool.
 
-    SELECT max_courses
-    INTO max_value
-    FROM allocation_rule
-    ORDER BY id
-    LIMIT 1;
+\subsection{Modelling procedure}
 
-    IF current_value >= max_value THEN
-        RAISE EXCEPTION 'Problem: A teacher cannot be assigned to more than % course instances each academic period. Employee id: %, already allocated: %', max_value, NEW.employee_id, current_value;
-    END IF;
+The modelling procedure was accomplished by translating the project requirements and the concept model given in this course, into a conceptual diagram. The translation process started from the given conceptual model and extending it. For each noun in the project description, a candidate entity or attribute was considered, if it hasn't been modeled in the given conceptual model. Every connection between nouns was considered as a candidate relation. Using these approaches,the given conceptual model could then be extended with new entities, for instance study periods, course instances, salary version history, the allocation rule and formulae for derived hours.
 
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+After creating the conceptual model, a logical-physical model could be created by extending the conceptual model. This was carried out by following the given steps of the video lecture on logical and physical diagrams.
 
-CREATE OR REPLACE TRIGGER trigger_4_instances_each_study_period
-BEFORE INSERT OR UPDATE
-ON teaching_allocation
-FOR EACH ROW
-EXECUTE FUNCTION validate_4_instances_each_study_period();
-\end{lstlisting}
+\begin{enumerate}
+  \item For each entity, a table was created for each entity, and the attributes of the entity was assigned as columns.
+  \item One-to-one and one-to-many relations were implemented as foreign keys on the side with cardinality one.
+  \item Multivalued attributes (many-to-many relations), such as phone numbers, addresses and skills of each employee, were moved to 2 separate tables and connected through cross-reference tables.
+  \item A data type was chosen for each column, and \texttt{NOT NULL}, \texttt{UNIQUE} and \texttt{CHECK} constraints were specified to the suitable attributes. This part was accomplished using intuition and by checking the project requirements.
+  \item A primary key was chosen for each weak entity, either a generated surrogate key or a composite key of foreign keys. A surrogate key was assigned if the weak entity has a meaning without its affiliated strong entity, a composite key of foreign keys were used. 
+  \item For each foreign key, the behaviour on update and delete was decided based on intuition and project requirement, in order to decide which referential integrity action was most suitable for the given case.
+  \item The model was checked and evaluated against normal forms up to 3NF, where duplicated and derived data was removed.
+  \item Additional rules that cannot be expressed using Astah ER-diagram were instead written as notes/comments, attached to the given property in the diagram.
+  \item Finally, the logical-physical diagram was checked that all operations that are mentioned in the project description could be accomplished
+\end{enumerate}
 
-\pagebreak
+After creating the logical-physical diagram, a SQL \texttt{CREATE}-script was verbatimly translated from the logical-physical ER-diagram. Since the task is tedious, an Astah-tool for creating SQL \texttt{CREATE}-statements was used. Followed by the SQL \texttt{CREATE}-script, the table insertion script and the trigger script were both implemented as well.
 
-\section{Discussion}
+\subsection{Evaluation}
 
-\textbf{This chapter \textit{analysis} the result presented in the previous section.} 
+The model was manually evaulated against the project description and the assessment criteria for seminar 1. By checking each criteria in the assessment criteria for seminar 1, the correctness for the logical-physical diagram could be evaluated. Additionally, the correctness of the SQL scripts were evaluated manually by checking the number of databases, retrieving their schemas as well as retrieving all rows from each table. The trigger, that ensured that each employee is assigned to maximum four course instances in one academic period, could be checked for correctness by deliberately inserting the same employee to more than four different course instances that were taken place in the same academic period. If the manual testing failed, the trigger has to be corrected. The database tables has to be dropped and re-created and re-inserted from the ground up.
 
-Evaluate your solution according to the assessment criteria found in the assessment-criteria documents, which are found under the bullet \textit{In the Discussion chapter of your report...}, under each task on the Project page in Canvas. You do not have to cover all specified criteria.
+
 
 \section{Comments About the Course}
 
