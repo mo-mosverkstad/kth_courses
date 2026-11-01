@@ -348,6 +348,91 @@ For the higher-grade requirement, all relevant data must be stored in the databa
 
 Finally, the higher-grade requirement that course layouts and salaries must be changeable over time is supported through versioning in \texttt{course\_layout.version} and salary history maintained in \texttt{employee\_salary}. This makes it possible to preserve previous versions of course layouts and historical salary information when changes occur.
 
+\section{Discussion}
+\label{sec:discussion}
+
+% \textbf{This chapter \textit{analysis} the result presented in the previous section.}
+% Evaluate your solution according to the assessment criteria found in the assessment-criteria documents, which are found under the bullet \textit{In the Discussion chapter of your report...}, under each task on the Project page in Canvas. You do not have to cover all specified criteria.
+
+The result mentioned above is evaluated according to the assessment criteria for seminar 1, while the 2 topics required for higher grade is discussed. Additionally, the changes made after the review of earlier version of the model is described as well.
+
+\subsection{Naming conventions}
+
+For naming conventions, all table and columns are named in lower case with underscores, in order to separate them from the SQL keywords in all capital letters. The table and column names are mostly taken from the project description as much as possible, for instance \texttt{course\_instance}, \texttt{planned\_activity} and \texttt{multiplication\_factor}. All single primary keys are written as \texttt{id}, while all foreign keys are formatted as \texttt{<table>\_id}, which makes it easy to distinguish primary and foreign key attributes. The disadvantage of naming the primary key as \texttt{id}, instead of \texttt{<table>\_id}, is that natural joins cannot be used. This requires join conditions to be explicitly written, which gives more verbose SQL queries. On the other hand, explicit join conditions are more explicit, avoiding 2 columns with same name to be joined by mistake.
+
+On the other hand, some names could be improved. For instance, \texttt{num\_students} could be named as \texttt{number\_of\_students}, while \texttt{employee\_salary.salary} as \texttt{salary\_amount}, in order to avoid mistaking a short attribute name \texttt{salary} as a table.
+
+\subsection{Crow foot notation and cardinality}
+
+The diagram uses crow foot notation, and every cardinality can be mapped into a constraint in the database. This means that a cardinality of exactly one on the referenced side corresponds to a \texttt{NOT NULL} foreign key, while zero or one is translated as a nullable foreign key, such as for \texttt{supervisor\_id}. Cardinalities of at most one on the referencing side correspond to a \texttt{UNIQUE} foreign key. Relations between a table and a cross-reference table are drawn with solid lines, since the foreign keys are part of the primary key (identifying relations), while all other relations are drawn with dashed lines if the foreign key is not a part of the primary key.
+
+\subsection{Normalization}
+
+For normalization check, the model is mostly in 3NF with one exception. The reason is that columns of all tables contain atomic values. Multivalued attributes such as phone numbers, addresses and skills are handled by storing them in separate tables, which concludes that the model is in 1NF. The composite primary keys only exist in cross-reference tables, where the only non-key columns (such as \texttt{allocation\_hours}) depend on the whole key. This shows that the model fulfills 2NF. Finally, data that would otherwise be repeated on many rows is stored only once, for example job titles, period names, teaching activities with their multiplication factors, and course names, which do not depend on the layout version. Therefore, almost no non-key column depends transitively on the primary key.
+
+However, the address table contains one possible exception, since in Sweden the city can be derived from the zip code. On the other hand, splitting the table further was not considered necessary, since the purpose of addresses are for contact details, and over-normalization would make the queries more complex without any practical benefit
+
+\subsection{Tables, columns and constraints}
+
+All tables are required to store the data of the project description, and no table stores data that is not mentioned there. One exception could be the personal number, which is used to identify a person, but by intuition it is a very obvious data to store. Column types were chosen as \texttt{INT} for counts and keys, \texttt{NUMERIC} for ECTS credits, salaries, factors and formula constants since these must be stored as decimal fractional number exactly, \texttt{DATE} for dates, and \texttt{VARCHAR} with a reasonable length for text, always in even powers of 2.
+
+Most rules are enforced by constraints: \texttt{NOT NULL} for required data, \texttt{UNIQUE} for natural keys such as course codes, employment IDs and period names, and \texttt{CHECK} for value ranges such as the number of students and the dates of a period. However, rules that span several rows or tables cannot be expressed with these constraints. The allocation limit is enforced by a trigger, but there are some cases where a trigger is not implemented:
+
+The manager of a department should be employed at that department. The foreign key only ensures that the manager is an employee. Additionally, employee who is a manger in one department can be employed in another department. The motivation here is that an employee can be a first-line manager in one department, but is an employee to a second-line manager in another department.
+
+The sum of the allocated hours of a planned activity should not exceed its planned hours. It cannot be enforced since physical allocations may not always match the planned hours, and a constraint would make it impossible to change the planning afterwards.
+
+% The trigger also has a limitation: if two transactions allocate the same teacher at the same time, both may read the old number of allocations and both may succeed. This should be handled by the program in task 3, for example with \texttt{SELECT FOR UPDATE}.
+
+\subsection{Primary keys}
+
+Surrogate keys were chosen for all entity tables, since most natural keys may change or be missing. A course code is mostly stable, while a personal number may be \texttt{NULL}, and an address has no short natural key at all. Surrogate keys also keep the foreign keys short, since a table like \texttt{teaching\_allocation} only needs one column to reference a planned activity, instead of the course instance and the activity together.
+
+The disadvantage is that a surrogate key does not prevent the same real-world object from being stored twice. Therefore, every table with a surrogate key also has a \texttt{UNIQUE} constraint on its natural key, for example \texttt{UNIQUE(course\_id, version)} in \texttt{course\_layout} and \texttt{UNIQUE(employee\_id, valid\_from)} in \texttt{employee\_salary}. On the other hand, cross-reference tables do not have a surrogate key, since the combination of their two foreign keys is already unique.
+
+\subsection{Relations and possible operations}
+
+All operations mentioned in the project description can be performed with the model. The planned hours of a course instance, including the multiplication factors and the derived hours, can be calculated from \texttt{planned\_activity}, \texttt{teaching\_activity} and \texttt{derived\_activity\_formula}, and the allocated hours per teacher from \texttt{teaching\_allocation}. Teachers with a specific skill can be found through \texttt{employee\_skill}, and the teachers allocated to more than a given number of course instances in a period can be found by grouping the allocations by employee and academic period.
+
+The teaching cost of a course instance can also be calculated. The salary that is valid for a course instance is the latest salary of the teacher with a \texttt{valid\_from} date before the start date of the academic period of the instance, as shown in Listing \ref{lst:salary}. Since old salaries are never overwritten but kept, the cost of a course instance can still be reconstructed after a salary has changed. To calculate the cost, the monthly salary must be converted to an hourly cost, for example by dividing by a standard number of working hours per month. This number is currently not stored in the database, and would have to be added to fully meet the requirement that the application should not contain any data.
+
+\begin{lstlisting}[style=sql, caption={The salary of one employee that is valid for one course instance}, label={lst:salary}]
+SELECT es.salary
+FROM course_instance ci
+INNER JOIN academic_period ap ON ap.id = ci.academic_period_id
+INNER JOIN employee_salary es ON es.valid_from <= ap.start_date
+WHERE ci.instance_id = '2025-50022'
+  AND es.employee_id = 1
+ORDER BY es.valid_from DESC
+LIMIT 1;
+\end{lstlisting}
+
+\subsection{Derived data}
+
+The model does not store derived data. The examination and administration hours are calculated from the number of students and HP, and only the constants of the formulae are stored. Also the hours including the multiplication factor are calculated by the queries, and the end date of a salary is given by the next salary. If derived data were stored, redundancy between the source data and the derive data will appear, which would cause inconsistency and database anomalies. On the other hand, the queries become slightly more verbose and complex, but this can be resolved using views.
+
+The formulae could have been stored in a generic way, as a constant and a list of coefficients, each multiplied with a named input. This could store any linear formula, but the names of the inputs had to be translated into columns by the queries, meaning that the queries has to know the formula. The current solution with fixed columns for students and HP is simpler and lets the database check the data. The disadvantage is that adding another input requires altering the table schema by adding a new column, for instance number of lecture hours.
+
+\subsection{Tables instead of free text for constants}
+
+The four periods P1 to P4 are stored in the table \texttt{period}. An ENUM could have been used, but a table makes it possible to add a new period or to make an academic period deprecated, while keeping the historical data. On the other hand, an ENUM value cannot be included or excluded without altering the database schema. In the same way, job titles, skills and teaching activities are stored in tables rather than assigning ENUM.
+
+However, there are cases where free text is preferred over ENUMs. For instance, the properties of addresses and phone numbers are stored as free text. They are optional and are only used as notes for persons with several addresses or phone numbers, so they are never used in queries. A lookup table might or ENUM might protect users from entering typos, but adds unnecessary complexity for full user case enumaration of phone number types and address types.
+
+\subsection{Storing all data in the database}
+% Discuss advantages and disadvantages of storing all data in the database, as is done here, instead of having some data in the application. This discussion shall be placed in the Discussion chapter of the report.
+
+For the higher grade, all data mentioned in the project description is stored in the database, also data that could have been written in the application. The limit of four course instances is stored in \texttt{allocation\_rule}, the multiplication factors in \texttt{teaching\_activity}, the constants of the examination and administration formulae in \texttt{derived\_activity\_formula}, and the dates of the periods in \texttt{academic\_period}.
+
+The advantage is that the rules can be changed without changing the application program. In this case, the database can enforce the data-related rules itself, as the trigger does for the allocation limit. This means that the application program does not need to handle data-specific logic, and can therefore handle more high-level buisness logic. Additionally, the data is more visible since the database can be easily queried, instead of being hidden in program code.
+
+The disadvantages is that the database and the queries become more complex, since a constant 4 must be read from a table instead of being written directly in the code. The model must also be designed in advance for the kind of changes that are expected. For example, the formula table can change the constants of the formulae, but not the structure of a formula. Rules that span several tables also need procedural code in the database, such as triggers, which is harder to test and cannot be ported between database systems. 
+
+\subsection{Keeping multiple versions of data}
+
+There are multiple instances of keeping multiple versions of data. Especially in terms of course layouts and salaries, since they are prone to change, which means old versions must still be able to be retrieved. Course layout versions shows this behavior since a new course layout can be inserted with a higher version number, and each course instance references the layout it was given with. Additionally, salaries are also versioned with the date the salary starts to be valid. The end date is deliberately not stored, since it is always the closest start date of the next salary. Storing it would be duplicated data, and two salaries of the same employee could then overlap, which cannot be prevented by a \texttt{CHECK} constraint, since such a constraint only sees one row.
+
+The advantages of keeping versions are that historical data stays correct, so that for example the cost of a course instance from an earlier year can be reconstructed, and that nothing is lost when data changes. The disadvantages are that the database grows with every change, that the queries must always select the correct version, which makes them more complex and error-prone, and that it must be decided which data is versioned. In this model, the course name, the multiplication factors and the formula constants are not versioned. If the lecture factor is changed, the hours of all previous course instances also change, so these tables should also be versioned if historical reports must remain unchanged.
 
 \section{Comments About the Course}
 
