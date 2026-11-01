@@ -12,6 +12,7 @@ __pycache__/
 *.log
 *.out
 *.synctex.gz
+latexmkrc
 
 # Built PDFs must not be tracked
 *.pdf

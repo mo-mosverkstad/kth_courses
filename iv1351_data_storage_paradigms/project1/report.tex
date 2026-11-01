@@ -2,11 +2,29 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{graphicx}
+% SVG support: converted to vector PDF by Inkscape at compile time (needs -shell-escape, see latexmkrc).
+% inkscapelatex=false keeps the diagram's own text and fonts instead of re-typesetting them with LaTeX.
+\usepackage[inkscapelatex=false]{svg}
 \usepackage{lastpage}
 \usepackage{pgf}
 \usepackage{wrapfig}
 \usepackage{fancyvrb}
 \usepackage{listings}
+\usepackage{xcolor}
+% Style for SQL / PL/pgSQL code listings
+\lstdefinestyle{sql}{
+  language=SQL,
+  morekeywords={RETURNS,TRIGGER,DECLARE,BEGIN,END,IF,THEN,RAISE,EXCEPTION,RETURN,LANGUAGE,FUNCTION,REPLACE,EXECUTE,BEFORE,EACH,ROW,INTEGER,LIMIT,INTO,INNER,JOIN},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!45!black}\itshape,
+  stringstyle=\color{red!65!black},
+  frame=single,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false
+}
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 
@@ -61,7 +79,7 @@ It is furthermore declared that the solution below is a contribution by the proj
 % \textbf{This chapter tells \textit{what} are you going to do.} 
 % Explain the task and the requirements on the solution. It's important to clearly state the requirements. \textit{Also specify which other student you worked with when solving the tasks, or if you worked alone.}
 
-This report concerns the design of a course database system. The database system stores courses, course layout versions, teaching allocations, and employees at a university. A conceptual diagram, along with a logical-physical ER-diagram is created for modeling the database and specifying the database schema/layout, as well as queries for creating the database tables, inserting sample table data, and additional database trigger operations for complying with requirement constraints. 
+This report concerns the design of a course database system. The database system stores courses, course layout versions, teaching allocations, and employees at a university. A conceptual diagram, along with a logical-physical ER-diagram is created for modeling the database and specifying the database schema/layout, as well as queries for creating the database tables, inserting sample table data, and additional database trigger operations for complying with requirement constraints. Additionally, the project task is carried out alone.
 
 The database is intended to store university courses and employees (teachers), which are described as below. The purpose is to generate reports and statistics from the given data, for instance calculating the total teaching cost of a course instance in a given time interval.
 
@@ -73,9 +91,10 @@ The first part concerns course layout and course instances. For each course, a u
 Each course instance contain a number of teaching activities, labelled as lecture, lab, tutorial, seminar, examination, administration and other. More teaching activity types could be added into the database, such as help sessions. The total number of required hours for each teaching activity is calculated differently.
 For some teaching activities, such as lecture, lab, tutorial and seminar, the number of required hours can be calculated by multiplying the number planned hours with a multiplication factor of a given teaching activity. In other words, if the multiplication factor for lecture is 5, that means for every hour of holding lecture, 5 hours are required including preparation time.
 For other teaching activities, the number of required hours are derived from the number of students or ECTS credits. The formulae for calculating the required hours of examination and admin are stated as below (taken from project description):
+
 \begin{lstlisting}
-Examination hour = 32 + 0.725* #Students 
-Admin hours = 2*HP + 28 + 0.2* #Students
+Examination hour = 32 + 0.725 * #Students
+Admin hours = 2 * HP + 28 + 0.2 * #Students
 \end{lstlisting}
 
 \subsection{Departments, people and employees}
@@ -85,7 +104,58 @@ Employees can be allocated to different course instances, while a course instanc
 
 \section{Literature Study}
 
-This chapter must prove that you collected sufficient knowledge before starting development, instead of just hacking away without knowing how to complete a task. State what you have read and briefly summarize what you have learned.
+% This chapter must prove that you collected sufficient knowledge before starting development, instead of just hacking away without knowing how to complete a task. State what you have read and briefly summarize what you have learned.
+
+In terms of literature study, the relevant fundamental and theoretical knowledge for carrying out the project task. These includes the database relational model, SQL language, database normalization, conceptual models, logical and physical models. The relational model, SQL language and database normalization concepts are covered both in the course book and the lecture presentations, while the conceptual models, logical and physical models are mostly covered in Leif Lindbäck's videos which is more tied with the project task requirement. Also, the same concepts are covered in the coursebook, but are stated more generally.
+
+\subsection{Relational database model}
+
+The relational database model organizes data into relations (tables). Each relation (table) consists of rows (tuple or records) and columns (attributes). A relation has both an intentional state, which is the same as domain definition, and an extensional state, which describes the current data currently being stored in the table. A table can be considered as a relation, since each tuple exists in the table domain, which is a cross product of the domains of individual attributes.
+
+The relational algebra and relational calculus provides different relation (table) operations, such as selecting tuples and projecting attributes of a relation. Additionally, it also states that relationships between tables can be established using primary and foreign keys, and can be considered by an equijoin between the two tables. A primary key uniquely identifies each record in a table, while a foreign key references a record in another table and maintains referential integrity.
+
+The relational database model is an important key concept in terms of organizing the given data in terms of courses and employees since the database contains multiple interconnected entities, such as courses, course instances, employees, departments, and teaching activities.
+
+\subsection{SQL}
+Structured Query Language (SQL) is used to define, manipulate, query, and retrieve data in relational databases. Instead of specifying the query in relational calculus which looks mathematically verbose, SQL offers a query specification that resembles natural language. The language include multiple parts, such as Data Definition Language (DDL) which is used to create and alter database table schema, Data Query Language (DQL) which is used to retrieve data from tables using \texttt{SELECT} and Data Manipulation Language (DML) which is used to \texttt{INSERT}, \texttt{UPDATE} and \texttt{DELETE} records.
+
+During creating database tables, database constraints on tables are used to further restrict the domain. The constraints includes for instance primary key constraints, foreign key constraints that specify actions during \texttt{ON UPDATE} and \texttt{ON DELETE}, \texttt{UNIQUE} constraints that allows only one unique value composition of one or more columns, \texttt{NOT NULL} constraints that rejects \texttt{NULL} value and \texttt{CHECK} constraints. These constraints helps database integrity and prevents invalid records from being stored.
+
+Additionally, database triggers in PostgreSQL are also important for ensuring database integrity of rows that spans over different table records with more complex validation logic. A trigger is automatically executed on a database table operation such as \texttt{INSERT}, \texttt{UPDATE}, or \texttt{DELETE}. If the validation fails for the database trigger, the operation is rejected.
+
+\subsection{Database normalization}
+
+Database normalization is a process to reduce redundancy and avoid data anomalies. The process concerns dividing a large anormal table into smaller tables with relationship between them that complies with the normal form. The main normal forms includes First Normal Form (1NF), Second Normal Form (2NF), and Third Normal Form (3NF).
+
+First Normal Form requires all attributes to contain atomic values, such as \texttt{INT}, \texttt{FLOAT}, \texttt{VARCHAR}, or \texttt{DATE}, and all rows and columns must be unique. Second Normal Form requires First Normal Form and that non-key attributes (attributes that are not a part of candidate key), must depend on the entire candidate key than only a part of it. Third Normal Form specifies that non-key attributes must depend only on the candidate key, along with Second Normal Form, which means that they do not depend transitively on candidate keys.
+
+Database normalization is also another important concept because it helps to avoid unnecessary duplication in the database and makes data maintainance easier, especially in database storage with different types of related information.
+
+\subsection{Conceptual Data Modeling}
+---
+
+Conceptual Data Modeling
+
+Conceptual data modeling describes the information requirements of a system at a high level, independently of a specific database management system or implementation. Entity-Relationship (ER) modeling is commonly used for this purpose. It identifies entities, their attributes, and the relationships between them. Relationships can also have cardinalities, describing how many instances of one entity can be associated with instances of another entity.
+
+The conceptual modeling material, particularly the instructional videos provided for the project, helped develop an understanding of how textual requirements can be translated into an entity-relationship model. This is an important initial step because it allows the relationships and constraints of the application to be identified before considering the actual database implementation.
+
+---
+
+\subsection{Logical and Physical Database Design}
+---
+
+Logical and Physical Database Design
+
+Logical database design translates the conceptual model into a relational structure. Entities are represented as tables, attributes become columns, and relationships are implemented using primary and foreign keys. At this stage, the structure is further refined to satisfy relational database principles and normalization requirements.
+
+Physical database design concerns how the logical structure is implemented in a particular database management system. This includes defining data types, constraints, indexes, and other database-specific implementation details.
+
+Studying these two design levels provided an understanding of how to progress from an abstract representation of the application to an actual relational database schema. The distinction is important because the conceptual model focuses on the information requirements, whereas the logical and physical models describe how those requirements can be represented and implemented in a database.
+
+Overall, the literature study provided the necessary theoretical foundation for analyzing the project requirements, designing the database models, and implementing the database using SQL and PostgreSQL.
+
+---
 
 \section{Method}
 
@@ -101,11 +171,66 @@ Explain how you worked when solving the tasks and how you evaluated that your so
 
 \begin{figure}[h!]
   \begin{center}
-    \includegraphics[scale=0.6]{../temp.pdf}
-    \caption{A sample diagram, included to illustrate caption (this text), numbering and reference in text.}
+    \includesvg[width=\textwidth]{diagrams/conceptual}
+    \caption{conceptual diagram}
     \label{fig:diag}
   \end{center}
 \end{figure}
+
+\begin{figure}[h!]
+  \begin{center}
+    \includesvg[width=\textwidth]{diagrams/logical-physical}
+    \caption{Logical-physical ER-diagram}
+    \label{fig:diag}
+  \end{center}
+\end{figure}
+
+\begin{lstlisting}[style=sql]
+CREATE OR REPLACE FUNCTION validate_4_instances_each_study_period()
+RETURNS TRIGGER AS $$
+DECLARE
+    new_instance_id INTEGER;
+    new_academic_period_id INTEGER;
+    current_value INTEGER;
+    max_value INTEGER;
+BEGIN
+    -- extract instance_id and academic_period_id
+    SELECT course_instance.id, course_instance.academic_period_id
+    INTO new_instance_id, new_academic_period_id
+    FROM planned_activity
+    INNER JOIN course_instance ON course_instance.id = planned_activity.course_instance_id
+    WHERE planned_activity.id = NEW.planned_activity_id;
+
+    -- count the number of teaching_allocation from given employee and academic period
+    SELECT COUNT(DISTINCT course_instance.id)
+    INTO current_value
+    FROM teaching_allocation
+    INNER JOIN planned_activity ON planned_activity.id = teaching_allocation.planned_activity_id
+    INNER JOIN course_instance ON course_instance.id = planned_activity.course_instance_id
+    WHERE teaching_allocation.employee_id = NEW.employee_id
+      AND course_instance.academic_period_id = new_academic_period_id
+      AND course_instance.id <> new_instance_id;
+
+    SELECT max_courses
+    INTO max_value
+    FROM allocation_rule
+    ORDER BY id
+    LIMIT 1;
+
+    IF current_value >= max_value THEN
+        RAISE EXCEPTION 'Problem: A teacher cannot be assigned to more than % course instances each academic period. Employee id: %, already allocated: %', max_value, NEW.employee_id, current_value;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_4_instances_each_study_period
+BEFORE INSERT OR UPDATE
+ON teaching_allocation
+FOR EACH ROW
+EXECUTE FUNCTION validate_4_instances_each_study_period();
+\end{lstlisting}
 
 \pagebreak
 
