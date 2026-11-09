@@ -12,6 +12,31 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{url} % for the repository link in the Result chapter
+% The two ER diagrams are too wide for a portrait text block. Each one gets a page of its
+% own, with the diagram turned sideways and the margins reduced so it is as large as
+% possible. lscape rotates only the content, so the page itself stays portrait (use
+% pdflscape instead to also set /Rotate and have viewers show the page turned).
+% geometry is loaded with pass so it changes nothing except to provide \newgeometry.
+\usepackage{lscape}
+\usepackage[pass]{geometry}
+% \diagrampage{<file>}{<caption>}{<label>}: one rotated, nearly full-page figure.
+\newcommand{\diagrampage}[3]{%
+  \newgeometry{margin=10mm}%
+  \begin{landscape}%
+    \vspace*{\fill}
+    % Inside landscape, \linewidth is the rotated (long) page direction, while the
+    % available height is bounded by \paperwidth. keepaspectratio picks whichever
+    % of the two limits binds, so one macro fits both a wide and a squarer diagram.
+    \begin{figure}[h!]
+      \centering
+      \includesvg[width=\linewidth,height=0.78\paperwidth,keepaspectratio]{#1}
+      \caption{#2}
+      \label{#3}
+    \end{figure}%
+    \vspace*{\fill}
+  \end{landscape}%
+  \restoregeometry%
+}
 % Style for SQL / PL/pgSQL code listings
 \lstdefinestyle{sql}{
   language=SQL,
@@ -26,6 +51,13 @@
   keepspaces=true,
   showstringspaces=false
 }
+% Long identifiers such as UNIQUE(course_instance_id, teaching_activity_id) are single
+% unbreakable words, so TeX pushed them past the right margin (one line stuck out by
+% 100pt). Allow a line break after each underscore, without inserting a hyphen that
+% could be mistaken for part of the name. emergencystretch mops up the tighter lines.
+\renewcommand{\_}{\textunderscore\allowbreak}
+\emergencystretch=2em
+
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 
@@ -92,15 +124,15 @@ The first part concerns course layout and course instances. For each course, a u
 
 Each course instance contains a number of teaching activities, labelled as lecture, lab, tutorial, seminar, examination, administration and other. More teaching activity types could be added into the database, such as help sessions. The total number of required hours for each teaching activity is calculated differently.
 For some teaching activities, such as lecture, lab, tutorial and seminar, the number of required hours can be calculated by multiplying the number planned hours with a multiplication factor of a given teaching activity. In other words, if the multiplication factor for lecture is 5, that means for every hour of holding lecture, 5 hours are required including preparation time.
-For other teaching activities, the number of required hours are derived from the number of students or ECTS credits. The formulae for calculating the required hours of examination and admin are stated as below (taken from project description):
+For other teaching activities, the number of required hours are derived from the number of students or ECTS credits. The formulae for calculating the required hours of examination and admin are stated as below (taken from the project description~\cite{project}):
 
-\begin{lstlisting}
+\begin{lstlisting}[basicstyle=\ttfamily, columns=fullflexible, keepspaces=true]
 Examination hour = 32 + 0.725 * #Students
 Admin hours = 2 * HP + 28 + 0.2 * #Students
 \end{lstlisting}
 
 \subsection{Departments, people and employees}
-The university has a number of employees (or teachers), with their contact details, job title and salary recorded in the database. The salary format can be given monthly. Employee salaries can be changed, thus it is necessary to version them. Employees are affiliated with different departments and are allocated to different teaching activities of course instances. Allocations can be proceeded depending on the given skill set of employees. The university contains multiple departments, each with a manager who is also an employee. Each employee can also have a supervisor, which is also another employee.
+The university has a number of employees (or teachers), with their contact details, job title and salary recorded in the database. The salary format can be given monthly. Employee salaries can be changed, which means that it is necessary to version them. Also, employees are affiliated with different departments and are allocated to different teaching activities of course instances. Allocations can sometimes be proceeded depending on the given skill set of employees. The university contains multiple departments, each with a manager who is also an employee. Each employee can also have a supervisor, which is also another employee.
 
 Employees can be allocated to different course instances, while a course instance can have multiple employees being allocated in. However, one teacher must not be allocated more than 4 different course instance in the same academic period.
 
@@ -108,37 +140,37 @@ Employees can be allocated to different course instances, while a course instanc
 
 % This chapter must prove that you collected sufficient knowledge before starting development, instead of just hacking away without knowing how to complete a task. State what you have read and briefly summarize what you have learned.
 
-The knowledge required for the project task was collected from the course material before the database modelling was started. The following sources were read or watched:
+The knowledge required for the project task was collected from the course material before the database modelling was started. The bullet points shows the following sources:
 
 \begin{itemize}
-  \item The project description and the description of project task 1 on the course pages in Canvas. These define the requirements that are summarized in Chapter~\ref{sec:introduction}, and the task description also states what the report must contain.
-  \item \textit{Tips and Tricks for Project Task 1} (\texttt{seminar1-tips-and-tricks.pdf}). It covers the exact meaning of the cardinality of a relation, the use of \texttt{INT GENERATED ALWAYS AS IDENTITY} for surrogate primary keys, naming conventions for surrogate keys, the primary key of a table that represents a multivalued attribute, the difference between a multivalued attribute and a many-to-many relation, relations to self, the choice between fewer and bigger or more and smaller tables, the risks of derived data, and lookup tables versus ENUMs.
-  \item \textit{Assessment Criteria For Seminar 1, Logical and Physical Model} (\texttt{assessment-criteria-seminar1.pdf}). It was used as a checklist, both while the model was created and while Chapter~\ref{sec:discussion} was written.
-  \item The recorded lecture series on the conceptual model, about three hours in total, and the recorded lectures on logical and physical models, both by Leif Lindbäck. The latter describes the eleven-step procedure that the modelling procedure in Section~\ref{sec:modelling} is based on, and it also defines the combined logical-physical diagram that is used in this report.
-  \item The lecture on SQL (lecture 3) and normalisation (lecture 4), which covers the normal forms and functional dependencies.
-  \item The course book, [Fundamentals of database systems, 7th edition, by Ramez Elmasri, Sham Navathe], and in particular its chapters on the relational model, SQL and normalisation and [ISE Database System Concepts, 7th edition, by Abraham Silberschatz, S Sudarshan, Henry Korth]
+  \item The project description~\cite{project} and the description of project task 1~\cite{task1} on the course pages in Canvas. These define the requirements that are summarized in Chapter~\ref{sec:introduction}, and the task description also states what the report must contain.
+  \item \textit{Tips and Tricks for Project Task 1}~\cite{tips}. It covers several basic concepts such as cardinality of a relation, the use of \texttt{INT GENERATED ALWAYS AS IDENTITY} for surrogate primary keys, naming conventions for surrogate keys, the primary key of a table that represents a multivalued attribute, the difference between a multivalued attribute and a many-to-many relation, relations to self, the choice between fewer and bigger or more and smaller tables, the risks of derived data, and lookup tables versus ENUMs.
+  \item \textit{Assessment Criteria For Seminar 1, Logical and Physical Model}~\cite{criteria}. It was used as a checklist, both while the model was created and while Chapter~\ref{sec:discussion} was written.
+  \item The recorded lecture series on the conceptual model~\cite{conceptuallecture}, about three hours in total, and the recorded lectures on logical and physical models~\cite{logicallecture}, both by Leif Lindbäck. The latter describes the eleven-step procedure that the modelling procedure in Section~\ref{sec:modelling} is based on, and it also defines the combined logical-physical diagram that is used in this report.
+  \item The lecture on SQL (lecture 3) and the lecture on normalisation (lecture 4)~\cite{normalisationlecture}, which covers the normal forms and functional dependencies.
+  \item The course books~\cite{elmasri,silberschatz}, and in particular their chapters on the relational model, SQL and normalisation.
 \end{itemize}
 
-The topics that were learned from these sources, and that the solution depends on, are summarized in the sections below. The relational model, the SQL language and normalization are covered both by the course book and by the lectures, where the course book states them more generally, while the conceptual model and the logical and physical models are covered mainly by the recorded videos, which are closer to what the project task asks for.
+The basic concepts that the solution depends on, are summarized as below. The relational model, the SQL language and normalization are covered both by the course books~\cite{elmasri,silberschatz} and by the lectures, where the course books state them more generally, while the conceptual model and the logical and physical models are covered mainly by the recorded videos~\cite{conceptuallecture,logicallecture}, which are closer to what the project task asks for.
 
 \subsection{Relational database model}
 
-The relational database model organizes data into relations (tables). Each relation (table) consists of rows (tuple or records) and columns (attributes). A relation has both an intentional state, which is the same as domain definition, and an extensional state, which describes the current data currently being stored in the table. A table can be considered as a relation, since each tuple exists in the table domain, which is a cross product of the domains of individual attributes.
+The relational database model~\cite{elmasri,silberschatz} organizes data into relations (tables). Each relation (table) consists of rows (tuple or records) and columns (attributes). A relation has both an intentional state, which is the same as domain definition, and an extensional state, which describes the current data currently being stored in the table. A table can be considered as a relation, since each tuple exists in the table domain, which is a cross product of the domains of individual attributes.
 
 The relational algebra and relational calculus provides different relation (table) operations, such as selecting tuples and projecting attributes of a relation. Additionally, it also states that relationships between tables can be established using primary and foreign keys, and can be considered by an equijoin between the two tables. A primary key uniquely identifies each record in a table, while a foreign key references a record in another table and maintains referential integrity.
 
 The relational database model is an important key concept in terms of organizing the given data in terms of courses and employees since the database contains multiple interconnected entities, such as courses, course instances, employees, departments, and teaching activities.
 
 \subsection{SQL}
-Structured Query Language (SQL) is used to define, manipulate, query, and retrieve data in relational databases. Instead of specifying the query in relational calculus which looks mathematically verbose, SQL offers a query specification that resembles natural language. The language include multiple parts, such as Data Definition Language (DDL) which is used to create and alter database table schema, Data Query Language (DQL) which is used to retrieve data from tables using \texttt{SELECT} and Data Manipulation Language (DML) which is used to \texttt{INSERT}, \texttt{UPDATE} and \texttt{DELETE} records.
+Structured Query Language (SQL)~\cite{elmasri,silberschatz} is used to define, manipulate, query, and retrieve data in relational databases. Instead of specifying the query in relational calculus which looks mathematically verbose, SQL offers a query specification that resembles natural language. The language includes multiple parts, such as Data Definition Language (DDL) which is used to create and alter database table schema, Data Query Language (DQL) which is used to retrieve data from tables using \texttt{SELECT} and Data Manipulation Language (DML) which is used to \texttt{INSERT}, \texttt{UPDATE} and \texttt{DELETE} records.
 
-During creating database tables, database constraints on tables are used to further restrict the domain. The constraints includes for instance primary key constraints, foreign key constraints that specify actions during \texttt{ON UPDATE} and \texttt{ON DELETE}, \texttt{UNIQUE} constraints that allows only one unique value composition of one or more columns, \texttt{NOT NULL} constraints that rejects \texttt{NULL} value and \texttt{CHECK} constraints. These constraints helps database integrity and prevents invalid records from being stored.
+During creating database tables, database constraints on tables are used to further restrict the domain. The constraints include for instance primary key constraints, foreign key constraints that specify actions during \texttt{ON UPDATE} and \texttt{ON DELETE}, \texttt{UNIQUE} constraints that allows only one unique value composition of one or more columns, \texttt{NOT NULL} constraints that rejects \texttt{NULL} value and \texttt{CHECK} constraints. These constraints help database integrity and prevents invalid records from being stored.
 
 Additionally, database triggers in PostgreSQL are also important for ensuring database integrity of rows that spans over different table records with more complex validation logic. A trigger is automatically executed on a database table operation such as \texttt{INSERT}, \texttt{UPDATE}, or \texttt{DELETE}. If the validation fails for the database trigger, the operation is rejected.
 
 \subsection{Database normalization}
 
-Database normalization is a process to reduce redundancy and avoid data anomalies. The process concerns dividing a large unnormalised table into smaller tables with relationship between them that complies with the normal form. The main normal forms includes First Normal Form (1NF), Second Normal Form (2NF), and Third Normal Form (3NF).
+Database normalization~\cite{elmasri,normalisationlecture} is a process to reduce redundancy and avoid data anomalies. The process concerns dividing a large unnormalised table into smaller tables with relationship between them that complies with the normal form. The main normal forms include First Normal Form (1NF), Second Normal Form (2NF), and Third Normal Form (3NF).
 
 First Normal Form requires all attributes to contain atomic values, such as \texttt{INT}, \texttt{FLOAT}, \texttt{VARCHAR}, or \texttt{DATE}, and all rows and columns must be unique. Second Normal Form requires First Normal Form and that non-key attributes (attributes that are not a part of candidate key), must depend on the entire candidate key than only a part of it. Third Normal Form specifies that non-key attributes must depend only on the candidate key, along with Second Normal Form, which means that they do not depend transitively on candidate keys.
 
@@ -146,7 +178,7 @@ Database normalization is also another important concept because it helps to avo
 
 \subsection{Conceptual Data Modeling}
 
-Conceptual model shows the high-level system requirements by sketching out the relationship between different entities. The model is independent of specific database management system or implementation. 
+Conceptual model~\cite{conceptuallecture} shows the high-level system requirements by sketching out the relationship between different entities. The model is independent of specific database management system or implementation. 
 
 Entity-Relationship (ER) modeling can be used for conceptual models. It identifies entities, their attributes, and the relationships between them. Relationships can also have cardinalities, which describes the number of instances of one entity that can be associated with another entity.
 
@@ -154,11 +186,11 @@ Conceptual model is an important initial step because it can visualize, structur
 
 \subsection{Logical and Physical Database Design}
 
-Logical database design translates the conceptual model into a relational structure. Entities are represented as tables, attributes become columns, and relationships are implemented using primary and foreign keys. The structure is further refined to satisfy the principles of relational databases but agnostic in terms of database management system.
+Logical database design~\cite{logicallecture} translates the conceptual model into a relational structure. Entities are represented as tables, attributes become columns, and relationships are implemented using primary and foreign keys. The structure is further refined to satisfy the principles of relational databases but agnostic in terms of database management system.
 
 Physical database design concerns how the logical structure is implemented in a particular database management system. This includes defining data types, constraints, indexes, and other database-specific implementation details.
 
-For this project, a logical-physical diagram is created, which is a combination of logical and physical model. It is a specialized model for simplification in this project, and the model is given in Leif Lindbäck's lecture videos.
+For this project, a logical-physical diagram is created, which is a combination of logical and physical model. It is a specialized model for simplification in this project, and the model is given in Leif Lindbäck's lecture videos~\cite{logicallecture}.
 
 The logical-physical database design diagram is ultimately important since it provides the actual database design but with the similar shape as conceptual model.
 
@@ -188,7 +220,7 @@ The sample insertion data was created using an online data generator (generateda
 
 The modelling procedure was accomplished by translating the project requirements and the concept model given in this course, into a conceptual diagram. The translation process started from the given conceptual model and extending it. For each noun in the project description, a candidate entity or attribute was considered, if it hasn't been modeled in the given conceptual model. Every connection between nouns was considered as a candidate relation. Using these approaches, the given conceptual model could then be extended with new entities, for instance study periods, course instances, salary version history, the allocation rule and formulae for derived hours.
 
-After creating the conceptual model, a logical-physical model could be created by extending the conceptual model. This was carried out by following the given steps of the video lecture on logical and physical diagrams.
+After creating the conceptual model, a logical-physical model could be created by extending the conceptual model. This was carried out by following the given steps of the video lecture on logical and physical diagrams~\cite{logicallecture}.
 
 \begin{enumerate}
   \item For each entity, a table was created for each entity, and the attributes of the entity was assigned as columns.
@@ -206,7 +238,7 @@ After creating the logical-physical diagram, a SQL \texttt{CREATE}-script was ve
 
 \subsection{Evaluation}
 
-The model was manually evaluated against the project description and the assessment criteria for seminar 1. By checking each criteria in the assessment criteria for seminar 1, the correctness for the logical-physical diagram could be evaluated. Additionally, the correctness of the SQL scripts were evaluated manually by checking the number of databases, retrieving their schemas as well as retrieving all rows from each table. The trigger, that ensured that each employee is assigned to maximum four course instances in one academic period, could be checked for correctness by deliberately inserting the same employee to more than four different course instances that were taken place in the same academic period. If the manual testing failed, the trigger has to be corrected. The database tables has to be dropped and re-created and re-inserted from the ground up.
+The model was manually evaluated against the project description~\cite{project} and the assessment criteria for seminar 1~\cite{criteria}. By checking each criteria in the assessment criteria, the correctness for the logical-physical diagram could be evaluated. Additionally, the correctness of the SQL scripts were evaluated manually by checking the number of databases, retrieving their schemas as well as retrieving all rows from each table. The trigger, that ensured that each employee is assigned to maximum four course instances in one academic period, could be checked for correctness by deliberately inserting the same employee to more than four different course instances that were taken place in the same academic period. If the manual testing failed, the trigger has to be corrected. The database tables have to be dropped and re-created and re-inserted from the ground up.
 
 \section{Result}
 
@@ -226,7 +258,7 @@ The SQL files can be listed as below:
   \item Additionally, \texttt{build.bash} is a bash script that cleans the database, creates the tables and insert the data into them, making sure that the scripts are executed in correct order.
 \end{itemize}
 
-Equivalent MySQL scripts are also available and included in the repository. Their file names ends with \texttt{-mysql.sql}, instead of \texttt{-postgresql.sql}.
+MySQL versions of the create script and the insert script are also included in the repository, with file names ending with \texttt{-mysql.sql} instead of \texttt{-postgresql.sql}. They build the same 21 tables with the same constraints, but there is deliberately no MySQL version of the trigger. The MySQL scripts therefore store the allocation limit in \texttt{allocation\_rule}, without enforcing it in the database. The reason is that trigger syntax is not portable between database management systems, which is also discussed in Section~\ref{sec:alldata}. PostgreSQL is the database management system used for this project, and only the PostgreSQL version is complete.
 
 \subsection{Conceptual model}
 
@@ -234,13 +266,7 @@ The conceptual model in Figure~\ref{fig:conceptual} contains all of the high-lev
 
 Two connections are deliberately drawn as attributes instead of relations in the conceptual model, which are \texttt{department.manager} and \texttt{employee.supervisor/manager}. At the conceptual level, the model only shows existing information. The fact that a department has a manager and an employee has a supervisor are simply facts about a department respective an employee. Both of them are converted into relations in the logical-physical model, because the value of each attribute is an employee and not a plain value such as a phone number. An attribute whose value is an entity cannot be stored as a column of its own, so the manager becomes the foreign key \texttt{department.manager\_employee\_id} referencing \texttt{employee}, and the supervisor becomes the foreign key \texttt{employee.supervisor\_id} referencing the \texttt{employee} table itself, which is a relation to self. The note \textit{A manager is also an employee} in Figure~\ref{fig:conceptual} is what signals that this conversion is needed.
 
-\begin{figure}[h!]
-  \begin{center}
-    \includesvg[width=\textheight,angle=90]{diagrams/conceptual}
-    \caption{The conceptual model of the course database}
-    \label{fig:conceptual}
-  \end{center}
-\end{figure}
+\diagrampage{diagrams/conceptual}{The conceptual model of the course database}{fig:conceptual}
 
 \subsection{Logical-physical model}
 
@@ -248,13 +274,7 @@ The logical-physical model in Figure~\ref{fig:logical} concerns the actual imple
 
 For table properties that cannot be meaningfully interpreted in Astah, there are multiple notes/comment conventions that are used in the diagram. First of all, every primary key attribute that doesn't work as foreign key are defined as \texttt{INT NOT NULL GENERATED ALWAYS AS IDENTITY}. Its values are automatically generated by the database and cannot be set manually. Second, a foreign key is formatted as \texttt{<referenced\_table>\_id}, or simply named after its role if one table references the same table twice, for instance \texttt{manager\_employee\_id} and \texttt{supervisor\_id}. Third, the referential integrity for update for all foreign keys are declared as \texttt{ON UPDATE CASCADE}. In terms of deletion, they are by default restricted unless a note stating \texttt{ON DELETE CASCADE}. Fourth, composite \texttt{UNIQUE} constraints and \texttt{CHECK} constraints are written as notes/comments and attached to each table, since they cannot be shown in entity boxes. Fifth, business rules that cannot be expressed as a constraint at all are written as notes as well. The rule that a teacher must not be allocated to more than four course instances in the same academic period is attached in this way to \texttt{teaching\_allocation} and \texttt{allocation\_rule}, which are the tables it concerns. Such a note states the rule itself, while the way it is enforced is explained in plain text in Section~\ref{sec:allocations}, since a diagram cannot show procedural code.
 
-\begin{figure}[h!]
-  \begin{center}
-    \includesvg[width=\textheight,angle=90]{diagrams/logical-physical}
-    \caption{The logical-physical model of the database, in crow foot notation}
-    \label{fig:logical}
-  \end{center}
-\end{figure}
+\diagrampage{diagrams/logical-physical}{The logical-physical model of the database, in crow foot notation}{fig:logical}
 
 \subsubsection{Courses, layouts and instances}
 
@@ -270,7 +290,7 @@ The teaching activities are stored as rows in \texttt{teaching\_activity}, which
 
 The actual planned hours of each activity in a course instance are stored in the table \texttt{planned\_activity}. With the constraint \texttt{UNIQUE(course\_instance\_id, teaching\_activity\_id)}, an activity could only be planned at most once per instance.
 
-The project description states that teaching activities may be associated with course layouts or with course instances. In this model, a planned activity is associated with a course instance only, through the foreign key \texttt{planned\_activity.course\_instance\_id}. For this design choise, there are 2 reasons: First, the planned hours in the project description are given per course instance, not per layout. Second, the derived examination and administration hours depend on the number of registered students, which is an attribute of the instance and not of the layout. This means that the activities of an instance cannot be fully described by the layout.
+The project description states that teaching activities may be associated with course layouts or with course instances. In this model, a planned activity is associated with a course instance only, through the foreign key \texttt{planned\_activity.course\_instance\_id}. For this design choice, there are 2 reasons: First, the planned hours in the project description are given per course instance, not per layout. Second, the derived examination and administration hours depend on the number of registered students, which is an attribute of the instance and not of the layout. This means that the activities of an instance cannot be fully described by the layout.
 
 The disadvantage is that the planned hours must be entered again for every new instance of a course, even when the current course instance is the same as previous. Alternatively, associating planned activities with the course layout, would let every instance of a layout inherit the same hours, but planning a course instance differently from the inherited layout would be difficult. The database, on the other hand, would also suffer from high rigidity, unnecessary complexity and slow queries. Since the planned hours are the result of planning one particular instance, they are stored per instance.
 
@@ -350,11 +370,11 @@ EXECUTE FUNCTION validate_4_instances_each_study_period();
 
 \subsection{Insertion of sample data}
 
-An insert SQL script fills in the created tables with sample data. Tables, such as course, person, address, and phone number, are populated with around 30--40 records each. Most of the data concerns the 2 courses IV1351 and IX1500, with instances (\texttt{2025-50022} and \texttt{2025-50011}). In summary, the script contains approximately 20 courses, 40 course instances in the years 2023 to 2025, 4 departments, 20 employees with seven different KTH job titles, salaries with raises in 2025, and 40 allocations. Foreign key values are always inserted using subqueries on unique business values, such as course codes and employment IDs, since the generated primary key values are unknown.
+An insert SQL script (\texttt{db-insertion-postgresql.sql}) fills in the created tables with sample data. Tables, such as course, person, address, and phone number, are populated with a couple of tens of records each. Most of the data concerns the 2 courses IV1351 and IX1500, with instances (\texttt{2025-50022} and \texttt{2025-50011}). In summary, the script contains approximately 20 courses, 40 course instances in the years 2023 to 2025, 4 departments, 20 employees with seven different KTH job titles, salaries with raises in 2025, and 40 allocations. Foreign key values are always inserted using subqueries on unique business values, such as course codes and employment IDs, since the generated primary key values are unknown.
 
 \subsection{Comparison between requirement and result}
 
-The project requirements are met by the tables and table properties below:
+The project requirements are met by the table properties below:
 
 The course layout requirement, including course code, name, ECTS credits, minimum and maximum number of students, is met through the \texttt{course} and \texttt{course\_layout} tables. Furthermore, the course instance requirement, including ID, period, year, and number of students, is met through the \texttt{course\_instance}, \texttt{academic\_period}, and \texttt{period} tables.
 
@@ -376,11 +396,11 @@ Finally, the higher-grade requirement that course layouts and salaries must be c
 % \textbf{This chapter \textit{analysis} the result presented in the previous section.}
 % Evaluate your solution according to the assessment criteria found in the assessment-criteria documents, which are found under the bullet \textit{In the Discussion chapter of your report...}, under each task on the Project page in Canvas. You do not have to cover all specified criteria.
 
-The result mentioned above is evaluated according to the assessment criteria for seminar 1, while the 2 topics required for higher grade is discussed.
+The result mentioned above is evaluated according to the assessment criteria for seminar 1~\cite{criteria}, while the 2 topics required for higher grade is discussed.
 
 \subsection{Naming conventions}
 
-For naming conventions, all table and columns are named in lower case with underscores, in order to separate them from the SQL keywords in all capital letters. The table and column names are mostly taken from the project description as much as possible, for instance \texttt{course\_instance}, \texttt{planned\_activity} and \texttt{multiplication\_factor}. All single primary keys are written as \texttt{id}, while all foreign keys are formatted as \texttt{<table>\_id}, which makes it easy to distinguish primary and foreign key attributes. The disadvantage of naming the primary key as \texttt{id}, instead of \texttt{<table>\_id}, is that natural joins cannot be used. This requires join conditions to be explicitly written, which gives more verbose SQL queries. On the other hand, explicit join conditions are more explicit, avoiding 2 columns with same name to be joined by mistake.
+For naming conventions, all table and columns are named in lower case with underscores, in order to separate them from the SQL keywords in all capital letters. The table and column names are mostly taken from the project description as much as possible, for instance \texttt{course\_instance}, \texttt{planned\_activity} and \texttt{multiplication\_factor}. All single primary keys are written as \texttt{id}, while all foreign keys are formatted as \texttt{<table\_name>\_id}, which makes it easy to distinguish primary and foreign key attributes. The disadvantage of naming the primary key as \texttt{id} is that natural joins cannot be used. This requires join conditions to be explicitly written, which gives more verbose SQL queries. On the other hand, explicit join conditions are more explicit, avoiding 2 columns with same name to be joined by mistake.
 
 On the other hand, some names could be improved. For instance, \texttt{num\_students} could be named as \texttt{number\_of\_students}, while \texttt{employee\_salary.salary} as \texttt{salary\_amount}, in order to avoid mistaking a short attribute name \texttt{salary} as a table.
 
@@ -392,7 +412,7 @@ The diagram uses crow foot notation, and every cardinality can be mapped into a 
 
 For normalization check, the model is mostly in 3NF with one exception. The reason is that columns of all tables contain atomic values. Multivalued attributes such as phone numbers, addresses and skills are handled by storing them in separate tables, which concludes that the model is in 1NF. The composite primary keys only exist in cross-reference tables, where the only non-key columns (such as \texttt{allocation\_hours}) depend on the whole key. This shows that the model fulfills 2NF. Finally, data that would otherwise be repeated on many rows is stored only once, for example job titles, period names, teaching activities with their multiplication factors, and course names, which do not depend on the layout version. Therefore, almost no non-key column depends transitively on the primary key.
 
-However, the address table contains one possible exception, since in Sweden the city can be derived from the zip code. On the other hand, splitting the table further was not considered necessary, since the purpose of addresses are for contact details, and over-normalization would make the queries more complex without any practical benefit
+However, the address table contains one possible exception, since in Sweden the city can be derived from the zip code. On the other hand, splitting the table further was not considered necessary, since the purpose of addresses are for contact details, and over-normalization would make the queries more complex without any practical benefit.
 
 \subsection{Tables, columns and constraints}
 
@@ -404,7 +424,7 @@ The manager of a department should be employed at that department. The foreign k
 
 The sum of the allocated hours of a planned activity should not exceed its planned hours. It cannot be enforced since physical allocations may not always match the planned hours, and a constraint would make it impossible to change the planning afterwards.
 
-The table \texttt{allocation\_rule} should contain exactly one row, since the university has one single allocation limit, but nothing in the schema enforces that. If a second row with another value of \texttt{max\_courses} were inserted, the trigger would silently use the row with the lowest \texttt{id} and ignore the other one. The rule cannot be written as a column constraint, because it concerns the number of rows in the table and not the value of a column. Instead, it could be enforced with a \texttt{UNIQUE} constraint on primary key id column, which makes a second row impossible.
+The table \texttt{allocation\_rule} should contain exactly one row, since the university has one single allocation limit, but nothing in the schema enforces that. If a second row with another value of \texttt{max\_courses} were inserted, the trigger would silently use the row with the lowest \texttt{id} and ignore the other one. The rule cannot be written as a column constraint, because it concerns the number of rows in the table and not the value of a column. A \texttt{UNIQUE} constraint on the primary key does not help either, since every new row simply gets a new generated \texttt{id}. It could instead be enforced by adding an extra column that is allowed to hold only one single value, by combining a \texttt{CHECK} constraint with a \texttt{UNIQUE} constraint on that column, which makes a second row impossible. Another alternative is a trigger that counts the rows.
 
 % The trigger also has a limitation: if two transactions allocate the same teacher at the same time, both may read the old number of allocations and both may succeed. This should be handled by the program in task 3, for example with \texttt{SELECT FOR UPDATE}.
 
@@ -412,7 +432,7 @@ The table \texttt{allocation\_rule} should contain exactly one row, since the un
 
 Surrogate keys were chosen for all entity tables, since most natural keys may change or be missing. A course code is mostly stable, while a personal number may be \texttt{NULL}, and an address has no short natural key at all. Surrogate keys also keep the foreign keys short, since a table like \texttt{teaching\_allocation} only needs one column to reference a planned activity, instead of the course instance and the activity together.
 
-The disadvantage is that a surrogate key does not prevent the same real-world object from being stored twice. Therefore, every table with a surrogate key also has a \texttt{UNIQUE} constraint on its natural key, for example \texttt{UNIQUE(course\_id, version)} in \texttt{course\_layout} and \texttt{UNIQUE(employee\_id, valid\_from)} in \texttt{employee\_salary}. On the other hand, cross-reference tables do not have a surrogate key, since the combination of their two foreign keys is already unique.
+The disadvantage is that a surrogate key does not prevent the same real-world object from being stored twice. Therefore, almost every table with a surrogate key also has a \texttt{UNIQUE} constraint on its natural key, for example \texttt{UNIQUE(course\_id, version)} in \texttt{course\_layout} and \texttt{UNIQUE(employee\_id, valid\_from)} in \texttt{employee\_salary}. There are two exceptions. The first is \texttt{allocation\_rule}, which has no natural key at all, as discussed above. The second is \texttt{person}, where \texttt{personal\_number} is \texttt{UNIQUE} but nullable, so two persons without a Swedish personal number can still be stored twice. Names are not suitable as a natural key, since two different persons may share the same name, so this duplication can only be prevented outside the database. On the other hand, cross-reference tables do not have a surrogate key, since the combination of their two foreign keys is already unique.
 
 \subsection{Relations and possible operations}
 
@@ -433,7 +453,9 @@ LIMIT 1;
 
 \subsection{Derived data}
 
-The model does not store derived data. The examination and administration hours are calculated from the number of students and HP, and only the constants of the formulae are stored. Also the hours including the multiplication factor are calculated by the queries, and the end date of a salary is given by the next salary. If derived data were stored, redundancy between the source data and the derived data will appear, which would cause inconsistency and database anomalies. On the other hand, the queries become slightly more verbose and complex, but this can be resolved using views.
+The model does not store derived data. The examination and administration hours are calculated from the number of students and HP, and only the constants of the formulae are stored.
+
+One column may look derived without being so, namely \texttt{course\_instance.instance\_id}. In the sample data it is generated from the academic year, the course and the period number, which makes it look like it could be calculated from the other columns of the row. That is only a convenience for producing readable test data. In reality a course instance ID is assigned externally by the university, it is not required to follow any pattern, and it may be changed, which is why it is stored and not computed. Also the hours including the multiplication factor are calculated by the queries, and the end date of a salary is given by the next salary. If derived data were stored, redundancy between the source data and the derived data will appear, which would cause inconsistency and database anomalies. On the other hand, the queries become slightly more verbose and complex, but this can be resolved using views.
 
 The formulae could have been stored in a generic way, as a constant and a list of coefficients, each multiplied with a named input. This could store any linear formula, but the names of the inputs had to be translated into columns by the queries, meaning that the queries have to know the formula. The current solution with fixed columns for students and HP is simpler and lets the database check the data. The disadvantage is that adding another input requires altering the table schema by adding a new column, for instance number of lecture hours.
 
@@ -461,13 +483,65 @@ There are multiple instances of keeping multiple versions of data. Especially in
 
 The advantages of keeping versions are that historical data stays correct, so that for example the cost of a course instance from an earlier year can be reconstructed, and that nothing is lost when data changes. The disadvantages are that the database grows with every change, that the queries must always select the correct version, which makes them more complex and error-prone, and that it must be decided which data is versioned. In this model, the course name, the multiplication factors and the formula constants are not versioned. If the lecture factor is changed, the hours of all previous course instances also change, so these tables should also be versioned if historical reports must remain unchanged.
 
+\section{References}
+\label{sec:references}
+
+% thebibliography is used instead of BibTeX, so that the report compiles with pdflatex
+% alone and the reference list is kept in this single source file. Cite with \cite{key}.
+\renewcommand{\refname}{}
+\vspace{-2\baselineskip}
+\begin{thebibliography}{9}
+
+\bibitem{elmasri}
+Ramez Elmasri and Shamkant B. Navathe.
+\textit{Fundamentals of Database Systems}, 7th edition.
+Pearson, 2016.
+
+\bibitem{silberschatz}
+Abraham Silberschatz, Henry F. Korth and S. Sudarshan.
+\textit{Database System Concepts}, 7th edition (ISE).
+McGraw-Hill, 2019.
+
+\bibitem{project}
+Leif Lindbäck and the IV1351 teaching staff.
+\textit{Project: Course Layout and Teaching Load Allocations}.
+Course page, Data Storage Paradigms IV1351, KTH, HT26.
+
+\bibitem{task1}
+\textit{Project Task 1, Logical and Physical Model}.
+Course page, Data Storage Paradigms IV1351, KTH, HT26.
+
+\bibitem{tips}
+\textit{Tips and Tricks for Project Task 1} (\texttt{seminar1-tips-and-tricks.pdf}).
+Course material, Data Storage Paradigms IV1351, KTH, HT26.
+
+\bibitem{criteria}
+\textit{Assessment Criteria For Seminar 1, Logical and Physical Model}
+(\texttt{assessment-criteria-seminar1.pdf}).
+Course material, Data Storage Paradigms IV1351, KTH, HT26.
+
+\bibitem{conceptuallecture}
+Leif Lindbäck.
+\textit{The Conceptual Model}. Recorded lecture series, about three hours.
+Data Storage Paradigms IV1351, KTH, HT26.
+
+\bibitem{logicallecture}
+Leif Lindbäck.
+\textit{Logical and Physical Models}. Recorded lecture series.
+Data Storage Paradigms IV1351, KTH, HT26.
+
+\bibitem{normalisationlecture}
+\textit{Normalisation}. Lecture 4, Data Storage Paradigms IV1351, KTH, HT26.
+
+\end{thebibliography}
+
 \section{Comments About the Course}
 
 % \textbf{This section is optional, but please at least write approximately how much time you spent on the assignment}, including lectures, labs, tutorials and seminars. This is of great help for course evaluation.
 
 % Also, any other comment(s) related to this course offering or to coming offerings is much appreciated. 
 
-In terms of spent time for performing course tasks, both lectures (1--4) and labs (1) took approximately 5 days each. Additionally, the project task 1 itself took 5 days to accomplish. This course offering is taken place in P2, which is one week longer than P1.
+In terms of spent time for performing course tasks, both lectures (1--4) and labs (1) took approximately 5 days each. Additionally, the project task 1 itself took 5 days to accomplish. This course offering is taken place in P2, which is one week longer than P1. This provides more time and doesn't make the deadlines tight.
 
 
 \end{document}
