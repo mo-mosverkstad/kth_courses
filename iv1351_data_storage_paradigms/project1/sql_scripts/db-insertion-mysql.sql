@@ -554,8 +554,8 @@ INNER JOIN employee AS e
     ON e.employment_id = v.employment_id;
 
 
-INSERT INTO allocation_rule (max_courses)
-VALUES (4);
+INSERT INTO policy (policy_name, policy_value)
+VALUES ('allocation_rule', 4);
 
 
 INSERT INTO teaching_activity (activity_name, multiplication_factor)

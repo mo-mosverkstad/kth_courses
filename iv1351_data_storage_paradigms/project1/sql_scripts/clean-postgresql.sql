@@ -10,7 +10,7 @@ DROP TABLE IF EXISTS teaching_activity CASCADE;
 
 -- Allocation rule
 
-DROP TABLE IF EXISTS allocation_rule CASCADE;
+DROP TABLE IF EXISTS policy CASCADE;
 
 -- Affiliated properties: address, phone number, skill, salary
 

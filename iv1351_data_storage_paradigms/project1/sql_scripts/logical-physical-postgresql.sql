@@ -154,11 +154,12 @@ CREATE TABLE employee_salary (
     UNIQUE (employee_id, valid_from)
 );
 
--- Allocation rule
+-- Policy table (standalone)
 
-CREATE TABLE allocation_rule (
+CREATE TABLE policy (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    max_courses INT NOT NULL
+    policy_name VARCHAR(128) NOT NULL UNIQUE,
+    policy_value INT NOT NULL
 );
 
 -- Activity and formula

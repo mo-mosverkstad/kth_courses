@@ -23,11 +23,14 @@ BEGIN
       AND course_instance.academic_period_id = new_academic_period_id
       AND course_instance.id <> new_instance_id;
 
-    SELECT max_courses
+    SELECT policy_value
     INTO max_value
-    FROM allocation_rule
-    ORDER BY id
-    LIMIT 1;
+    FROM policy
+    WHERE policy_name = 'allocation_rule';
+
+    IF max_value IS NULL THEN
+        RAISE EXCEPTION 'Problem: The policy allocation_rule is missing in table policy';
+    END IF;
 
     IF current_value >= max_value THEN
         RAISE EXCEPTION 'Problem: A teacher cannot be assigned to more than % course instances each academic period. Employee id: %, already allocated: %', max_value, NEW.employee_id, current_value;

@@ -156,9 +156,10 @@ CREATE TABLE employee_salary (
 
 -- Allocation rule
 
-CREATE TABLE allocation_rule (
+CREATE TABLE policy (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    max_courses INT NOT NULL
+    policy_name VARCHAR(128) NOT NULL UNIQUE,
+    policy_value INT NOT NULL
 );
 
 -- Activity and formula
