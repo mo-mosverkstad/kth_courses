@@ -39,13 +39,13 @@ SELECT
         WHEN teaching_activity.activity_name = 'Administration'
         THEN teaching_allocation.allocation_hours * teaching_activity.multiplication_factor
         ELSE 0
-    END) AS other_overhead_hours,
+    END) AS administration_hours,
 
     SUM(CASE
         WHEN teaching_activity.activity_name = 'Examination'
         THEN teaching_allocation.allocation_hours * teaching_activity.multiplication_factor
         ELSE 0
-    END) AS other_overhead_hours,
+    END) AS examination_hours,
 
     SUM(CASE
         WHEN teaching_activity.activity_name IN
@@ -86,6 +86,11 @@ GROUP BY
     course_instance.instance_id,
     course_layout.hp,
     employee.id,
+    person.first_name,
+    person.last_name,
+    job_title.job_title_name
+
+HAVING person.first_name = 'Grant' AND person.last_name = 'Lester'
 
 ORDER BY
     course.course_code,
