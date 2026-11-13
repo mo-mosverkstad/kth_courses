@@ -319,7 +319,7 @@ Salaries are stored in \texttt{employee\_salary}, one row per salary change. A s
 
 Teaching allocations of teachers (employees) are recorded in the table \texttt{teaching\_allocation}, which connects a planned activity of a course instance with an employee and stores the real allocated hours. The hours are stored there as raw hours, whereas the multiplication factor is applied, similar to the expected planned hours. Since the primary key is the combination of primary keys of planned activity and employee, a teacher can be allocated to multiple activities, while an activity can have multiple teachers.
 
-However, the requirement states that a teacher cannot be allocated to more than 4 course instances in each academic period. To enforce the rule, the number 4 is stored in another table \texttt{policy}, instead of being hardcoded in the application logic. The \texttt{allocation\_rule} is stored as a key-value pair of the \texttt{policy} table. Since the limit checks multiple rows in different tables, it can not be expressed as a column constraint to the table domain. Instead, the requirement is enforced by the trigger, shown in Listing~\ref{lst:trigger}, which is executed before each insert or update of an allocation. The trigger finds the course instance and the academic period of the new allocation, counts the other course instances that the teacher is already allocated to in the same period, and rejects the allocation if that number is going to exceed \texttt{max\_courses}.
+However, the requirement states that a teacher cannot be allocated to more than 4 course instances in each academic period. To enforce the rule, the number 4 is stored in another table \texttt{policy}, instead of being hardcoded in the application logic. The \texttt{allocation\_rule} is stored as a key-value pair of the \texttt{policy} table. Since the limit checks multiple rows in different tables, it can not be expressed as a column constraint to the table domain. Instead, the requirement is enforced by the trigger, shown in Listing~\ref{lst:trigger}, which is executed before each insert or update of an allocation. The trigger finds the course instance and the academic period of the new allocation, counts the other course instances that the teacher is already allocated to in the same period, and rejects the allocation if that number is going to exceed the maximum number of courses, stored in \texttt{policy.policy\_value}.
 
 \begin{lstlisting}[style=sql, caption={A trigger is used to maintain the maximum number of course instances per teacher and period (\texttt{trigger-postgresql.sql}).}, label={lst:trigger}]
 CREATE OR REPLACE FUNCTION validate_4_instances_each_study_period()
@@ -347,11 +347,14 @@ BEGIN
       AND course_instance.academic_period_id = new_academic_period_id
       AND course_instance.id <> new_instance_id;
 
-    SELECT max_courses
+    SELECT policy_value
     INTO max_value
-    FROM allocation_rule
-    ORDER BY id
-    LIMIT 1;
+    FROM policy
+    WHERE policy_name = 'allocation_rule';
+
+    IF max_value IS NULL THEN
+        RAISE EXCEPTION 'Problem: The policy allocation_rule is missing in table policy';
+    END IF;
 
     IF current_value >= max_value THEN
         RAISE EXCEPTION 'Problem: A teacher cannot be assigned to more than % course instances each academic period. Employee id: %, already allocated: %', max_value, NEW.employee_id, current_value;
@@ -424,7 +427,7 @@ The manager of a department should be employed at that department. The foreign k
 
 The sum of the allocated hours of a planned activity should not exceed its planned hours. It cannot be enforced since physical allocations may not always match the planned hours, and a constraint would make it impossible to change the planning afterwards.
 
-The table \texttt{policy} contains policy data in key-value pairs where values are integers. This is useful for scattered policy configurations, especially the maximum number of course instance a teacher can be allocated to during one academic period, with the key named \texttt{allocation\_rule}. Database triggers are mostly used to ensure that its stored data complies with the policy rules that cannot be ensured with database constraints alone.
+The table \texttt{policy} contains policy data in key-value pairs where values are integers. This is useful for scattered policy configurations, especially the maximum number of course instance a teacher can be allocated to during one academic period, with the key named \texttt{allocation\_rule}. Because each policy name is assigned as \texttt{UNIQUE NOT NULL}, this means that each policy has only one value. Also, the trigger raises an error if \texttt{allocation\_rule} row is missing, which prevents user from using the database with an absent policy. Database triggers are mostly used to ensure that its stored data complies with the policy rules that cannot be ensured with database constraints alone.
 
 % Remove stale paragraph
 % The table \texttt{allocation\_rule} should contain exactly one row, since the university has one single allocation limit, but nothing in the schema enforces that. If a second row with another value of \texttt{max\_courses} were inserted, the trigger would silently use the row with the lowest \texttt{id} and ignore the other one. The rule cannot be written as a column constraint, because it concerns the number of rows in the table and not the value of a column. A \texttt{UNIQUE} constraint on the primary key does not help either, since every new row simply gets a new generated \texttt{id}. It could instead be enforced by adding an extra column that is allowed to hold only one single value, by combining a \texttt{CHECK} constraint with a \texttt{UNIQUE} constraint on that column, which makes a second row impossible. Another alternative is a trigger that counts the rows.
@@ -480,7 +483,12 @@ The advantage is that the rules can be changed without changing the application 
 
 The disadvantages are that the database and the queries become more complex, since a constant 4 must be read from a table instead of being written directly in the code. The model must also be designed in advance for the kind of changes that are expected. For example, the formula table can change the constants of the formulae, but not the structure of a formula. Rules that span several tables also need procedural code in the database, such as triggers, which is harder to test and cannot be ported between database systems.
 
-One number that is used when the teaching cost is calculated is deliberately not stored, namely the number of working hours per month that converts a monthly salary into an hourly cost. The reason is that this number is not mentioned anywhere in the project description. The description only says that the salary is used to calculate the teaching cost of a course instance or of a department, and it explicitly leaves the salary format to the designer, which is why the monthly format in \texttt{employee\_salary} is a design decision and not stored data. The task also states that only data that is clearly mentioned in the description has to be considered. The conversion factor is therefore not business data that the model fails to store, but a convention outside the described business, in the same way as the choice of rounding method for the derived hours. If the university did decide on a standard number of working hours per month, it would become data about the organisation and it should then be stored rather than written in the application. The natural place would be in a separate policy enforcing table, or a column in \texttt{job\_title} if the number differed between job titles.
+One number that is used when the teaching cost is calculated is deliberately not stored, namely the number of working hours per month that converts a monthly salary into an hourly cost. The reason is that this number is not mentioned anywhere in the project description. The description only says that the salary is used to calculate the teaching cost of a course instance or of a department, and it explicitly leaves the salary format to the designer, which is why the monthly format in \texttt{employee\_salary} is a design decision and not stored data. The task also states that only data that is clearly mentioned in the description has to be considered. The conversion factor is therefore not business data that the model fails to store, but a convention outside the described business, in the same way as the choice of rounding method for the derived hours. If the university did decide on a standard number of working hours per month, it would become data about the organisation and it should then be stored rather than written in the application. The natural place would to store the information in a separate policy enforcing table, or a column in \texttt{job\_title} if the number differed between job titles.
+
+\subsection{Storing mathematical formulae}
+The mathematical formulae that are used for deriving planned hours depend on multiple external variables. Since the formulae described in the requirement are affine, a base constant and several coefficients, given hours per student and hours per hp, are stored as different columns or attributes of the table \texttt{derived\_activity\_formula}. This is not the general approach for storing mathematical formulae, considering that the formulae may be rewritten non-linearly, or involving other external variables.
+
+A general approach would be storing the mathematical formula as a binary AST tree in a separate graph table. However, this also poses additional unnecessary complexity, since administration costs are mostly defined as affine for calculation simplicity. Database changes after reorganizations may happen, but changing derived hours that depend on other variables happens extremely rarely, for instance introducing the length of an academic period as a variable. In such cases, adding a new column when necessary is an acceptable trade-off for a simpler database design and more efficient queries for the common use cases.
 
 \subsection{Keeping multiple versions of data}
 
