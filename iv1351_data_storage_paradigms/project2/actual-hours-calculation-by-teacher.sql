@@ -2,6 +2,7 @@ SELECT
     course.course_code,
     course_instance.instance_id AS course_instance_id,
     course_layout.hp,
+    period.period_name AS period,
     CONCAT(person.first_name, ' ', person.last_name) AS teacher_name,
     job_title.job_title_name AS designation,
 
@@ -85,12 +86,15 @@ GROUP BY
     course.course_code,
     course_instance.instance_id,
     course_layout.hp,
+    period.period_name,
     employee.id,
     person.first_name,
     person.last_name,
     job_title.job_title_name
 
+-- Parameter part begin
 HAVING person.first_name = 'Grant' AND person.last_name = 'Lester'
+-- Parameter part end
 
 ORDER BY
     course.course_code,

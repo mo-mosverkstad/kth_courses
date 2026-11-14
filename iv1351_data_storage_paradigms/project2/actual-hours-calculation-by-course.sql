@@ -78,8 +78,7 @@ INNER JOIN job_title
 LEFT JOIN teaching_activity
     ON planned_activity.teaching_activity_id = teaching_activity.id
 
--- WHERE academic_period.academic_year = EXTRACT(YEAR FROM CURRENT_DATE)::int
-WHERE academic_period.academic_year = 2025
+WHERE academic_period.academic_year = EXTRACT(YEAR FROM CURRENT_DATE)::int
 
 GROUP BY
     course.course_code,
@@ -90,7 +89,9 @@ GROUP BY
     person.last_name,
     job_title.job_title_name
 
-HAVING course_instance.instance_id = '2025-50011'
+-- Parameter part begin
+HAVING course.course_code = 'IV1351'
+-- Parameter part end
 
 ORDER BY
     course.course_code,

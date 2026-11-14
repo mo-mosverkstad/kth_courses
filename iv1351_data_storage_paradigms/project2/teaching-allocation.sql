@@ -3,7 +3,7 @@ SELECT
     CONCAT(person.first_name, ' ', person.last_name) AS teacher_name,
     academic_period.academic_year AS academic_year,
     period.period_name AS period_number,
-    COUNT(course_instance.id) AS number_of_courses
+    COUNT(DISTINCT course_instance.id) AS number_of_courses
 FROM employee
 INNER JOIN person
 ON employee.person_id = person.id
@@ -18,13 +18,22 @@ ON course_instance.academic_period_id = academic_period.id
 INNER JOIN period
 ON academic_period.period_id = period.id
 
+-- WHERE CURRENT_DATE BETWEEN academic_period.start_date AND academic_period.end_date
+-- Parameter part begin
+WHERE academic_period.academic_year = 2026 AND period.period_name = 'P2'
+-- Parameter part end
+
 GROUP BY
     employee.employment_id,
     person.first_name,
     person.last_name,
     academic_period.id,
     period.period_name
-    
+
+-- Parameter part begin
+HAVING COUNT(DISTINCT course_instance.id) > 1
+-- Parameter part end
+
 ORDER BY
     academic_year DESC,
     period_number,
