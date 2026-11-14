@@ -19,6 +19,10 @@ VALUES
     ('II1303', 'Signal Processing'),
     ('IL1332', 'Digital System Design Using Hardware Description Languages');
 
+INSERT INTO course (course_code, course_name)
+SELECT CONCAT('AB', LPAD(i::TEXT, 5, '0')), CONCAT('Course AB', LPAD(i::TEXT, 5, '0'))
+FROM generate_series(0, 99999) AS i;
+
 
 INSERT INTO course_layout (
     min_students,
@@ -92,11 +96,23 @@ WITH course_data(course_code, base_students, study_period) AS (
         ('IE1202', 80, 'P2'),
         ('II1303', 80, 'P2'),
         ('IL1332', 80, 'P1')
+    UNION ALL
+    SELECT
+        course_code,
+        100 AS base_students,
+        CASE ROW_NUMBER() OVER (ORDER BY id) % 4
+            WHEN 0 THEN 'P1'
+            WHEN 1 THEN 'P2'
+            WHEN 2 THEN 'P3'
+            WHEN 3 THEN 'P4'
+        END
+    FROM course
+    WHERE course_code LIKE 'AB%'
 ),
 years AS (
     SELECT
         year
-    FROM generate_series(2023, 2026) AS year
+    FROM generate_series(1970, 2030) AS year
 )
 INSERT INTO course_instance (
     instance_id,
@@ -108,7 +124,7 @@ SELECT
     CONCAT(
         years.year,
         '-5',
-        LPAD(course.id::TEXT, 3, '0'),
+        LPAD(course.id::TEXT, 6, '0'),
         RIGHT(course_data.study_period, 1)
     ),
     course_layout.id,
@@ -167,6 +183,13 @@ INSERT INTO person (personal_number,first_name,last_name)
 VALUES
   ('3498713432','Yasir','Parker'),
   ('1924525089','Abigail','Gallegos');
+INSERT INTO person (personal_number, first_name, last_name)
+SELECT
+    LPAD(i::TEXT, 10, '0') AS personal_number,
+    CONCAT('F', i::TEXT) AS first_name,
+    CONCAT('L', i::TEXT) AS last_name
+FROM
+    generate_series(0, 450000) AS i;
 
 
 INSERT INTO address (city,zip,street,house_number,country)
@@ -210,6 +233,16 @@ VALUES
   ('Ockelbo','11872','Ap #676-6737 Fringilla Road','46','Sweden'),
   ('Göteborg','33795','Ap #304-5544 Felis St.','7','Sweden');
 
+INSERT INTO address (city, zip, street, house_number, country)
+SELECT
+    (ARRAY['Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Linköping', 'Örebro', 'Västerås', 'Umeå'])[i % 8 + 1] AS city,
+    (10000 + i * 37 % 90000)::TEXT AS zip,
+    CONCAT('Street ', i::TEXT) AS street,
+    (i % 99 + 1)::TEXT AS house_number,
+    'Sweden' AS country
+FROM
+    generate_series(0, 500000) AS i;
+
 
 INSERT INTO phone_number (phone_number)
 VALUES
@@ -252,6 +285,12 @@ VALUES
   ('(268) 218-6654'),
   ('(409) 775-8714');
 
+INSERT INTO phone_number (phone_number)
+SELECT
+    CONCAT('07', LPAD(i::TEXT, 8, '0')) AS phone_number
+FROM
+    generate_series(0, 500000) AS i;
+
 
 INSERT INTO person_address (
     person_id,
@@ -280,13 +319,12 @@ CROSS JOIN LATERAL generate_series(
         ELSE 1
     END
 ) AS apart_number(n)
-JOIN address ON address.id = (
-    SELECT id
+JOIN (
+    SELECT
+        id,
+        ROW_NUMBER() OVER (ORDER BY id) - 1 AS n
     FROM address
-    ORDER BY id
-    OFFSET (person.n + apart_number.n - 2) % (SELECT COUNT(*) FROM address)
-    LIMIT 1
-);
+) AS address ON address.n = (person.n + apart_number.n - 2) % (SELECT COUNT(*) FROM address);
 
 INSERT INTO person_phone_number (
     person_id,
@@ -313,13 +351,12 @@ CROSS JOIN LATERAL generate_series(
         ELSE 1
     END
 ) AS phone_count(n)
-JOIN phone_number ON phone_number.id = (
-    SELECT id
+JOIN (
+    SELECT
+        id,
+        ROW_NUMBER() OVER (ORDER BY id) - 1 AS n
     FROM phone_number
-    ORDER BY id
-    OFFSET (person.n + phone_count.n - 2) % (SELECT COUNT(*) FROM phone_number)
-    LIMIT 1
-);
+) AS phone_number ON phone_number.n = (person.n + phone_count.n - 2) % (SELECT COUNT(*) FROM phone_number);
 
 
 INSERT INTO job_title (job_title_name)
@@ -358,6 +395,12 @@ VALUES
     ('Electrical Engineering', 0),
     ('Electronics and Embedded Systems', 0);
 
+INSERT INTO department(department_name, manager_employee_id)
+SELECT
+    CONCAT('Department ', i::TEXT) AS department_name,
+    0 AS manager_employee_id
+FROM generate_series(1, 1000) AS i;
+
 
 INSERT INTO employee (
     employment_id,
@@ -376,13 +419,12 @@ FROM (
         ROW_NUMBER() OVER (ORDER BY id) AS n
     FROM person
 ) AS person
-JOIN department ON department.id = (
-    SELECT id
+JOIN (
+    SELECT
+        id,
+        ROW_NUMBER() OVER (ORDER BY id) - 1 AS n
     FROM department
-    ORDER BY id
-    OFFSET (person.n - 1) % (SELECT COUNT(*) FROM department)
-    LIMIT 1
-)
+) AS department ON department.n = (person.n - 1) % (SELECT COUNT(*) FROM department)
 JOIN job_title ON job_title.id = (
     SELECT id
     FROM job_title
@@ -533,6 +575,10 @@ WHERE derived_activity_formula.id IS NOT NULL
    OR (course_instance.n + teaching_activity.n) % 3 <> 0;
 
 
+-- Temporary index: the allocation trigger looks up each employee's allocations once per inserted row
+
+CREATE INDEX tmp_teaching_allocation_employee ON teaching_allocation (employee_id);
+
 INSERT INTO teaching_allocation (
     planned_activity_id,
     employee_id,
@@ -542,8 +588,7 @@ SELECT
     planned_activity.id,
     employee.id,
     CASE teacher.n
-        WHEN 1 THEN planned_activity.total_hours
-            - (planned_activity.teacher_count - 1) * (planned_activity.total_hours / planned_activity.teacher_count)
+        WHEN 1 THEN planned_activity.total_hours - (planned_activity.teacher_count - 1) * (planned_activity.total_hours / planned_activity.teacher_count)
         ELSE planned_activity.total_hours / planned_activity.teacher_count
     END
 FROM (
@@ -588,13 +633,14 @@ CROSS JOIN LATERAL generate_series(
     1,
     planned_activity.teacher_count
 ) AS teacher(n)
-JOIN employee ON employee.id = (
-    SELECT id
+JOIN (
+    SELECT
+        id,
+        ROW_NUMBER() OVER (ORDER BY id) - 1 AS n
     FROM employee
-    ORDER BY id
-    OFFSET CASE
+) AS employee ON employee.n = CASE
         WHEN planned_activity.activity_name = 'Administration' AND planned_activity.k <= 4 THEN 0
         ELSE (planned_activity.k - 1) * 4 + (planned_activity.m + teacher.n - 2) % 4
-    END % (SELECT COUNT(*) FROM employee)
-    LIMIT 1
-);
+    END % (SELECT COUNT(*) FROM employee);
+
+DROP INDEX tmp_teaching_allocation_employee;

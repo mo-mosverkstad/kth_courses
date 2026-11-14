@@ -10,4 +10,5 @@ run_sql() {
 run_sql clean-postgresql.sql
 run_sql logical-physical-postgresql.sql
 run_sql trigger-postgresql.sql
+# run-sql raw-insertion.data.sql
 run_sql db-insertion-postgresql.sql
