@@ -587,10 +587,9 @@ INSERT INTO teaching_allocation (
 SELECT
     planned_activity.id,
     employee.id,
-    CASE teacher.n
-        WHEN 1 THEN planned_activity.total_hours - (planned_activity.teacher_count - 1) * (planned_activity.total_hours / planned_activity.teacher_count)
-        ELSE planned_activity.total_hours / planned_activity.teacher_count
-    END
+    CAST(ROUND(
+        planned_activity.total_hours * (0.7 + (planned_activity.k % 7) * 0.1) / planned_activity.teacher_count
+    ) AS INT)
 FROM (
     SELECT
         planned_activity.id,
