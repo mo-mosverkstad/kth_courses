@@ -1,0 +1,20 @@
+                                                                             QUERY PLAN                                                                             
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=116270.43..156933.63 rows=318303 width=294) (actual time=498.365..1086.959 rows=100018 loops=1)
+   Group Key: course_code, instance_id, course_instance_id, hp, period_number, num_students
+   ->  Sort  (cost=116270.43..117684.71 rows=565711 width=53) (actual time=498.268..598.787 rows=566769 loops=1)
+         Sort Key: course_code, instance_id, course_instance_id, hp, period_number, num_students
+         Sort Method: external merge  Disk: 36488kB
+         ->  Bitmap Heap Scan on course_activity_view  (cost=6304.69..42880.08 rows=565711 width=53) (actual time=33.473..215.345 rows=566769 loops=1)
+               Recheck Cond: (academic_year = 2025)
+               Heap Blocks: exact=29235
+               ->  Bitmap Index Scan on course_activity_view_year_period  (cost=0.00..6163.26 rows=565711 width=0) (actual time=18.193..18.195 rows=566769 loops=1)
+                     Index Cond: (academic_year = 2025)
+ Planning Time: 0.607 ms
+ JIT:
+   Functions: 9
+   Options: Inlining false, Optimization false, Expressions true, Deforming true
+   Timing: Generation 0.919 ms, Inlining 0.000 ms, Optimization 0.509 ms, Emission 10.519 ms, Total 11.947 ms
+ Execution Time: 1109.151 ms
+(16 rows)
+

@@ -1,0 +1,44 @@
+                                                                                                                                                                                                                                                                                                                                                                     QUERY PLAN                                                                                                                                                                                                                                                                                                                                                                      
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ HashAggregate  (cost=884107.48..884112.81 rows=67 width=100) (actual time=14131.898..15796.251 rows=228600 loops=1)
+   Group Key: course_instance.id
+   Filter: (abs(((sum((((sum(teaching_allocation.allocation_hours))::numeric * teaching_activity.multiplication_factor))) - sum(((COALESCE((planned_activity.planned_hours)::numeric, ((derived_activity_formula.base_hours + (derived_activity_formula.hours_per_student * (course_instance.num_students)::numeric)) + (derived_activity_formula.hours_per_hp * course_layout.hp))) * teaching_activity.multiplication_factor)))) / sum(((COALESCE((planned_activity.planned_hours)::numeric, ((derived_activity_formula.base_hours + (derived_activity_formula.hours_per_student * (course_instance.num_students)::numeric)) + (derived_activity_formula.hours_per_hp * course_layout.hp))) * teaching_activity.multiplication_factor))))) > 0.15)
+   Batches: 85  Memory Usage: 8641kB  Disk Usage: 90184kB
+   Rows Removed by Filter: 171472
+   ->  HashAggregate  (cost=655316.23..828097.38 rows=3200577 width=84) (actual time=10071.627..13118.968 rows=2267074 loops=1)
+         Group Key: course_layout.id, course_instance.id, planned_activity.id, teaching_activity.id, derived_activity_formula.id
+         Planned Partitions: 128  Batches: 129  Memory Usage: 8209kB  Disk Usage: 253752kB
+         ->  Hash Left Join  (cost=91220.39..268246.45 rows=3200577 width=59) (actual time=1481.901..7936.024 rows=3200577 loops=1)
+               Hash Cond: (teaching_activity.id = derived_activity_formula.teaching_activity_id)
+               ->  Hash Left Join  (cost=91219.35..254757.26 rows=3200577 width=41) (actual time=1481.776..7463.358 rows=3200577 loops=1)
+                     Hash Cond: (planned_activity.teaching_activity_id = teaching_activity.id)
+                     ->  Hash Join  (cost=91218.19..241267.96 rows=3200577 width=35) (actual time=1481.504..6980.410 rows=3200577 loops=1)
+                           Hash Cond: (course_instance.course_layout_id = course_layout.id)
+                           ->  Hash Join  (cost=88231.79..229879.68 rows=3200577 width=28) (actual time=946.736..5439.181 rows=3200577 loops=1)
+                                 Hash Cond: (planned_activity.course_instance_id = course_instance.id)
+                                 ->  Hash Join  (cost=74334.17..168118.46 rows=3200577 width=20) (actual time=776.624..3356.044 rows=3200577 loops=1)
+                                       Hash Cond: (teaching_allocation.planned_activity_id = planned_activity.id)
+                                       ->  Seq Scan on teaching_allocation  (cost=0.00..49306.77 rows=3200577 width=8) (actual time=0.060..375.174 rows=3200577 loops=1)
+                                       ->  Hash  (cost=34925.74..34925.74 rows=2267074 width=16) (actual time=774.073..774.075 rows=2267074 loops=1)
+                                             Buckets: 262144  Batches: 32  Memory Usage: 5266kB
+                                             ->  Seq Scan on planned_activity  (cost=0.00..34925.74 rows=2267074 width=16) (actual time=0.063..256.511 rows=2267074 loops=1)
+                                 ->  Hash  (cost=6942.72..6942.72 rows=400072 width=12) (actual time=167.483..167.484 rows=400072 loops=1)
+                                       Buckets: 262144  Batches: 4  Memory Usage: 6345kB
+                                       ->  Seq Scan on course_instance  (cost=0.00..6942.72 rows=400072 width=12) (actual time=0.088..73.690 rows=400072 loops=1)
+                           ->  Hash  (cost=1736.18..1736.18 rows=100018 width=11) (actual time=534.380..534.381 rows=100018 loops=1)
+                                 Buckets: 131072  Batches: 1  Memory Usage: 5322kB
+                                 ->  Seq Scan on course_layout  (cost=0.00..1736.18 rows=100018 width=11) (actual time=482.997..504.049 rows=100018 loops=1)
+                     ->  Hash  (cost=1.07..1.07 rows=7 width=10) (actual time=0.069..0.070 rows=7 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                           ->  Seq Scan on teaching_activity  (cost=0.00..1.07 rows=7 width=10) (actual time=0.052..0.055 rows=7 loops=1)
+               ->  Hash  (cost=1.02..1.02 rows=2 width=22) (actual time=0.049..0.050 rows=2 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     ->  Seq Scan on derived_activity_formula  (cost=0.00..1.02 rows=2 width=22) (actual time=0.013..0.014 rows=2 loops=1)
+ Planning Time: 2.566 ms
+ JIT:
+   Functions: 57
+   Options: Inlining true, Optimization true, Expressions true, Deforming true
+   Timing: Generation 4.370 ms, Inlining 89.209 ms, Optimization 279.312 ms, Emission 230.686 ms, Total 603.576 ms
+ Execution Time: 15854.010 ms
+(40 rows)
+

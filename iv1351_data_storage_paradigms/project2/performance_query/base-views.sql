@@ -20,6 +20,7 @@ SELECT
     period.period_name AS period_number,
     course_instance.num_students AS num_students,
     teaching_activity.activity_name AS activity_name,
+    teaching_activity.multiplication_factor AS multiplication_factor,
     COALESCE(
         planned_activity.planned_hours,
         derived_activity_formula.base_hours
@@ -49,8 +50,9 @@ CREATE UNIQUE INDEX course_activity_view_planned_activity
     ON course_activity_view (planned_activity_id);
 CREATE INDEX course_activity_view_year_period
     ON course_activity_view (academic_year, period_number);
-CREATE INDEX course_activity_view_instance
-    ON course_activity_view (instance_id);
+
+-- Removed index for view course_activity_view_instance
+-- CREATE INDEX course_activity_view_instance ON course_activity_view (instance_id);
 
 
 -- One row per teacher and academic period.
