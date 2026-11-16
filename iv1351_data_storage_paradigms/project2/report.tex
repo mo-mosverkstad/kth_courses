@@ -156,6 +156,65 @@ Also, it is shown that a materialized view is out of date after a new allocation
 
 Whether indexes and materialized views are reasonably justified in terms of performance gain, and what would change if the workload changed, are explained and analyzed in the discussion as well. 
 
+\section{Literature Study}
+
+% This chapter must prove that you collected sufficient knowledge before starting development, instead of just hacking away without knowing how to complete a task. State what you have read and briefly summarize what you have learned.
+
+The knowledge required for project task 2 was collected from the following sources before writing the analytical SQL queries:
+
+\begin{itemize}
+  \item The project description~\cite{project} and the description of project task 2~\cite{task2} on the course pages in Canvas. They define the requirements summarized in Section~\ref{sec:requirements}.
+  \item \textit{Tips and Tricks for Project Task 2}~\cite{tips2} and the \textit{Assessment Criteria For Seminar 2}~\cite{criteria2}. The assessment criteria were used as a checklist for the queries and for Chapter~\ref{sec:discussion}.
+  \item The lecture on SQL~\cite{sqllecture}, which covers joins, aggregate functions, \texttt{GROUP BY}, \texttt{HAVING}, subqueries and views, as well as, lectures on Indexing for mechanism with indexes.
+  \item The PostgreSQL documentation~\cite{postgresdocs}, in particular the chapters on set-returning functions such as \texttt{generate\_series}, on indexes, on materialized views, and on \texttt{EXPLAIN ANALYZE}.
+  \item The course books~\cite{elmasri,silberschatz}, in particular their chapters on SQL, on indexing and on query processing.
+\end{itemize}
+
+The basic database concepts as the fundamentals of the solution are summarized as below. Since the relational model, ER-diagrams, modelling and normalizations are covered in Project Task 1, these concepts are not mentioned. Instead, aggregations, materalized views, indexes and performance analysis provided by database such as \texttt{EXPLAIN ANALYZE}. 
+
+\subsection{OLAP and aggregation}
+
+For this task, the queries are OLAP, which means that large number of row data of a specific table is processed and aggregated in order to create report. In constrast to OLTP queries which involves reading and writing a certain few rows into each table as part of the daily business. OLAP queries are mainly built from aggregate functions, such as \texttt{SUM} and \texttt{COUNT}, proceeded after grouping certain rows. Row grouping is done by \texttt{GROUP BY} which divides the joined rows into groups where a certain keyword has the same value, for example one group per course instance. By using this, one result row per group can be calculated.
+
+Additionally, the \texttt{WHERE} keyword filters the rows before they are grouped, while the \texttt{HAVING} keyword filters the groups after the aggregation, for example to keep only the teachers with more than a given number of course instances. Only aggregate functions and grouped attributes are allowed to exist after \texttt{HAVING} keyword.
+
+The \texttt{COUNT(DISTINCT ...)} variation counts different values instead of rows, which is needed when the same value appears on several joined rows.
+
+
+However, one caveat with aggregation over joins is that a join can multiply existing rows. For instance, if a planned activity is joined with its two allocation, the same planned activity appears exactly same on both rows. Summing its planned hours counts them twice, leading to an incorrect result, bigger than expected. To correct it, one can aggregate each side separately before joining the aggregated results.
+
+\subsection{Views and materialized views}
+
+A view is a non-physical table, above the existing physical tables, that can be used as a table. It can for instance be used to create certain denormalized tables, that are simpler to proceed, based on existing normalized tables. In this case, physical tables can still stay normalized.
+
+A non-materialized view is computed each time when it is used, and doesn't store anything than a merely virtual representation of existing physical tables. Though it doesn't make queries faster, it provides simplicity and security in database. On the other hand, a materalized view, stores the result and caches them in the database. Reading from it is equivalently as fast as reading from the table. However, once the underlying existing tables changes, the view must also be refreshed using \texttt{REFRESH MATERIALIZED VIEW}, which computes the whole query again. A plain refresh locks the view, while \texttt{REFRESH MATERIALIZED VIEW CONCURRENTLY} lets other queries read the old content during the refresh, but requires a unique index on the view and takes longer.
+
+\subsection{Indexes}
+
+An index is an additional data structure, at the side of the table that makes table queries faster when finding the value of one or more columns. Such indexes are useful since finding a value or multiple values can be done without iterating through all rows of a certain table. PostgreSQL uses B-tree indexes by default and creates one automatically for every primary key and \texttt{UNIQUE} constraint. B-tree allows both equality and comparasion operators and the time complexity is $O(log(n))$ instead of linear scan $O(n)$. Hash indexes can also be created in PostgreSQL, enabling $O(1)$ complexity but can only handle equality checks.
+
+On the other hand, an index still comes with a cost. It uses disk space and must be updated on every insert, update and delete of the indexed table. This means that indexes on some tables produces more performance gain, especially when frequently queries and filtered, than on other which seldomly filtered.
+
+\subsection{Query plans and \texttt{EXPLAIN ANALYZE}}
+
+PostgreSQL does not execute a query as it is written by user-level intuition. Instead, the query planner or optimizer estimates the cost of different execution plans, based on statistics about the tables, and chooses the cheapest one. Examples of plan steps are a sequential scan, which reads a whole table, an index scan or bitmap scan, which uses an index, and hash join, merge join or nested loop, which are different ways of joining two inputs.
+
+\texttt{EXPLAIN} shows the chosen plan with its estimated costs, and \texttt{EXPLAIN ANALYZE} also executes the query and shows the actual number of rows and the time of each step, together with the total execution time. Comparing estimated and actual numbers shows where the planner was wrong, and comparing plans before and after an index or view is added shows whether, and how, the change is used. The planner does not always use an existing index. When a query needs a large part of a table, reading the table sequentially is usually cheaper than looking up each row through the index.
+
+\subsection{Generating test data}
+
+Large amounts of dummy test data can be generated directly in SQL with the function \texttt{generate\_series(a, b)} that return a number range from \texttt{a} to \texttt{b} as rows of a one-attributed table. Both \texttt{a} and \texttt{b} are included in the range.
+
+The function becomes useful when combined with \texttt{INSERT INTO <table\_name> SELECT}, which can insert any number of rows, where the values are computed from the row number, for example with the modulo operator, or chosen with \texttt{random()} function that generates a random value.
+
+\section{Method}
+
+\section{Result}
+
+\section{Discussion}
+\label{sec:discussion}
+
+
 
 \section{Comments About the Course}
 
@@ -187,46 +246,23 @@ Leif Lindbäck and the IV1351 teaching staff.
 \textit{Project: Course Layout and Teaching Load Allocations}.
 Course page, Data Storage Paradigms IV1351, KTH, HT26.
 
-\bibitem{task1}
-\textit{Project Task 1, Logical and Physical Model}.
-Course page, Data Storage Paradigms IV1351, KTH, HT26.
-
 \bibitem{task2}
 \textit{Project Task 2, SQL}.
 Course page, Data Storage Paradigms IV1351, KTH, HT26.
 
-\bibitem{tips}
-\textit{Tips and Tricks for Project Task 1} (\texttt{seminar1-tips-and-tricks.pdf}).
-Course material, Data Storage Paradigms IV1351, KTH, HT26.
-
 \bibitem{tips2}
 \textit{Tips and Tricks for Project Task 2} (\texttt{seminar2-tips-and-tricks.pdf}).
-Course material, Data Storage Paradigms IV1351, KTH, HT26.
-
-\bibitem{criteria}
-\textit{Assessment Criteria For Seminar 1, Logical and Physical Model}
-(\texttt{assessment-criteria-seminar1.pdf}).
 Course material, Data Storage Paradigms IV1351, KTH, HT26.
 
 \bibitem{criteria2}
 \textit{Assessment Criteria For Seminar 2} (\texttt{seminar2-assessment-criteria.pdf}).
 Course material, Data Storage Paradigms IV1351, KTH, HT26.
 
-\bibitem{conceptuallecture}
-Leif Lindbäck.
-\textit{The Conceptual Model}. Recorded lecture series, about three hours.
-Data Storage Paradigms IV1351, KTH, HT26.
-
-\bibitem{logicallecture}
-Leif Lindbäck.
-\textit{Logical and Physical Models}. Recorded lecture series.
-Data Storage Paradigms IV1351, KTH, HT26.
+\bibitem{sqllecture}
+\textit{SQL, the Structured Query Language}. Lecture 3, Data Storage Paradigms IV1351, KTH, HT26.
 
 \bibitem{normalisationlecture}
 \textit{Normalisation}. Lecture 4, Data Storage Paradigms IV1351, KTH, HT26.
-
-\bibitem{sqllecture}
-\textit{SQL, the Structured Query Language}. Lecture 3, Data Storage Paradigms IV1351, KTH, HT26.
 
 \bibitem{postgresdocs}
 The PostgreSQL Global Development Group.
