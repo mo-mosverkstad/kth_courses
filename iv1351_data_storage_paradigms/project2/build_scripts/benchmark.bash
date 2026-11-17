@@ -14,6 +14,7 @@ build_start=$(date +%s.%N)
 run_sql clean-postgresql.sql
 run_sql logical-physical-postgresql.sql
 run_sql trigger-postgresql.sql
+run_sql trigger-table-assertion.sql
 
 insert_start=$(date +%s.%N)
 sudo -u postgres psql -v ON_ERROR_STOP=1 -d course_database -c '\timing on' -f "$SCRIPT_DIR/$INSERT_SCRIPT" \
