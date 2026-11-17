@@ -72,6 +72,24 @@ FROM generate_series(2023, 2026) AS academic_year, (
     SELECT id, period_name FROM period
 ) AS period;
 
+
+INSERT INTO teaching_activity (activity_name, multiplication_factor)
+VALUES
+    ('Lecture', 3.6),
+    ('Lab', 2.4),
+    ('Tutorial', 2.4),
+    ('Seminar', 1.8),
+    ('Others', 1.0),
+    ('Examination', 1.0),
+    ('Administration', 1.0);
+
+
+INSERT INTO derived_activity_formula (teaching_activity_id, base_hours, hours_per_student, hours_per_hp)
+VALUES
+    ((SELECT id FROM teaching_activity WHERE activity_name = 'Examination'), 32, 0.725, 0),
+    ((SELECT id FROM teaching_activity WHERE activity_name = 'Administration'), 28, 0.2, 2);
+
+
 WITH course_data(course_code, base_students, study_period) AS (
     VALUES
         ('IX1500', 110, 'P1'),
@@ -485,33 +503,13 @@ INSERT INTO policy (policy_name, policy_value)
 VALUES ('allocation_rule', 4);
 
 
-INSERT INTO teaching_activity (activity_name, multiplication_factor)
-VALUES
-    ('Lecture', 3.6),
-    ('Lab', 2.4),
-    ('Tutorial', 2.4),
-    ('Seminar', 1.8),
-    ('Others', 1.0),
-    ('Examination', 1.0),
-    ('Administration', 1.0);
-
-
-INSERT INTO derived_activity_formula (teaching_activity_id, base_hours, hours_per_student, hours_per_hp)
-VALUES
-    ((SELECT id FROM teaching_activity WHERE activity_name = 'Examination'), 32, 0.725, 0),
-    ((SELECT id FROM teaching_activity WHERE activity_name = 'Administration'), 28, 0.2, 2);
-
-
 INSERT INTO planned_activity (
     planned_hours,
     teaching_activity_id,
     course_instance_id
 )
 SELECT
-    CASE
-        WHEN derived_activity_formula.id IS NULL
-        THEN 10 + (course_instance.n * 7 + teaching_activity.n * 13) % 60
-    END,
+    10 + (course_instance.n * 7 + teaching_activity.n * 13) % 60,
     teaching_activity.id,
     course_instance.id
 FROM (
@@ -528,9 +526,9 @@ CROSS JOIN (
 ) AS teaching_activity
 LEFT JOIN derived_activity_formula
     ON derived_activity_formula.teaching_activity_id = teaching_activity.id
-WHERE derived_activity_formula.id IS NOT NULL
-   OR teaching_activity.n = 1
-   OR (course_instance.n + teaching_activity.n) % 3 <> 0;
+WHERE derived_activity_formula.id IS NULL
+  AND (teaching_activity.n = 1
+   OR (course_instance.n + teaching_activity.n) % 3 <> 0);
 
 
 INSERT INTO teaching_allocation (
