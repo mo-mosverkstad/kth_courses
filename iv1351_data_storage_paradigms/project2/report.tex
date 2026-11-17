@@ -38,7 +38,7 @@
   \restoregeometry%
 }
 % Style for SQL / PL/pgSQL code listings
-\lstdefinestyle{sql}{
+\lstdefinestyle{SQL}{
   language=SQL,
   morekeywords={RETURNS,TRIGGER,DECLARE,BEGIN,END,IF,THEN,RAISE,EXCEPTION,RETURN,LANGUAGE,FUNCTION,REPLACE,EXECUTE,BEFORE,EACH,ROW,INTEGER,LIMIT,INTO,INNER,JOIN},
   basicstyle=\ttfamily\footnotesize,
@@ -208,6 +208,44 @@ Large amounts of dummy test data can be generated directly in SQL with the funct
 The function becomes useful when combined with \texttt{INSERT INTO <table\_name> SELECT}, which can insert any number of rows, where the values are computed from the row number, for example with the modulo operator, or chosen with \texttt{random()} function that generates a random value.
 
 \section{Method}
+
+For method, the task was divided into multiple parts: writing analytical OLAP queries for course database summarization of planned and allocated hours, scaling up the database records, comparing mismatches between allocated and planned hours and optimizing the database by introducing indexes and materialized views.
+
+The solution of the task is proceeded differently for different parts. For writing queries, analytical SQL queries with aggregate functions and groups are written and executed in the small database before scaling it. The reason is that the correctness of the SQL query can be verified manually by comparing the expected result with the output of the SQL query. For scaling up the database records, more dummy rows are generated using \texttt{generate\_series} on mostly independent tables. For instance, names with numeric ordered values are inserted into a table \texttt{person}. On the other hand, most tables that hold foreign key does not need to be changed, since they iterate through the independent tables and insert dummy data based on it. For improving the SQL query performance, the table joins that require aggregate functions to sum are written as materialized views, since recalculation of aggregate functions is an expensive operation that is unnecessary in a course database where number of workload hours rarely change. Indexes are created on columns of tables, that is frequently filtered on the specific column.
+
+\subsection{Tools}
+
+For solving the task, the following tools were used:
+
+The main database management system PostgreSQL 16 was used for developing analytical SQL scripts and improving their preformance. It was executed on Ubuntu 22 in Windows Subsystem for Linux (WSL), and all scripts were written as file and then executed using the psql command-line utility with the following command:
+
+\texttt{sudo -u postgres psql -v ON_ERROR_STOP=1 -d course_database -f "<file\_name>"}.
+
+In this case, a query can be written and modified as a text file before feeding it into the database system.
+This approach allows queries to be written, reviewed, and modified in text files before being executed by the database system. Furthermore, the \texttt{ON\_ERROR\_STOP=1} option ensures that script execution stops if an SQL error occurs, making it easier to identify and address errors during development.
+
+For general development, Visual Studio Code was used to write the SQL script and this report, while Git and GitHub were used for version control for storing and backing up SQL queries. The report was written and typeset with \LaTeX.
+
+The sample insertion data was partly created using an online data generator (generatedata.com) and adapted afterwards to the database. The person, address and phone number sample data could be generated using the online tool. Furthermore, additional data was generated using PostgreSQL function \texttt{generate\_series} and used the number, sometimes concatenated with prefixes for identification, for data values such as names, address and phone numbers.
+
+\subsection{Writing SQL scripts}
+
+The modelling procedure was accomplished by translating the project requirements and the concept model given in this course, into a conceptual diagram. The translation process started from the given conceptual model and extending it. For each noun in the project description, a candidate entity or attribute was considered, if it hasn't been modeled in the given conceptual model. Every connection between nouns was considered as a candidate relation. Using these approaches, the given conceptual model could then be extended with new entities, for instance study periods, course instances, salary version history, the allocation rule and formulae for derived hours.
+
+After creating the conceptual model, a logical-physical model could be created by extending the conceptual model. This was carried out by following the given steps of the video lecture on logical and physical diagrams~\cite{logicallecture}.
+
+\subsection{Scaling up the database}
+
+In order to scale up the database, the insertion script must insert more data than existing dataset. In the insertion script, queries for inserting data into independent tables, which does not rely on foreign keys to other tables, are written explicitly in a extensional definition using \texttt{VALUES} keyword. To scale up these tables, instead of relying on external random data generator tool \texttt{https://generatedata.com/generator} which would increase the size of the SQL script file, additional dummy rows can be generated using \texttt{generate\_series} instead. This allows the SQL script file to remain relatively small.
+
+Additionally, some tables that relies on foreign keys can be scaled up by changing the range parameter. For instance the \texttt{academic\_period} tabl can be scaled up by widening the year range from \texttt{2023--2026} to \texttt{1970--2030}, allowing a larger number of rows to be inserted. However, the insertion queries for most tables that rely on foreign keys do not need to be changed, since they operate by joining other tables and do not depend on any specific parameters.
+
+\subsection{Improving performance}
+
+The performance of the database is improved, both by 
+
+\subsection{Evaluation}
+
 
 \section{Result}
 
