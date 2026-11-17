@@ -57,7 +57,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_derived_planned_activity_num_students()
+CREATE OR REPLACE FUNCTION update_derived_planned_activity_course_instance()
 RETURNS TRIGGER AS $$
 BEGIN
     PERFORM recalculate_derived_planned_hours(NEW.id);
@@ -66,12 +66,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER trigger_update_derived_planned_activity_num_students
-AFTER UPDATE OF num_students
+CREATE OR REPLACE TRIGGER trigger_update_derived_planned_activity_course_instance
+AFTER UPDATE OF num_students, course_layout_id
 ON course_instance
 FOR EACH ROW
-WHEN (OLD.num_students IS DISTINCT FROM NEW.num_students)
-EXECUTE FUNCTION update_derived_planned_activity_num_students();
+WHEN (OLD.num_students IS DISTINCT FROM NEW.num_students
+   OR OLD.course_layout_id IS DISTINCT FROM NEW.course_layout_id)
+EXECUTE FUNCTION update_derived_planned_activity_course_instance();
 
 CREATE OR REPLACE FUNCTION update_derived_planned_activity_hp()
 RETURNS TRIGGER AS $$
@@ -126,3 +127,74 @@ BEFORE INSERT OR UPDATE OR DELETE
 ON planned_activity
 FOR EACH ROW
 EXECUTE FUNCTION protect_derived_planned_activity();
+
+CREATE OR REPLACE FUNCTION protect_derived_activity_formula()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'UPDATE' AND NEW.teaching_activity_id = OLD.teaching_activity_id THEN
+        RETURN NEW;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1
+        FROM teaching_activity
+        WHERE teaching_activity.id = OLD.teaching_activity_id
+          AND teaching_activity.activity_name IN ('Administration', 'Examination')
+    ) THEN
+        RAISE EXCEPTION 'Problem: The formula of the planned activities Administration and Examination is used to create and calculate them, and cannot be removed';
+    END IF;
+
+    IF TG_OP = 'DELETE' THEN
+        RETURN OLD;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_protect_derived_activity_formula
+BEFORE UPDATE OF teaching_activity_id OR DELETE
+ON derived_activity_formula
+FOR EACH ROW
+EXECUTE FUNCTION protect_derived_activity_formula();
+
+CREATE OR REPLACE FUNCTION protect_derived_teaching_activity()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.activity_name IN ('Administration', 'Examination') THEN
+        RAISE EXCEPTION 'Problem: The planned activities Administration and Examination are created and calculated automatically, and their names cannot be changed';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_protect_derived_teaching_activity
+BEFORE UPDATE OF activity_name
+ON teaching_activity
+FOR EACH ROW
+WHEN (OLD.activity_name IS DISTINCT FROM NEW.activity_name)
+EXECUTE FUNCTION protect_derived_teaching_activity();
+
+CREATE OR REPLACE FUNCTION update_derived_planned_activity_formula()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE planned_activity
+    SET planned_hours = derived_planned_hours(
+        planned_activity.course_instance_id,
+        planned_activity.teaching_activity_id
+    )
+    WHERE planned_activity.teaching_activity_id = NEW.teaching_activity_id;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_update_derived_planned_activity_formula
+AFTER UPDATE OF base_hours, hours_per_student, hours_per_hp
+ON derived_activity_formula
+FOR EACH ROW
+WHEN (OLD.base_hours IS DISTINCT FROM NEW.base_hours
+   OR OLD.hours_per_student IS DISTINCT FROM NEW.hours_per_student
+   OR OLD.hours_per_hp IS DISTINCT FROM NEW.hours_per_hp)
+EXECUTE FUNCTION update_derived_planned_activity_formula();
