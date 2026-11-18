@@ -10,6 +10,6 @@ run_sql() {
 # Wipe out and build database from ground
 run_sql clean-postgresql.sql
 run_sql logical-physical-postgresql.sql
-run_sql trigger-postgresql.sql
+run_sql trigger-4-instance-study-period.sql
 run_sql trigger-table-assertion.sql
 run_sql db-insertion-postgresql.sql
