@@ -7,6 +7,7 @@ run_sql() {
     sudo -u postgres psql -v ON_ERROR_STOP=1 -d course_database -f "$SCRIPT_DIR/$1"
 }
 
+# Wipe out and build database from ground
 run_sql clean-postgresql.sql
 run_sql logical-physical-postgresql.sql
 run_sql trigger-postgresql.sql
