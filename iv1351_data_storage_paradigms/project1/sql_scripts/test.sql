@@ -57,9 +57,7 @@ WHERE academic_period.academic_year = 2027
 GROUP BY employee.employment_id;
 
 \echo
-\echo '1. A new course instance with 121 students is inserted. Examination and'
-\echo '   administration must appear by themselves, 32 + 0.725 * 121 = 120 hours'
-\echo '   and 28 + 0.2 * 121 + 2 * 7.5 = 67 hours.'
+\echo '1. A new course instance with 121 students is inserted. Examination and administration must appear by default (32 + 0.725 * 121 = 120 hours, 28 + 0.2 * 121 + 2 * 7.5 = 67 hours)'
 
 INSERT INTO course_instance (instance_id, course_layout_id, academic_period_id, num_students)
 VALUES
@@ -83,8 +81,7 @@ VALUES
 SELECT * FROM test_planned_activity;
 
 \echo
-\echo '2. The number of students is changed to 200. Both activities must follow,'
-\echo '   32 + 0.725 * 200 = 177 hours and 28 + 0.2 * 200 + 2 * 7.5 = 83 hours.'
+\echo '2. The number of students is changed to 200. (32 + 0.725 * 200 = 177 hours, 28 + 0.2 * 200 + 2 * 7.5 = 83 hours)'
 
 UPDATE course_instance
 SET num_students = 200
@@ -93,8 +90,7 @@ WHERE instance_id = '2027-32288';
 SELECT * FROM test_planned_activity;
 
 \echo
-\echo '3. The course layout is changed to 30 credits. Only administration depends'
-\echo '   on the credits, 28 + 0.2 * 200 + 2 * 30 = 128 hours.'
+\echo '3. The course layout is changed to 30 credits. Administration: 28 + 0.2 * 200 + 2 * 30 = 128 hours'
 
 UPDATE course_layout
 SET hp = 30.0
@@ -104,8 +100,7 @@ WHERE course_id = (SELECT id FROM course WHERE course_code = 'IK1203')
 SELECT * FROM test_planned_activity;
 
 \echo
-\echo '4. The course instance is moved to course layout version 2, which has 15'
-\echo '   credits. Administration must become 28 + 0.2 * 200 + 2 * 15 = 98 hours.'
+\echo '4. The course instance is moved to course layout version 2, which has 15 credits, Administration: 28 + 0.2 * 200 + 2 * 15 = 98 hours'
 
 UPDATE course_instance
 SET course_layout_id = (
@@ -119,9 +114,7 @@ WHERE instance_id = '2027-32288';
 SELECT * FROM test_planned_activity;
 
 \echo
-\echo '5. The base hours of the examination formula are changed from 32 to 100.'
-\echo '   Examination must become 100 + 0.725 * 200 = 245 hours. The change is'
-\echo '   undone afterwards, so that the following numbers stay comparable.'
+\echo '5. The base hours of the examination formula are changed from 32 to 100, changes are undone (Examination: 100 + 0.725 * 200 = 245 hours)'
 
 SAVEPOINT changed_formula;
 
@@ -134,8 +127,7 @@ SELECT * FROM test_planned_activity;
 ROLLBACK TO SAVEPOINT changed_formula;
 
 \echo
-\echo '6. A lecture of 60 hours is added by hand. Activities without a formula'
-\echo '   must still be possible to plan manually.'
+\echo '6. Add lecture of 60 hours in IK1203'
 
 INSERT INTO planned_activity (planned_hours, teaching_activity_id, course_instance_id)
 VALUES
@@ -148,7 +140,7 @@ VALUES
 SELECT * FROM test_planned_activity;
 
 \echo
-\echo '7. The planned hours of examination are changed by hand. Must be rejected.'
+\echo '7. The planned hours of examination are changed by hand. Must reject!!!'
 
 SAVEPOINT rejected;
 
@@ -160,7 +152,7 @@ WHERE course_instance_id = (SELECT id FROM course_instance WHERE instance_id = '
 ROLLBACK TO SAVEPOINT rejected;
 
 \echo
-\echo '8. Administration is deleted by hand. Must be rejected.'
+\echo '8. Administration is deleted by hand. Must rejected!!!'
 
 SAVEPOINT rejected;
 
@@ -171,7 +163,7 @@ WHERE course_instance_id = (SELECT id FROM course_instance WHERE instance_id = '
 ROLLBACK TO SAVEPOINT rejected;
 
 \echo
-\echo '9. Another examination activity is inserted by hand. Must be rejected.'
+\echo '9. Another examination activity is inserted by hand. Must rejected!!!'
 
 SAVEPOINT rejected;
 
@@ -186,8 +178,7 @@ VALUES
 ROLLBACK TO SAVEPOINT rejected;
 
 \echo
-\echo '10. The examination formula is deleted. Must be rejected, since the'
-\echo '    triggers cannot calculate the planned hours without it.'
+\echo '10. The examination formula is deleted. Triggers cannot calculate the planned hours without it. Must reject!!!'
 
 SAVEPOINT rejected;
 
@@ -197,8 +188,7 @@ WHERE teaching_activity_id = (SELECT id FROM teaching_activity WHERE activity_na
 ROLLBACK TO SAVEPOINT rejected;
 
 \echo
-\echo '11. The examination activity is renamed. Must be rejected, since the'
-\echo '    triggers recognise the derived activities by their names.'
+\echo '11. The examination activity is renamed. Triggers does not recognise the derived activities by their names. Must reject!!!'
 
 SAVEPOINT rejected;
 
@@ -209,8 +199,7 @@ WHERE activity_name = 'Examination';
 ROLLBACK TO SAVEPOINT rejected;
 
 \echo
-\echo '12. Nothing above changed the data. The planned hours must still be the'
-\echo '    same as in step 6, and the lecture must still be possible to update.'
+\echo '12. Check nothing above change the data, The planned hours must still be the same as in step 6, lecture must still be possible to update'
 
 UPDATE planned_activity
 SET planned_hours = 70
@@ -220,9 +209,7 @@ WHERE course_instance_id = (SELECT id FROM course_instance WHERE instance_id = '
 SELECT * FROM test_planned_activity;
 
 \echo
-\echo '13. One teacher is allocated to the examination of five course instances in'
-\echo '    the same academic period. The first four must be accepted and the fifth'
-\echo '    must be rejected, since the policy allows four.'
+\echo '13. One teacher is allocated to the examination of 5 course instances in the same academic period. The 1st 4 must be accepted and the 5th rejected!!!'
 
 INSERT INTO course_instance (instance_id, course_layout_id, academic_period_id, num_students)
 SELECT
@@ -251,7 +238,7 @@ WHERE teaching_activity.activity_name = 'Examination'
 SELECT * FROM test_allocated_instance;
 
 \echo
-\echo '    The fifth course instance must now be rejected.'
+\echo 'The fifth course instance must now be rejected!!!'
 
 SAVEPOINT rejected;
 
