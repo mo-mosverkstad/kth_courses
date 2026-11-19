@@ -40,6 +40,10 @@ DROP TABLE IF EXISTS course CASCADE;
 -- Trigger functions
 
 DROP FUNCTION IF EXISTS validate_4_instances_each_study_period() CASCADE;
+DROP FUNCTION IF EXISTS validate_4_instances_planned_activity() CASCADE;
+DROP FUNCTION IF EXISTS validate_4_instances_course_instance() CASCADE;
+DROP FUNCTION IF EXISTS validate_allocated_instances(INT, INT) CASCADE;
+DROP FUNCTION IF EXISTS max_instances_each_study_period() CASCADE;
 DROP FUNCTION IF EXISTS insert_derived_planned_activity() CASCADE;
 DROP FUNCTION IF EXISTS update_derived_planned_activity_course_instance() CASCADE;
 DROP FUNCTION IF EXISTS update_derived_planned_activity_hp() CASCADE;
