@@ -21,29 +21,24 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.model;
+package se.kth.iv1351.coursedb.model;
 
 /**
- * Thrown when create, read or delete of an account fails.
+ * Specifies a read-only view of an account.
  */
-public class AccountException extends Exception {
+public interface AccountDTO {
+    /**
+     * @return The account number.
+     */
+    public String getAccountNo();
 
     /**
-     * Create a new instance thrown because of the specified reason.
-     *
-     * @param reason Why the exception was thrown.
+     * @return The balance.
      */
-    public AccountException(String reason) {
-        super(reason);
-    }
+    public int getBalance();
 
     /**
-     * Create a new instance thrown because of the specified reason and exception.
-     *
-     * @param reason    Why the exception was thrown.
-     * @param rootCause The exception that caused this exception to be thrown.
+     * @return The holder's name.
      */
-    public AccountException(String reason, Throwable rootCause) {
-        super(reason, rootCause);
-    }
+    public String getHolderName();
 }

@@ -21,17 +21,17 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.controller;
+package se.kth.iv1351.coursedb.controller;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import se.kth.iv1351.bankjdbc.integration.BankDAO;
-import se.kth.iv1351.bankjdbc.integration.BankDBException;
-import se.kth.iv1351.bankjdbc.model.Account;
-import se.kth.iv1351.bankjdbc.model.AccountDTO;
-import se.kth.iv1351.bankjdbc.model.AccountException;
-import se.kth.iv1351.bankjdbc.model.RejectedException;
+import se.kth.iv1351.coursedb.integration.BankDAO;
+import se.kth.iv1351.coursedb.integration.BankDBException;
+import se.kth.iv1351.coursedb.model.Account;
+import se.kth.iv1351.coursedb.model.AccountDTO;
+import se.kth.iv1351.coursedb.model.AccountException;
+import se.kth.iv1351.coursedb.model.RejectedException;
 
 /**
  * This is the application's only controller, all calls to the model pass here.

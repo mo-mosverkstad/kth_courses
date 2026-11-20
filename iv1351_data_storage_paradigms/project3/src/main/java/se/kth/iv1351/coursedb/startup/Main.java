@@ -1,13 +1,14 @@
 /*
- * The MIT License (MIT)
- * Copyright (c) 2020 Leif Lindbäck
+ * The MIT License
+ *
+ * Copyright 2017 Leif Lindbäck <leifl@kth.se>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction,including without limitation the rights
+ * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so,subject to the following conditions:
+ * furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
@@ -21,29 +22,25 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.integration;
+package se.kth.iv1351.coursedb.startup;
+
+import se.kth.iv1351.coursedb.controller.Controller;
+import se.kth.iv1351.coursedb.integration.BankDBException;
+import se.kth.iv1351.coursedb.view.BlockingInterpreter;
 
 /**
- * Thrown when a call to the bank database fails.
+ * Starts the bank client.
  */
-public class BankDBException extends Exception {
-
+public class Main {
     /**
-     * Create a new instance thrown because of the specified reason.
-     *
-     * @param reason Why the exception was thrown.
+     * @param args There are no command line arguments.
      */
-    public BankDBException(String reason) {
-        super(reason);
-    }
-
-    /**
-     * Create a new instance thrown because of the specified reason and exception.
-     *
-     * @param reason    Why the exception was thrown.
-     * @param rootCause The exception that caused this exception to be thrown.
-     */
-    public BankDBException(String reason, Throwable rootCause) {
-        super(reason, rootCause);
+    public static void main(String[] args) {
+        try {
+        new BlockingInterpreter(new Controller()).handleCmds();
+        } catch(BankDBException bdbe) {
+            System.out.println("Could not connect to Bank db.");
+            bdbe.printStackTrace();
+        }
     }
 }
