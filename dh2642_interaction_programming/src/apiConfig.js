@@ -18,6 +18,11 @@ export const OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast";
 export const MAP_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 export const MAP_TILE_ATTRIBUTION = "(c) OpenStreetMap contributors";
 
+// Bias geocoding to Sweden, and prefer the Stockholm region. Without this a
+// short query such as "Kista" resolves to Kysta in Slovakia.
+export const GEOCODE_COUNTRY_CODES = "se";
+export const GEOCODE_VIEWBOX = "17.5,59.0,18.7,59.7";
+
 // The search area is deliberately bounded, which keeps the candidate set small
 // and the Overpass query fast.
 export const DEFAULT_AREA = {

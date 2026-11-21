@@ -5,7 +5,9 @@
 //
 // This module knows nothing about the store, Firebase or the views. It only
 // fetches and normalises into our own internal shape.
-import { OVERPASS_URL, NOMINATIM_URL } from "/src/apiConfig.js";
+import {
+    GEOCODE_COUNTRY_CODES, GEOCODE_VIEWBOX, NOMINATIM_URL, OVERPASS_URL,
+} from "/src/apiConfig.js";
 
 // Which OpenStreetMap amenities we consider usable as a meeting space, mapped
 // to the purpose that suggests them.
@@ -99,12 +101,18 @@ export function searchSpaces(area, purpose) {
 // Resolve a typed place name to coordinates. Deliberately coarse: we ask for
 // the area, not a street address, because starting points are shared with the
 // group and must never be a home address.
+//
+// The country and viewbox bias are not optional. Without them a short query
+// matches the wrong continent: "Kista" resolves to Kysta in Slovakia rather
+// than Kista in Stockholm, and every travel time computed from it is wrong.
 export function geocodeArea(query) {
     const params = new URLSearchParams({
         q: query,
         format: "jsonv2",
         limit: "1",
         addressdetails: "0",
+        countrycodes: GEOCODE_COUNTRY_CODES,
+        viewbox: GEOCODE_VIEWBOX,
     });
 
     return fetch(`${NOMINATIM_URL}/search?${params}`, {
