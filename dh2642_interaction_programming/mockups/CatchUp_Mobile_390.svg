@@ -1,0 +1,534 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1660" height="1340" viewBox="0 0 1660 1340" font-family="Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-label="Catch Up! low-fidelity wireframes for ten mobile screens of the Catch Up! meeting space planner">
+  <title>Catch Up! — low-fidelity screen mock-up</title>
+  <desc>Mobile-first wireframes: sign in and join, home list of catch ups, create wizard, invite and response status, personal availability and travel limits, options with map and list, option detail explanation, live voting, confirmed result, and profile defaults.</desc>
+
+  <defs>
+    <style><![CDATA[
+      .bg     { fill:#f4f5f7; }
+      .phone  { fill:#ffffff; stroke:#b9bec7; stroke-width:2; }
+      .hdr    { fill:#2f4858; }
+      .hdrtxt { fill:#ffffff; font-size:12px; font-weight:600; }
+      .nav    { fill:#eceef1; }
+      .lbl    { fill:#5a6472; font-size:10px; }
+      .txt    { fill:#1f2630; font-size:11px; }
+      .txtb   { fill:#1f2630; font-size:11.5px; font-weight:700; }
+      .small  { fill:#78828f; font-size:9px; }
+      .cap    { fill:#2f4858; font-size:14px; font-weight:700; }
+      .capn   { fill:#8d97a4; font-size:11px; }
+      .card   { fill:#fbfcfd; stroke:#ccd2da; stroke-width:1.2; rx:6; }
+      .field  { fill:#ffffff; stroke:#aeb6c0; stroke-width:1.2; rx:4; }
+      .btn    { fill:#2f6f8f; rx:5; }
+      .btntxt { fill:#ffffff; font-size:11px; font-weight:600; text-anchor:middle; }
+      .btn2   { fill:#ffffff; stroke:#2f6f8f; stroke-width:1.3; rx:5; }
+      .btn2t  { fill:#2f6f8f; font-size:10.5px; font-weight:600; text-anchor:middle; }
+      .map    { fill:#dde7ec; stroke:#c0ccd4; stroke-width:1; }
+      .bar    { fill:#2f6f8f; rx:2; }
+      .barbg  { fill:#dfe4ea; rx:2; }
+      .sloton { fill:#2f6f8f; rx:2; }
+      .slotoff{ fill:#e2e6eb; rx:2; }
+      .warn   { fill:#9a5b00; font-size:9.5px; }
+      .ok     { fill:#2d6a4f; font-size:9.5px; }
+      .skel   { fill:#e6eaee; rx:3; }
+      .pin    { fill:#c05746; }
+      .pintxt { fill:#ffffff; font-size:9px; font-weight:700; text-anchor:middle; }
+      .div    { stroke:#e3e7ec; stroke-width:1; }
+    ]]></style>
+  </defs>
+
+  <rect class="bg" width="1660" height="1340"/>
+
+  <text x="40" y="44" class="cap" font-size="22">Catch Up! — meeting space planner · MOBILE 390 px (low fidelity)</text>
+  <text x="40" y="66" class="capn">DH2642 / ID2216 HT26 project proposal · breakpoint 1 of 3 · wireframes tested with target users before implementation</text>
+
+  <!-- ============ ROW 1 ============ -->
+
+  <!-- 0 Sign in -->
+  <g id="M00-SignIn-Join" data-name="M00-SignIn-Join" transform="translate(40,100)">
+    <text x="0" y="-8" class="cap">0 · Sign in / join</text>
+    <rect class="phone" width="280" height="540" rx="14"/>
+    <text x="140" y="60" class="cap" font-size="19" text-anchor="middle">Catch Up!</text>
+    <text x="140" y="80" class="lbl" text-anchor="middle">Find the space that works for everyone.</text>
+    <rect class="btn" x="30" y="110" width="220" height="34"/>
+    <text x="140" y="132" class="btntxt">Continue with Google</text>
+    <line class="div" x1="30" y1="166" x2="250" y2="166"/>
+    <rect x="126" y="158" width="28" height="16" fill="#ffffff"/>
+    <text x="140" y="171" class="small" text-anchor="middle" style="fill:#8d97a4">or</text>
+    <text x="30" y="200" class="lbl">Email</text>
+    <rect class="field" x="30" y="206" width="220" height="28"/>
+    <text x="30" y="256" class="lbl">Password</text>
+    <rect class="field" x="30" y="262" width="220" height="28"/>
+    <rect class="btn" x="30" y="304" width="105" height="32"/>
+    <text x="82" y="325" class="btntxt">Sign in</text>
+    <rect class="btn2" x="145" y="304" width="105" height="32"/>
+    <text x="197" y="325" class="btn2t">Create account</text>
+    <line class="div" x1="30" y1="366" x2="250" y2="366"/>
+    <text x="30" y="392" class="txtb">Invited?</text>
+    <text x="30" y="408" class="lbl">Paste the code from your group</text>
+    <rect class="field" x="30" y="418" width="140" height="28"/>
+    <text x="42" y="437" class="txt">ABC-123</text>
+    <rect class="btn" x="180" y="418" width="70" height="28"/>
+    <text x="215" y="437" class="btntxt">Join</text>
+    <text x="30" y="474" class="small">An invite link /join/ABC-123 lands here</text>
+    <text x="30" y="488" class="small">and resumes into the meet-up after sign-in.</text>
+    <text x="30" y="516" class="small">Firebase Authentication · per-user data</text>
+  </g>
+
+  <!-- 1 Home -->
+  <g id="M01-Home" data-name="M01-Home" transform="translate(360,100)">
+    <text x="0" y="-8" class="cap">1 · Home — My Catch Ups</text>
+    <rect class="phone" width="280" height="540" rx="14"/>
+    <rect class="hdr" x="1" y="1" width="278" height="34" rx="13"/>
+    <rect class="hdr" x="1" y="20" width="278" height="15"/>
+    <text x="14" y="23" class="hdrtxt">Catch Up!</text>
+    <text x="266" y="23" class="hdrtxt" text-anchor="end">⚙  ◍</text>
+
+    <text x="14" y="56" class="txtb">⚡ Needs you (1)</text>
+    <rect class="card" x="14" y="64" width="252" height="76"/>
+    <text x="26" y="82" class="txtb">Project kickoff</text>
+    <text x="26" y="98" class="lbl">Invited by Mia · 3 of 4 responded</text>
+    <rect class="btn" x="26" y="106" width="150" height="26"/>
+    <text x="101" y="124" class="btntxt">Add my availability</text>
+
+    <text x="14" y="166" class="txtb">Upcoming</text>
+    <rect class="card" x="14" y="174" width="252" height="62"/>
+    <text x="26" y="192" class="txtb">✓ DH2642 project sync</text>
+    <text x="26" y="208" class="lbl">Tue 14:00 · KTH Library</text>
+    <text x="26" y="224" class="ok">Confirmed · everyone notified</text>
+
+    <text x="14" y="262" class="txtb">Voting now</text>
+    <rect class="card" x="14" y="270" width="252" height="62"/>
+    <text x="26" y="288" class="txtb">⏱ Coffee before lecture</text>
+    <text x="26" y="304" class="lbl">closes in 4 h · 2 of 3 voted</text>
+    <text x="26" y="320" class="small">updates live, no reload</text>
+
+    <text x="14" y="358" class="txtb">Past</text>
+    <rect class="skel" x="14" y="366" width="252" height="14"/>
+    <rect class="skel" x="14" y="386" width="200" height="14"/>
+
+    <rect class="btn" x="14" y="424" width="252" height="38"/>
+    <text x="140" y="448" class="btntxt">+ New Catch Up</text>
+    <text x="140" y="478" class="small" text-anchor="middle">One obvious primary action per screen</text>
+
+    <rect class="nav" x="1" y="500" width="278" height="39"/>
+    <text x="40" y="524" class="txtb">Home</text>
+    <text x="118" y="524" class="lbl">Invites</text>
+    <text x="206" y="524" class="lbl">Profile</text>
+  </g>
+
+  <!-- 2 Create -->
+  <g id="M02-Create" data-name="M02-Create" transform="translate(680,100)">
+    <text x="0" y="-8" class="cap">2 · Create — what &amp; when</text>
+    <rect class="phone" width="280" height="540" rx="14"/>
+    <rect class="hdr" x="1" y="1" width="278" height="34" rx="13"/>
+    <rect class="hdr" x="1" y="20" width="278" height="15"/>
+    <text x="14" y="23" class="hdrtxt">← New Catch Up</text>
+    <text x="252" y="23" class="hdrtxt">1/3</text>
+
+    <circle cx="50" cy="54" r="6" fill="#2f6f8f"/>
+    <line x1="56" y1="54" x2="134" y2="54" stroke="#ccd2da" stroke-width="2"/>
+    <circle cx="140" cy="54" r="6" fill="#ffffff" stroke="#ccd2da" stroke-width="2"/>
+    <line x1="146" y1="54" x2="224" y2="54" stroke="#ccd2da" stroke-width="2"/>
+    <circle cx="230" cy="54" r="6" fill="#ffffff" stroke="#ccd2da" stroke-width="2"/>
+    <text x="50" y="74" class="small" text-anchor="middle">Details</text>
+    <text x="140" y="74" class="small" text-anchor="middle">Invite</text>
+    <text x="230" y="74" class="small" text-anchor="middle">Collect</text>
+
+    <text x="14" y="104" class="lbl">What is it?</text>
+    <rect class="field" x="14" y="110" width="252" height="28"/>
+    <text x="26" y="129" class="txt">Project kickoff</text>
+
+    <text x="14" y="158" class="lbl">Purpose</text>
+    <circle cx="24" cy="172" r="5" fill="#2f6f8f"/><text x="36" y="176" class="txt">Meeting</text>
+    <circle cx="94" cy="172" r="5" fill="#fff" stroke="#aeb6c0"/><text x="106" y="176" class="txt">Study</text>
+    <circle cx="176" cy="172" r="5" fill="#fff" stroke="#aeb6c0"/><text x="188" y="176" class="txt">Social</text>
+
+    <text x="14" y="204" class="lbl">How long?</text>
+    <rect class="field" x="100" y="190" width="80" height="24"/>
+    <text x="110" y="206" class="txt">2 h  ▾</text>
+
+    <text x="14" y="238" class="lbl">Possible days</text>
+    <rect class="card" x="14" y="246" width="252" height="26"/>
+    <text x="24" y="263" class="txt">☑ Tue 25   12:00 – 18:00      ✎</text>
+    <rect class="card" x="14" y="278" width="252" height="26"/>
+    <text x="24" y="295" class="txt">☑ Wed 26   09:00 – 14:00      ✎</text>
+    <rect class="btn2" x="14" y="310" width="110" height="24"/>
+    <text x="69" y="326" class="btn2t">+ add a day</text>
+
+    <text x="14" y="360" class="lbl">Stay within</text>
+    <rect class="field" x="86" y="346" width="76" height="24"/>
+    <text x="96" y="362" class="txt">35 min ▾</text>
+    <text x="168" y="360" class="lbl">of the group</text>
+
+    <text x="14" y="394" class="lbl">Decide by</text>
+    <rect class="field" x="86" y="380" width="110" height="24"/>
+    <text x="96" y="396" class="txt">Mon 18:00</text>
+
+    <rect class="btn" x="14" y="424" width="252" height="36"/>
+    <text x="140" y="447" class="btntxt">Continue</text>
+    <text x="140" y="478" class="small" text-anchor="middle">Progress is always visible (step 1 of 3)</text>
+    <text x="140" y="494" class="small" text-anchor="middle">Defaults pre-filled from your profile</text>
+  </g>
+
+  <!-- 3 Invite -->
+  <g id="M03-Invite-Status" data-name="M03-Invite-Status" transform="translate(1000,100)">
+    <text x="0" y="-8" class="cap">3 · Invite &amp; response status</text>
+    <rect class="phone" width="280" height="540" rx="14"/>
+    <rect class="hdr" x="1" y="1" width="278" height="34" rx="13"/>
+    <rect class="hdr" x="1" y="20" width="278" height="15"/>
+    <text x="14" y="23" class="hdrtxt">← Project kickoff</text>
+    <text x="252" y="23" class="hdrtxt">2/3</text>
+
+    <text x="14" y="58" class="txtb">Share this</text>
+    <rect class="card" x="14" y="66" width="252" height="42"/>
+    <text x="26" y="84" class="txt">catchup.app/join/ABC-123</text>
+    <rect class="btn2" x="150" y="86" width="52" height="18"/>
+    <text x="176" y="99" class="btn2t">Copy</text>
+    <rect class="btn2" x="208" y="86" width="48" height="18"/>
+    <text x="232" y="99" class="btn2t">Share ⤴</text>
+    <text x="14" y="128" class="lbl">or read out the code</text>
+    <text x="14" y="148" class="txtb" font-size="16" letter-spacing="3">A B C – 1 2 3</text>
+
+    <line class="div" x1="14" y1="166" x2="266" y2="166"/>
+    <text x="14" y="188" class="txtb">Who's in</text>
+    <text x="266" y="188" class="txtb" text-anchor="end">3 of 4</text>
+
+    <circle cx="24" cy="208" r="6" fill="#2d6a4f"/>
+    <text x="40" y="212" class="txt">Mia (you)</text><text x="266" y="212" class="ok" text-anchor="end">✓ answered</text>
+    <circle cx="24" cy="232" r="6" fill="#2d6a4f"/>
+    <text x="40" y="236" class="txt">Noor</text><text x="266" y="236" class="ok" text-anchor="end">✓ answered</text>
+    <circle cx="24" cy="256" r="6" fill="#2d6a4f"/>
+    <text x="40" y="260" class="txt">Elias</text><text x="266" y="260" class="ok" text-anchor="end">✓ answered</text>
+    <circle cx="24" cy="280" r="6" fill="#fff" stroke="#aeb6c0" stroke-width="1.5"/>
+    <text x="40" y="284" class="txt">Sam</text><text x="266" y="284" class="warn" text-anchor="end">… waiting</text>
+    <rect class="btn2" x="176" y="294" width="90" height="24"/>
+    <text x="221" y="310" class="btn2t">Remind Sam</text>
+
+    <rect class="barbg" x="14" y="336" width="252" height="8"/>
+    <rect class="bar" x="14" y="336" width="189" height="8"/>
+    <text x="14" y="362" class="small">⟳ Updates live — no reload needed</text>
+    <text x="14" y="378" class="small">Last change 2 min ago</text>
+
+    <text x="14" y="408" class="warn">Organiser-only actions are marked</text>
+    <rect class="btn" x="14" y="424" width="252" height="36"/>
+    <text x="140" y="447" class="btntxt">Collect preferences →</text>
+    <text x="140" y="480" class="small" text-anchor="middle">Firestore onSnapshot drives the status list</text>
+  </g>
+
+  <!-- 4 Availability -->
+  <g id="M04-Availability" data-name="M04-Availability" transform="translate(1320,100)">
+    <text x="0" y="-8" class="cap">4 · My availability &amp; travel</text>
+    <rect class="phone" width="280" height="540" rx="14"/>
+    <rect class="hdr" x="1" y="1" width="278" height="34" rx="13"/>
+    <rect class="hdr" x="1" y="20" width="278" height="15"/>
+    <text x="14" y="23" class="hdrtxt">← My availability</text>
+    <text x="252" y="23" class="hdrtxt">3/3</text>
+
+    <text x="14" y="58" class="txtb">Tue 25 Nov</text>
+    <g>
+      <rect class="slotoff" x="14" y="66" width="26" height="20"/><text x="27" y="99" class="small" text-anchor="middle">10</text>
+      <rect class="slotoff" x="42" y="66" width="26" height="20"/><text x="55" y="99" class="small" text-anchor="middle">11</text>
+      <rect class="sloton"  x="70" y="66" width="26" height="20"/><text x="83" y="99" class="small" text-anchor="middle">12</text>
+      <rect class="sloton"  x="98" y="66" width="26" height="20"/><text x="111" y="99" class="small" text-anchor="middle">13</text>
+      <rect class="sloton"  x="126" y="66" width="26" height="20"/><text x="139" y="99" class="small" text-anchor="middle">14</text>
+      <rect class="sloton"  x="154" y="66" width="26" height="20"/><text x="167" y="99" class="small" text-anchor="middle">15</text>
+      <rect class="slotoff" x="182" y="66" width="26" height="20"/><text x="195" y="99" class="small" text-anchor="middle">16</text>
+      <rect class="slotoff" x="210" y="66" width="26" height="20"/><text x="223" y="99" class="small" text-anchor="middle">17</text>
+      <rect class="slotoff" x="238" y="66" width="26" height="20"/><text x="251" y="99" class="small" text-anchor="middle">18</text>
+    </g>
+    <text x="14" y="114" class="small">drag to select · or use arrow keys</text>
+
+    <text x="14" y="140" class="txtb">Wed 26 Nov</text>
+    <g>
+      <rect class="sloton"  x="14" y="148" width="26" height="20"/><text x="27" y="181" class="small" text-anchor="middle">09</text>
+      <rect class="sloton"  x="42" y="148" width="26" height="20"/><text x="55" y="181" class="small" text-anchor="middle">10</text>
+      <rect class="sloton"  x="70" y="148" width="26" height="20"/><text x="83" y="181" class="small" text-anchor="middle">11</text>
+      <rect class="slotoff" x="98" y="148" width="26" height="20"/><text x="111" y="181" class="small" text-anchor="middle">12</text>
+      <rect class="slotoff" x="126" y="148" width="26" height="20"/><text x="139" y="181" class="small" text-anchor="middle">13</text>
+      <rect class="slotoff" x="154" y="148" width="26" height="20"/><text x="167" y="181" class="small" text-anchor="middle">14</text>
+    </g>
+
+    <text x="14" y="206" class="lbl">I start from</text>
+    <rect class="field" x="14" y="212" width="222" height="26"/>
+    <text x="26" y="230" class="txt">Odenplan</text>
+    <text x="246" y="230" class="txt">📍</text>
+    <text x="14" y="252" class="small">Area only — never your exact address.</text>
+
+    <text x="14" y="282" class="lbl">Max travel</text>
+    <rect class="barbg" x="88" y="275" width="130" height="6"/>
+    <circle cx="178" cy="278" r="7" fill="#2f6f8f"/>
+    <text x="230" y="282" class="txtb">35 min</text>
+
+    <text x="14" y="312" class="lbl">I need</text>
+    <text x="14" y="332" class="txt">☑ Quiet       ☑ Power outlets</text>
+    <text x="14" y="352" class="txt">☐ Step-free entrance</text>
+    <text x="14" y="372" class="txt">☐ Food nearby</text>
+
+    <rect class="card" x="14" y="390" width="252" height="40" style="fill:#eef6f1;stroke:#9ec9b2"/>
+    <text x="26" y="408" class="ok">✓ Saved 14:08</text>
+    <text x="26" y="423" class="small">Only you can change this entry.</text>
+
+    <rect class="btn" x="14" y="444" width="252" height="36"/>
+    <text x="140" y="467" class="btntxt">See the options →</text>
+    <text x="140" y="500" class="small" text-anchor="middle">Pre-filled from profile defaults</text>
+  </g>
+
+  <!-- ============ ROW 2 ============ -->
+
+  <!-- 5 Options -->
+  <g id="M05-Options-MapList" data-name="M05-Options-MapList" transform="translate(40,740)">
+    <text x="0" y="-8" class="cap">5 · Options — map ⇄ list</text>
+    <rect class="phone" width="280" height="540" rx="14"/>
+    <rect class="hdr" x="1" y="1" width="278" height="34" rx="13"/>
+    <rect class="hdr" x="1" y="20" width="278" height="15"/>
+    <text x="14" y="23" class="hdrtxt">← Options</text>
+    <rect x="186" y="8" width="42" height="18" rx="3" fill="#ffffff"/>
+    <text x="207" y="21" class="btn2t">Map</text>
+    <text x="248" y="23" class="hdrtxt">List</text>
+
+    <rect class="map" x="1" y="35" width="278" height="130"/>
+    <text x="10" y="50" class="small">MapLibre GL — third-party component</text>
+    <circle class="pin" cx="70" cy="90" r="11"/><text x="70" y="94" class="pintxt">1</text>
+    <circle class="pin" cx="175" cy="112" r="11"/><text x="175" y="116" class="pintxt">2</text>
+    <circle class="pin" cx="110" cy="140" r="11"/><text x="110" y="144" class="pintxt">3</text>
+    <text x="84" y="94" class="small">KTH</text>
+    <text x="189" y="116" class="small">Stadsbibl.</text>
+
+    <text x="14" y="186" class="lbl">Sort</text>
+    <rect class="field" x="44" y="174" width="110" height="20"/>
+    <text x="52" y="188" class="txt">Best overall ▾</text>
+    <rect class="skel" x="162" y="174" width="104" height="20"/>
+    <text x="214" y="188" class="small" text-anchor="middle">travel 3 of 4 ⟳</text>
+
+    <rect class="card" x="14" y="202" width="252" height="88" style="stroke:#2f6f8f;stroke-width:2"/>
+    <circle class="pin" cx="32" cy="216" r="8"/><text x="32" y="219" class="pintxt">1</text>
+    <text x="46" y="220" class="txtb">KTH Library</text>
+    <text x="254" y="220" class="txtb" text-anchor="end">88/100</text>
+    <text x="26" y="238" class="lbl">Tue 14:00 – 16:00</text>
+    <rect class="bar" x="26" y="250" width="9" height="10"/>
+    <rect class="bar" x="38" y="246" width="9" height="14"/>
+    <rect class="bar" x="50" y="244" width="9" height="16"/>
+    <rect class="bar" x="62" y="238" width="9" height="22"/>
+    <text x="80" y="258" class="txt">12 · 18 · 21 · 29 min</text>
+    <text x="26" y="272" class="lbl">avg 20 · worst 29</text>
+    <text x="26" y="285" class="ok">4 of 4 free · step-free ✓</text>
+    <rect class="btn2" x="178" y="266" width="80" height="20"/>
+    <text x="218" y="280" class="btn2t">Why this?</text>
+
+    <rect class="card" x="14" y="298" width="252" height="70"/>
+    <circle class="pin" cx="32" cy="312" r="8"/><text x="32" y="315" class="pintxt">2</text>
+    <text x="46" y="316" class="txtb">Stadsbiblioteket</text>
+    <text x="254" y="316" class="txtb" text-anchor="end">81/100</text>
+    <rect class="bar" x="26" y="340" width="9" height="8"/>
+    <rect class="bar" x="38" y="336" width="9" height="12"/>
+    <rect class="bar" x="50" y="332" width="9" height="16"/>
+    <rect class="bar" x="62" y="326" width="9" height="22"/>
+    <text x="80" y="347" class="txt">9 · 17 · 24 · 41 min</text>
+    <text x="26" y="362" class="warn">⚠ Sam is over his 35 min limit</text>
+
+    <rect class="card" x="14" y="376" width="252" height="54"/>
+    <circle class="pin" cx="32" cy="390" r="8"/><text x="32" y="393" class="pintxt">3</text>
+    <text x="46" y="394" class="txtb">Café Primo</text>
+    <text x="254" y="394" class="lbl" text-anchor="end">—</text>
+    <text x="26" y="412" class="warn">⚠ weather data unavailable</text>
+    <rect class="btn2" x="196" y="402" width="62" height="20"/>
+    <text x="227" y="416" class="btn2t">Retry</text>
+
+    <rect class="btn2" x="14" y="438" width="120" height="30"/>
+    <text x="74" y="457" class="btn2t">+ Add a space</text>
+    <rect class="btn" x="146" y="438" width="120" height="30"/>
+    <text x="206" y="457" class="btntxt">Start voting →</text>
+    <text x="14" y="490" class="small">One bar per member — not just the average.</text>
+    <text x="14" y="504" class="small">A failing API degrades one card, not the screen.</text>
+    <text x="14" y="518" class="small">List works fully without the map (a11y).</text>
+  </g>
+
+  <!-- 6 Why this one -->
+  <g id="M06-OptionDetail-Why" data-name="M06-OptionDetail-Why" transform="translate(360,740)">
+    <text x="0" y="-8" class="cap">6 · Option detail — "Why this one?"</text>
+    <rect class="phone" width="280" height="540" rx="14"/>
+    <rect class="hdr" x="1" y="1" width="278" height="34" rx="13"/>
+    <rect class="hdr" x="1" y="20" width="278" height="15"/>
+    <text x="14" y="23" class="hdrtxt">← KTH Library</text>
+
+    <text x="14" y="60" class="txtb">Suitability</text>
+    <text x="266" y="60" class="cap" font-size="17" text-anchor="end">88 / 100</text>
+    <rect class="barbg" x="14" y="68" width="252" height="8"/>
+    <rect class="bar" x="14" y="68" width="222" height="8"/>
+
+    <text x="14" y="98" class="txtb">Travel time per member</text>
+    <text x="14" y="118" class="txt">Mia</text>
+    <rect class="barbg" x="60" y="109" width="150" height="9"/><rect class="bar" x="60" y="109" width="62" height="9"/>
+    <text x="266" y="118" class="txt" text-anchor="end">12 min</text>
+    <text x="14" y="138" class="txt">Noor</text>
+    <rect class="barbg" x="60" y="129" width="150" height="9"/><rect class="bar" x="60" y="129" width="93" height="9"/>
+    <text x="266" y="138" class="txt" text-anchor="end">18 min</text>
+    <text x="14" y="158" class="txt">Elias</text>
+    <rect class="barbg" x="60" y="149" width="150" height="9"/><rect class="bar" x="60" y="149" width="109" height="9"/>
+    <text x="266" y="158" class="txt" text-anchor="end">21 min</text>
+    <text x="14" y="178" class="txt">Sam</text>
+    <rect class="barbg" x="60" y="169" width="150" height="9"/><rect class="bar" x="60" y="169" width="150" height="9"/>
+    <text x="266" y="178" class="ok" text-anchor="end">29 min ✓</text>
+    <text x="14" y="196" class="lbl">average 20 · worst 29 · limit 35</text>
+
+    <line class="div" x1="14" y1="210" x2="266" y2="210"/>
+    <text x="14" y="230" class="txtb">How we got to 88</text>
+    <text x="14" y="250" class="txt">average travel</text><text x="266" y="250" class="txt" text-anchor="end">−20</text>
+    <text x="14" y="268" class="txt">worst journey (×0.7)</text><text x="266" y="268" class="txt" text-anchor="end">−20</text>
+    <text x="14" y="286" class="txt">everyone free</text><text x="266" y="286" class="ok" text-anchor="end">4 of 4 ok</text>
+    <text x="14" y="304" class="txt">step-free entrance</text><text x="266" y="304" class="ok" text-anchor="end">ok</text>
+    <text x="14" y="322" class="txt">open until 20:00</text><text x="266" y="322" class="ok" text-anchor="end">ok</text>
+    <text x="14" y="340" class="txt">rain 13:30 · 10%</text><text x="266" y="340" class="txt" text-anchor="end">−2</text>
+
+    <line class="div" x1="14" y1="354" x2="266" y2="354"/>
+    <text x="14" y="374" class="txtb">Space — from OpenStreetMap</text>
+    <text x="14" y="392" class="txt">Wi-Fi ✓   Power ✓   Step-free ✓</text>
+    <text x="14" y="408" class="warn">ⓘ Opening hours may be incomplete</text>
+    <text x="14" y="424" class="small">travel data fetched 14:32</text>
+
+    <rect class="btn2" x="14" y="438" width="252" height="26"/>
+    <text x="140" y="456" class="btn2t">Weigh fairness higher ▾</text>
+    <rect class="btn" x="14" y="472" width="252" height="34"/>
+    <text x="140" y="494" class="btntxt">Vote for this option</text>
+    <text x="140" y="522" class="small" text-anchor="middle">The app recommends — the group decides.</text>
+  </g>
+
+  <!-- 7 Vote -->
+  <g id="M07-Vote-Live" data-name="M07-Vote-Live" transform="translate(680,740)">
+    <text x="0" y="-8" class="cap">7 · Vote — live</text>
+    <rect class="phone" width="280" height="540" rx="14"/>
+    <rect class="hdr" x="1" y="1" width="278" height="34" rx="13"/>
+    <rect class="hdr" x="1" y="20" width="278" height="15"/>
+    <text x="14" y="23" class="hdrtxt">← Vote</text>
+    <text x="266" y="23" class="hdrtxt" text-anchor="end">closes 18:00</text>
+
+    <text x="14" y="60" class="txtb">3 of 4 voted</text>
+    <rect class="barbg" x="14" y="68" width="252" height="8"/>
+    <rect class="bar" x="14" y="68" width="189" height="8"/>
+
+    <rect class="card" x="14" y="90" width="252" height="76" style="stroke:#2f6f8f;stroke-width:2"/>
+    <circle class="pin" cx="32" cy="106" r="8"/><text x="32" y="109" class="pintxt">1</text>
+    <text x="46" y="110" class="txtb">KTH Library</text>
+    <text x="254" y="110" class="lbl" text-anchor="end">88/100</text>
+    <circle cx="30" cy="126" r="6" fill="#2f6f8f"/>
+    <circle cx="46" cy="126" r="6" fill="#2f6f8f"/>
+    <circle cx="62" cy="126" r="6" fill="#2f6f8f"/>
+    <text x="78" y="130" class="lbl">Mia · Noor · Elias</text>
+    <rect x="26" y="138" width="110" height="20" rx="4" fill="#2d6a4f"/>
+    <text x="81" y="152" class="btntxt">✓ Your vote</text>
+
+    <rect class="card" x="14" y="176" width="252" height="62"/>
+    <circle class="pin" cx="32" cy="192" r="8"/><text x="32" y="195" class="pintxt">2</text>
+    <text x="46" y="196" class="txtb">Stadsbiblioteket</text>
+    <text x="254" y="196" class="lbl" text-anchor="end">81/100</text>
+    <circle cx="30" cy="212" r="6" fill="#fff" stroke="#aeb6c0"/>
+    <text x="78" y="216" class="lbl">no votes yet</text>
+    <rect class="btn2" x="196" y="206" width="62" height="22"/>
+    <text x="227" y="221" class="btn2t">Vote</text>
+
+    <rect class="card" x="14" y="248" width="252" height="62"/>
+    <circle class="pin" cx="32" cy="264" r="8"/><text x="32" y="267" class="pintxt">3</text>
+    <text x="46" y="268" class="txtb">Café Primo</text>
+    <text x="254" y="268" class="lbl" text-anchor="end">74/100</text>
+    <circle cx="30" cy="284" r="6" fill="#fff" stroke="#aeb6c0"/>
+    <text x="78" y="288" class="lbl">no votes yet</text>
+    <rect class="btn2" x="196" y="278" width="62" height="22"/>
+    <text x="227" y="293" class="btn2t">Vote</text>
+
+    <rect class="card" x="14" y="324" width="252" height="48" style="fill:#f1f5f8"/>
+    <text x="26" y="342" class="txt">⟳ Sam voted just now</text>
+    <text x="26" y="358" class="small">live via Firestore onSnapshot — no reload</text>
+
+    <text x="14" y="392" class="lbl">You can change your vote until 18:00.</text>
+    <text x="14" y="410" class="small">Each vote is stored under your own user id,</text>
+    <text x="14" y="424" class="small">so nobody can overwrite anybody else.</text>
+
+    <line class="div" x1="14" y1="440" x2="266" y2="440"/>
+    <text x="14" y="460" class="warn">Organiser only</text>
+    <rect class="btn" x="14" y="468" width="252" height="34"/>
+    <text x="140" y="490" class="btntxt">Close vote &amp; confirm</text>
+    <text x="140" y="518" class="small" text-anchor="middle">asks for confirmation first</text>
+  </g>
+
+  <!-- 8 Confirmed -->
+  <g id="M08-Confirmed" data-name="M08-Confirmed" transform="translate(1000,740)">
+    <text x="0" y="-8" class="cap">8 · Confirmed</text>
+    <rect class="phone" width="280" height="540" rx="14"/>
+    <rect class="hdr" x="1" y="1" width="278" height="34" rx="13" style="fill:#2d6a4f"/>
+    <rect class="hdr" x="1" y="20" width="278" height="15" style="fill:#2d6a4f"/>
+    <text x="14" y="23" class="hdrtxt">✓ It's settled</text>
+
+    <text x="14" y="62" class="cap" font-size="15">Project kickoff</text>
+    <text x="14" y="84" class="txtb">Tue 25 Nov · 14:00 – 16:00</text>
+    <text x="14" y="102" class="txt">KTH Library, Osquars backe 31</text>
+
+    <rect class="map" x="14" y="114" width="252" height="120"/>
+    <text x="24" y="130" class="small">map + your route</text>
+    <circle class="pin" cx="150" cy="180" r="11"/><text x="150" y="184" class="pintxt">★</text>
+    <path d="M40 215 Q90 200 140 182" stroke="#2f6f8f" stroke-width="3" fill="none" stroke-dasharray="6 4"/>
+
+    <text x="14" y="258" class="lbl">Your trip</text><text x="266" y="258" class="txtb" text-anchor="end">18 min</text>
+    <text x="14" y="278" class="lbl">Leave by</text><text x="266" y="278" class="txtb" text-anchor="end">13:38</text>
+    <text x="14" y="298" class="lbl">Weather</text><text x="266" y="298" class="txt" text-anchor="end">🌧 light rain 13:30</text>
+
+    <line class="div" x1="14" y1="314" x2="266" y2="314"/>
+    <rect class="btn2" x="14" y="328" width="252" height="30"/>
+    <text x="140" y="347" class="btn2t">Add to calendar (.ics)</text>
+    <rect class="btn2" x="14" y="366" width="252" height="30"/>
+    <text x="140" y="385" class="btn2t">Share with the group ⤴</text>
+
+    <rect class="card" x="14" y="406" width="252" height="46" style="fill:#eef6f1;stroke:#9ec9b2"/>
+    <text x="26" y="424" class="ok">Everyone sees this plan,</text>
+    <text x="26" y="440" class="ok">on every device.</text>
+
+    <rect class="btn2" x="14" y="464" width="252" height="28" style="stroke:#9a5b00"/>
+    <text x="140" y="482" class="btn2t" style="fill:#9a5b00">Reopen the decision</text>
+    <text x="140" y="510" class="small" text-anchor="middle">destructive action → confirm first</text>
+  </g>
+
+  <!-- 9 Profile -->
+  <g id="M09-Profile" data-name="M09-Profile" transform="translate(1320,740)">
+    <text x="0" y="-8" class="cap">9 · Profile defaults</text>
+    <rect class="phone" width="280" height="540" rx="14"/>
+    <rect class="hdr" x="1" y="1" width="278" height="34" rx="13"/>
+    <rect class="hdr" x="1" y="20" width="278" height="15"/>
+    <text x="14" y="23" class="hdrtxt">← Profile</text>
+
+    <circle cx="36" cy="66" r="18" fill="#dfe4ea"/>
+    <text x="64" y="62" class="txtb" font-size="13">Mia Andersson</text>
+    <text x="64" y="78" class="small">mia@kth.se</text>
+
+    <line class="div" x1="14" y1="98" x2="266" y2="98"/>
+    <text x="14" y="120" class="lbl">My usual starting area</text>
+    <rect class="field" x="14" y="128" width="222" height="26"/>
+    <text x="26" y="146" class="txt">Odenplan</text>
+    <text x="246" y="146" class="txt">📍</text>
+
+    <text x="14" y="176" class="lbl">Usual max travel</text>
+    <rect class="field" x="150" y="162" width="86" height="24"/>
+    <text x="160" y="178" class="txt">35 min ▾</text>
+
+    <text x="14" y="212" class="lbl">I usually need</text>
+    <text x="14" y="232" class="txt">☑ Quiet       ☑ Power outlets</text>
+    <text x="14" y="252" class="txt">☐ Step-free entrance</text>
+    <text x="14" y="272" class="txt">☐ Food nearby</text>
+
+    <line class="div" x1="14" y1="290" x2="266" y2="290"/>
+    <text x="14" y="312" class="txtb">Privacy</text>
+    <text x="14" y="330" class="txt">Share my starting area</text>
+    <rect x="200" y="320" width="44" height="20" rx="10" fill="#dfe4ea"/>
+    <circle cx="211" cy="330" r="8" fill="#ffffff" stroke="#aeb6c0"/>
+    <text x="252" y="334" class="small">off</text>
+    <text x="14" y="350" class="small">Area level only. Never an exact address.</text>
+
+    <rect class="card" x="14" y="368" width="252" height="46" style="fill:#eef6f1;stroke:#9ec9b2"/>
+    <text x="26" y="386" class="ok">✓ Saved</text>
+    <text x="26" y="402" class="small">used as the default for every new Catch Up</text>
+
+    <text x="14" y="438" class="small">Persistence buys efficiency: you never retype</text>
+    <text x="14" y="452" class="small">the same preferences for a new meet-up.</text>
+
+    <rect class="btn2" x="14" y="470" width="252" height="30"/>
+    <text x="140" y="489" class="btn2t">Sign out</text>
+  </g>
+
+</svg>

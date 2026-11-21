@@ -1,0 +1,454 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1340" height="1830" viewBox="0 0 1340 1830" font-family="Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-label="Catch Up! meeting space planner wireframes for tablet portrait, 834 pixels wide">
+  <title>Catch Up! — tablet portrait wireframes (834 px)</title>
+  <desc>Four tablet-portrait frames: home with a left icon rail, the create wizard in two columns, the options screen with map and list both visible, and the option detail beside a live voting panel.</desc>
+
+  <rect width="1340" height="1830" fill="#f4f5f7" />
+
+  <text x="40" y="44" font-size="14px" fill="#2f4858" font-weight="700">Catch Up! — meeting space planner · TABLET PORTRAIT 834 px</text>
+  <text x="40" y="66" fill="#8d97a4" font-size="11px">breakpoint 2 of 3 · bottom tab bar becomes a left icon rail · map and list stop being tabs and are shown together</text>
+
+  
+  <g id="T01-Home" data-name="T01-Home" transform="translate(40,110)">
+    <text x="0" y="-10" fill="#2f4858" font-size="14px" font-weight="700">T1 · Home — My Catch Ups</text>
+    <rect width="600" height="800" rx="8" fill="#ffffff" stroke="#b9bec7" stroke-width="2" />
+
+    
+    <rect x="1" y="1" width="63" height="798" rx="7" fill="#eceef1" />
+    <rect x="40" y="1" width="24" height="798" fill="#eceef1" />
+    <circle cx="32" cy="30" r="13" fill="#2f4858" />
+    <text x="32" y="35" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">C</text>
+    <rect x="8" y="66" width="48" height="42" rx="7" fill="#dbe3e8" />
+    <rect x="24" y="74" width="16" height="14" rx="2" fill="#2f4858" />
+    <text x="32" y="102" fill="#2f4858" font-size="8px" font-weight="600" text-anchor="middle">Home</text>
+    <rect x="24" y="130" width="16" height="12" rx="2" fill="none" stroke="#5a6472" stroke-width="1.6" />
+    <circle cx="43" cy="129" r="4" fill="#c05746" />
+    <text x="32" y="158" fill="#5a6472" font-size="8px" font-weight="600" text-anchor="middle">Invites</text>
+    <circle cx="32" cy="192" r="8" fill="none" stroke="#5a6472" stroke-width="1.6" />
+    <text x="32" y="214" fill="#5a6472" font-size="8px" font-weight="600" text-anchor="middle">Profile</text>
+
+    
+    <rect x="64" y="1" width="535" height="46" fill="#2f4858" />
+    <rect x="560" y="1" width="39" height="46" rx="7" fill="#2f4858" />
+    <text x="84" y="29" font-size="12px" fill="#ffffff" font-weight="600">Catch Up!</text>
+    <text x="180" y="29" fill="#c6d2da" font-size="12px" font-weight="400">meeting space planner</text>
+    <circle cx="570" cy="24" r="12" fill="#5a7585" />
+    <text x="570" y="28" fill="#ffffff" font-size="10" font-weight="700" text-anchor="middle">M</text>
+
+    
+    <text x="84" y="80" font-size="14px" fill="#2f4858" font-weight="700">My Catch Ups</text>
+    <rect x="430" y="62" width="150" height="30" fill="#2f6f8f" rx="5" />
+    <text x="505" y="81" fill="#ffffff" font-size="11px" font-weight="600" text-anchor="middle">+ New Catch Up</text>
+
+    
+    <text x="84" y="116" fill="#1f2630" font-size="11.5px" font-weight="700">⚡ Needs you (1)</text>
+    <rect x="84" y="124" width="496" height="76" fill="#fbfcfd" stroke="#c05746" stroke-width="1.6" rx="6" />
+    <rect x="84" y="124" width="4" height="76" fill="#c05746" />
+    <text x="100" y="146" font-size="11.5px" fill="#1f2630" font-weight="700">Project kickoff</text>
+    <text x="100" y="164" fill="#5a6472" font-size="10px">Invited by Mia · decide by Mon 18:00</text>
+    <rect x="100" y="174" width="200" height="6" fill="#dfe4ea" rx="2" />
+    <rect x="100" y="174" width="150" height="6" fill="#2f6f8f" rx="2" />
+    <text x="310" y="180" fill="#78828f" font-size="9px">3 of 4 responded</text>
+    <rect x="420" y="146" width="146" height="30" fill="#2f6f8f" rx="5" />
+    <text x="493" y="166" fill="#ffffff" font-size="11px" font-weight="600" text-anchor="middle">Add my availability</text>
+
+    
+    <text x="84" y="230" fill="#1f2630" font-size="11.5px" font-weight="700">Upcoming</text>
+    <rect x="84" y="238" width="240" height="102" fill="#fbfcfd" stroke="#ccd2da" stroke-width="1.2" rx="6" />
+    <text x="98" y="260" fill="#1f2630" font-size="11.5px" font-weight="700">✓ DH2642 project sync</text>
+    <text x="98" y="278" fill="#5a6472" font-size="10px">Tue 14:00 · KTH Library</text>
+    <text x="98" y="296" fill="#2d6a4f" font-size="9.5px">Confirmed · everyone notified</text>
+    <line x1="98" y1="306" x2="310" y2="306" stroke="#e3e7ec" stroke-width="1" />
+    <text x="98" y="322" fill="#78828f" font-size="9px">Your trip 18 min · leave by 13:38</text>
+
+    <rect x="340" y="238" width="240" height="102" fill="#fbfcfd" stroke="#ccd2da" stroke-width="1.2" rx="6" />
+    <text x="354" y="260" fill="#1f2630" font-size="11.5px" font-weight="700">✓ Design review</text>
+    <text x="354" y="278" fill="#5a6472" font-size="10px">Thu 10:00 · Studio 4, Borggården</text>
+    <text x="354" y="296" fill="#2d6a4f" font-size="9.5px">Confirmed · step-free ✓</text>
+    <line x1="354" y1="306" x2="566" y2="306" stroke="#e3e7ec" stroke-width="1" />
+    <text x="354" y="322" fill="#78828f" font-size="9px">Your trip 24 min · leave by 09:36</text>
+
+    
+    <text x="84" y="370" fill="#1f2630" font-size="11.5px" font-weight="700">Voting now</text>
+    <rect x="84" y="378" width="240" height="100" fill="#fbfcfd" stroke="#ccd2da" stroke-width="1.2" rx="6" />
+    <text x="98" y="400" fill="#1f2630" font-size="11.5px" font-weight="700">⏱ Coffee before lecture</text>
+    <text x="98" y="418" fill="#5a6472" font-size="10px">closes in 4 h · 2 of 3 voted</text>
+    <rect x="98" y="428" width="140" height="6" fill="#dfe4ea" rx="2" />
+    <rect x="98" y="428" width="93" height="6" fill="#2f6f8f" rx="2" />
+    <text x="98" y="450" fill="#78828f" font-size="9px">⟳ updates live, no reload</text>
+    <rect x="98" y="456" width="90" height="26" fill="#2f6f8f" rx="5" />
+    <text x="143" y="473" fill="#ffffff" font-size="11px" font-weight="600" text-anchor="middle">Vote now</text>
+
+    <rect x="340" y="378" width="240" height="100" fill="#f7f8f9" stroke="#ccd2da" stroke-width="1.2" rx="6" stroke-dasharray="4 3" />
+    <text x="460" y="416" text-anchor="middle" fill="#5a6472" font-size="10px">Nothing else open right now.</text>
+    <rect x="400" y="430" width="120" height="28" fill="#ffffff" stroke="#2f6f8f" stroke-width="1.3" rx="5" />
+    <text x="460" y="448" fill="#2f6f8f" font-size="10.5px" font-weight="600" text-anchor="middle">Start a Catch Up</text>
+
+    
+    <text x="84" y="510" fill="#1f2630" font-size="11.5px" font-weight="700">Your saved defaults</text>
+    <rect x="84" y="518" width="496" height="70" fill="#eef6f1" stroke="#9ec9b2" stroke-width="1.2" rx="6" />
+    <text x="100" y="540" fill="#1f2630" font-size="11px">Odenplan · max 35 min · quiet, power outlets</text>
+    <text x="100" y="558" fill="#78828f" font-size="9px">Used automatically for every new Catch Up — you never retype them.</text>
+    <text x="100" y="576" fill="#2d6a4f" font-size="9.5px">✓ synced to every device you sign in on</text>
+    <rect x="480" y="540" width="86" height="26" fill="#ffffff" stroke="#2f6f8f" stroke-width="1.3" rx="5" />
+    <text x="523" y="557" fill="#2f6f8f" font-size="10.5px" font-weight="600" text-anchor="middle">Edit</text>
+
+    
+    <text x="84" y="620" fill="#1f2630" font-size="11.5px" font-weight="700">Past</text>
+    <rect x="84" y="628" width="496" height="28" fill="#fbfcfd" stroke="#ccd2da" stroke-width="1.2" rx="6" />
+    <text x="98" y="646" fill="#1f2630" font-size="11px">IV1351 revision · 18 Nov · Stadsbiblioteket</text>
+    <text x="566" y="646" text-anchor="end" fill="#78828f" font-size="9px">reuse ↻</text>
+    <rect x="84" y="662" width="496" height="28" fill="#fbfcfd" stroke="#ccd2da" stroke-width="1.2" rx="6" />
+    <text x="98" y="680" fill="#1f2630" font-size="11px">Sprint retro · 11 Nov · Café Primo</text>
+    <text x="566" y="680" text-anchor="end" fill="#78828f" font-size="9px">reuse ↻</text>
+
+    <line x1="84" y1="712" x2="580" y2="712" stroke="#e3e7ec" stroke-width="1" />
+    <text x="84" y="732" fill="#8d97a4" font-size="9px">Responsive change vs mobile: the bottom tab bar becomes a persistent left icon rail, and cards move</text>
+    <text x="84" y="746" fill="#8d97a4" font-size="9px">from one column to two. Nothing is hidden behind a tab that was reachable on mobile.</text>
+    <text x="84" y="766" fill="#8d97a4" font-size="9px">The saved-defaults panel is new at this width — there is finally room to show what persistence buys.</text>
+  </g>
+
+  
+  <g id="T02-Create" data-name="T02-Create" transform="translate(700,110)">
+    <text x="0" y="-10" fill="#2f4858" font-size="14px" font-weight="700">T2 · Create — two-column wizard</text>
+    <rect width="600" height="800" rx="8" fill="#ffffff" stroke="#b9bec7" stroke-width="2" />
+
+    <rect x="1" y="1" width="63" height="798" rx="7" fill="#eceef1" />
+    <rect x="40" y="1" width="24" height="798" fill="#eceef1" />
+    <circle cx="32" cy="30" r="13" fill="#2f4858" />
+    <text x="32" y="35" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">C</text>
+    <rect x="8" y="66" width="48" height="42" rx="7" fill="#dbe3e8" />
+    <rect x="24" y="74" width="16" height="14" rx="2" fill="#2f4858" />
+    <text x="32" y="102" fill="#2f4858" font-size="8px" font-weight="600" text-anchor="middle">Home</text>
+    <rect x="24" y="130" width="16" height="12" rx="2" fill="none" stroke="#5a6472" stroke-width="1.6" />
+    <text x="32" y="158" fill="#5a6472" font-size="8px" font-weight="600" text-anchor="middle">Invites</text>
+    <circle cx="32" cy="192" r="8" fill="none" stroke="#5a6472" stroke-width="1.6" />
+    <text x="32" y="214" fill="#5a6472" font-size="8px" font-weight="600" text-anchor="middle">Profile</text>
+
+    <rect x="64" y="1" width="535" height="46" fill="#2f4858" />
+    <rect x="560" y="1" width="39" height="46" rx="7" fill="#2f4858" />
+    <text x="84" y="29" font-size="12px" fill="#ffffff" font-weight="600">← New Catch Up</text>
+    <text x="566" y="29" text-anchor="end" fill="#ffffff" font-size="12px" font-weight="600">Step 1 of 3</text>
+
+    
+    <line x1="150" y1="78" x2="500" y2="78" stroke="#ccd2da" stroke-width="2" />
+    <circle cx="150" cy="78" r="8" fill="#2f6f8f" />
+    <circle cx="325" cy="78" r="8" fill="#ffffff" stroke="#ccd2da" stroke-width="2" />
+    <circle cx="500" cy="78" r="8" fill="#ffffff" stroke="#ccd2da" stroke-width="2" />
+    <text x="150" y="98" text-anchor="middle" font-size="11.5px" fill="#1f2630" font-weight="700">Details</text>
+    <text x="325" y="98" text-anchor="middle" fill="#5a6472" font-size="10px">Invite</text>
+    <text x="500" y="98" text-anchor="middle" fill="#5a6472" font-size="10px">Collect</text>
+
+    <line x1="84" y1="116" x2="580" y2="116" stroke="#e3e7ec" stroke-width="1" />
+
+    
+    <text x="84" y="142" fill="#5a6472" font-size="10px">What is it?</text>
+    <rect x="84" y="150" width="230" height="30" fill="#ffffff" stroke="#aeb6c0" stroke-width="1.2" rx="4" />
+    <text x="96" y="170" fill="#1f2630" font-size="11px">Project kickoff</text>
+
+    <text x="84" y="208" fill="#5a6472" font-size="10px">Purpose</text>
+    <circle cx="94" cy="224" r="5" fill="#2f6f8f" /><text x="106" y="228" fill="#1f2630" font-size="11px">Meeting</text>
+    <circle cx="94" cy="248" r="5" fill="#fff" stroke="#aeb6c0" /><text x="106" y="252" fill="#1f2630" font-size="11px">Study session</text>
+    <circle cx="94" cy="272" r="5" fill="#fff" stroke="#aeb6c0" /><text x="106" y="276" fill="#1f2630" font-size="11px">Social</text>
+    <text x="84" y="298" fill="#78828f" font-size="9px">Purpose only tunes which spaces we suggest.</text>
+
+    <text x="84" y="330" fill="#5a6472" font-size="10px">How long?</text>
+    <rect x="84" y="338" width="100" height="26" fill="#ffffff" stroke="#aeb6c0" stroke-width="1.2" rx="4" />
+    <text x="94" y="356" fill="#1f2630" font-size="11px">2 h  ▾</text>
+
+    <text x="84" y="390" fill="#5a6472" font-size="10px">Stay within</text>
+    <rect x="84" y="398" width="100" height="26" fill="#ffffff" stroke="#aeb6c0" stroke-width="1.2" rx="4" />
+    <text x="94" y="416" fill="#1f2630" font-size="11px">35 min ▾</text>
+    <text x="192" y="416" fill="#78828f" font-size="9px">of the group</text>
+
+    
+    <text x="350" y="142" fill="#5a6472" font-size="10px">Possible days</text>
+    <rect x="350" y="150" width="230" height="30" fill="#fbfcfd" stroke="#ccd2da" stroke-width="1.2" rx="6" />
+    <text x="362" y="169" fill="#1f2630" font-size="11px">☑ Tue 25   12:00 – 18:00</text>
+    <text x="566" y="169" text-anchor="end" fill="#1f2630" font-size="11px">✎</text>
+    <rect x="350" y="188" width="230" height="30" fill="#fbfcfd" stroke="#ccd2da" stroke-width="1.2" rx="6" />
+    <text x="362" y="207" fill="#1f2630" font-size="11px">☑ Wed 26   09:00 – 14:00</text>
+    <text x="566" y="207" text-anchor="end" fill="#1f2630" font-size="11px">✎</text>
+    <rect x="350" y="226" width="110" height="26" fill="#ffffff" stroke="#2f6f8f" stroke-width="1.3" rx="5" />
+    <text x="405" y="243" fill="#2f6f8f" font-size="10.5px" font-weight="600" text-anchor="middle">+ add a day</text>
+
+    <text x="350" y="286" fill="#5a6472" font-size="10px">Decide by</text>
+    <rect x="350" y="294" width="140" height="26" fill="#ffffff" stroke="#aeb6c0" stroke-width="1.2" rx="4" />
+    <text x="360" y="312" fill="#1f2630" font-size="11px">Mon 18:00</text>
+    <text x="350" y="334" fill="#78828f" font-size="9px">Voting closes automatically at this time.</text>
+
+    <text x="350" y="366" fill="#5a6472" font-size="10px">Search area</text>
+    <rect x="350" y="374" width="230" height="26" fill="#ffffff" stroke="#aeb6c0" stroke-width="1.2" rx="4" />
+    <text x="360" y="392" fill="#1f2630" font-size="11px">Central Stockholm + KTH campuses ▾</text>
+    <text x="350" y="414" fill="#78828f" font-size="9px">Keeps the candidate list small and fast.</text>
+
+    
+    <line x1="84" y1="446" x2="580" y2="446" stroke="#e3e7ec" stroke-width="1" />
+    <rect x="84" y="464" width="496" height="104" fill="#f7f9fa" stroke="#ccd2da" stroke-width="1.2" rx="6" />
+    <text x="100" y="486" fill="#1f2630" font-size="11.5px" font-weight="700">What happens next</text>
+    <circle cx="106" cy="506" r="8" fill="#2f6f8f" /><text x="106" y="509" fill="#ffffff" font-size="9px" font-weight="700" text-anchor="middle">1</text>
+    <text x="122" y="510" fill="#1f2630" font-size="11px">You share a link. Everybody adds their own availability and travel limit.</text>
+    <circle cx="106" cy="530" r="8" fill="#2f6f8f" /><text x="106" y="533" fill="#ffffff" font-size="9px" font-weight="700" text-anchor="middle">2</text>
+    <text x="122" y="534" fill="#1f2630" font-size="11px">We fetch spaces, travel times and weather, then score the options.</text>
+    <circle cx="106" cy="554" r="8" fill="#2f6f8f" /><text x="106" y="557" fill="#ffffff" font-size="9px" font-weight="700" text-anchor="middle">3</text>
+    <text x="122" y="558" fill="#1f2630" font-size="11px">The group votes. You confirm. Everyone's device updates live.</text>
+
+    
+    <text x="84" y="600" fill="#1f2630" font-size="11.5px" font-weight="700">Invite people now</text>
+    <text x="196" y="600" fill="#78828f" font-size="9px">optional — you can share the link later</text>
+    <rect x="84" y="610" width="360" height="30" fill="#ffffff" stroke="#aeb6c0" stroke-width="1.2" rx="4" />
+    <rect x="92" y="617" width="92" height="16" rx="8" fill="#e3ebf0" />
+    <text x="138" y="629" text-anchor="middle" fill="#2f4858" font-size="9px">noor@kth.se ✕</text>
+    <rect x="190" y="617" width="92" height="16" rx="8" fill="#e3ebf0" />
+    <text x="236" y="629" text-anchor="middle" fill="#2f4858" font-size="9px">elias@kth.se ✕</text>
+    <text x="292" y="630" fill="#5a6472" font-size="10px">add another…</text>
+    <rect x="454" y="610" width="126" height="30" fill="#ffffff" stroke="#2f6f8f" stroke-width="1.3" rx="5" />
+    <text x="517" y="629" fill="#2f6f8f" font-size="10.5px" font-weight="600" text-anchor="middle">Copy invite link</text>
+    <text x="84" y="662" fill="#78828f" font-size="9px">Anyone with the link can join and add their own availability. Only you can close the vote.</text>
+
+    
+    <line x1="84" y1="700" x2="580" y2="700" stroke="#e3e7ec" stroke-width="1" />
+    <rect x="84" y="714" width="90" height="32" fill="#ffffff" stroke="#2f6f8f" stroke-width="1.3" rx="5" />
+    <text x="129" y="734" fill="#2f6f8f" font-size="10.5px" font-weight="600" text-anchor="middle">Back</text>
+    <rect x="460" y="714" width="120" height="32" fill="#2f6f8f" rx="5" />
+    <text x="520" y="735" fill="#ffffff" font-size="11px" font-weight="600" text-anchor="middle">Continue →</text>
+    <text x="196" y="734" fill="#78828f" font-size="9px">Nothing is saved to the group until you continue.</text>
+
+    <text x="84" y="772" fill="#8d97a4" font-size="9px">Responsive change: the mobile wizard's one-field-per-scroll becomes two columns, so the whole step</text>
+    <text x="84" y="786" fill="#8d97a4" font-size="9px">fits without scrolling. The step count and the single primary action are unchanged.</text>
+  </g>
+
+  
+  <g id="T03-Options" data-name="T03-Options" transform="translate(40,980)">
+    <text x="0" y="-10" fill="#2f4858" font-size="14px" font-weight="700">T3 · Options — map and list together (no tabs)</text>
+    <rect width="600" height="800" rx="8" fill="#ffffff" stroke="#b9bec7" stroke-width="2" />
+
+    <rect x="1" y="1" width="63" height="798" rx="7" fill="#eceef1" />
+    <rect x="40" y="1" width="24" height="798" fill="#eceef1" />
+    <circle cx="32" cy="30" r="13" fill="#2f4858" />
+    <text x="32" y="35" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">C</text>
+    <rect x="8" y="66" width="48" height="42" rx="7" fill="#dbe3e8" />
+    <rect x="24" y="74" width="16" height="14" rx="2" fill="#2f4858" />
+    <text x="32" y="102" fill="#2f4858" font-size="8px" font-weight="600" text-anchor="middle">Home</text>
+    <rect x="24" y="130" width="16" height="12" rx="2" fill="none" stroke="#5a6472" stroke-width="1.6" />
+    <text x="32" y="158" fill="#5a6472" font-size="8px" font-weight="600" text-anchor="middle">Invites</text>
+    <circle cx="32" cy="192" r="8" fill="none" stroke="#5a6472" stroke-width="1.6" />
+    <text x="32" y="214" fill="#5a6472" font-size="8px" font-weight="600" text-anchor="middle">Profile</text>
+
+    <rect x="64" y="1" width="535" height="46" fill="#2f4858" />
+    <rect x="560" y="1" width="39" height="46" rx="7" fill="#2f4858" />
+    <text x="84" y="29" font-size="12px" fill="#ffffff" font-weight="600">← Project kickoff · Options</text>
+    <text x="566" y="29" text-anchor="end" fill="#ffffff" font-size="12px" font-weight="600">3 options</text>
+
+    
+    <rect x="84" y="62" width="496" height="236" rx="6" fill="#dde7ec" stroke="#c0ccd4" stroke-width="1" />
+    <text x="96" y="80" fill="#78828f" font-size="9px">MapLibre GL — user-visible third-party component</text>
+    <circle cx="190" cy="150" r="12" fill="#c05746" /><text x="190" y="154" fill="#ffffff" font-size="9px" font-weight="700" text-anchor="middle">1</text>
+    <text x="208" y="154" fill="#1f2630" font-size="11px">KTH Library</text>
+    <circle cx="380" cy="200" r="12" fill="#c05746" /><text x="380" y="204" fill="#ffffff" font-size="9px" font-weight="700" text-anchor="middle">2</text>
+    <text x="398" y="204" fill="#1f2630" font-size="11px">Stadsbiblioteket</text>
+    <circle cx="250" cy="250" r="12" fill="#c05746" /><text x="250" y="254" fill="#ffffff" font-size="9px" font-weight="700" text-anchor="middle">3</text>
+    <text x="268" y="254" fill="#1f2630" font-size="11px">Café Primo</text>
+    <circle cx="120" cy="230" r="5" fill="#5a6472" />
+    <text x="132" y="234" fill="#78828f" font-size="9px">group starting points</text>
+
+    
+    <text x="84" y="326" fill="#1f2630" font-size="11.5px" font-weight="700">3 options</text>
+    <text x="84" y="344" fill="#78828f" font-size="9px">Selecting a pin highlights its card, and the other way round.</text>
+    <text x="400" y="326" fill="#5a6472" font-size="10px">Sort</text>
+    <rect x="430" y="314" width="150" height="22" fill="#ffffff" stroke="#aeb6c0" stroke-width="1.2" rx="4" />
+    <text x="440" y="329" fill="#1f2630" font-size="11px">Best overall ▾</text>
+    <rect x="430" y="340" width="150" height="18" fill="#e6eaee" rx="3" />
+    <text x="505" y="353" text-anchor="middle" fill="#78828f" font-size="9px">travel 3 of 4 ⟳</text>
+
+    
+    <rect x="84" y="368" width="496" height="92" fill="#fbfcfd" stroke="#2f6f8f" stroke-width="2" rx="6" />
+    <circle cx="102" cy="390" r="9" fill="#c05746" /><text x="102" y="393" fill="#ffffff" font-size="9px" font-weight="700" text-anchor="middle">1</text>
+    <text x="118" y="394" font-size="11.5px" fill="#1f2630" font-weight="700">KTH Library</text>
+    <text x="566" y="394" font-size="11.5px" text-anchor="end" fill="#1f2630" font-weight="700">88/100</text>
+    <text x="118" y="412" fill="#5a6472" font-size="10px">Tue 25 Nov · 14:00 – 16:00 · open until 20:00</text>
+    <text x="118" y="436" fill="#78828f" font-size="9px">Mia</text>
+    <rect x="144" y="428" width="56" height="8" fill="#dfe4ea" rx="2" /><rect x="144" y="428" width="23" height="8" fill="#2f6f8f" rx="2" />
+    <text x="206" y="436" fill="#78828f" font-size="9px">Noor</text>
+    <rect x="238" y="428" width="56" height="8" fill="#dfe4ea" rx="2" /><rect x="238" y="428" width="35" height="8" fill="#2f6f8f" rx="2" />
+    <text x="300" y="436" fill="#78828f" font-size="9px">Elias</text>
+    <rect x="328" y="428" width="56" height="8" fill="#dfe4ea" rx="2" /><rect x="328" y="428" width="41" height="8" fill="#2f6f8f" rx="2" />
+    <text x="390" y="436" fill="#78828f" font-size="9px">Sam</text>
+    <rect x="416" y="428" width="56" height="8" fill="#dfe4ea" rx="2" /><rect x="416" y="428" width="56" height="8" fill="#2f6f8f" rx="2" />
+    <text x="118" y="452" fill="#2d6a4f" font-size="9.5px">avg 20 · worst 29 min · 4 of 4 free · step-free ✓</text>
+    <rect x="486" y="440" width="80" height="22" fill="#ffffff" stroke="#2f6f8f" stroke-width="1.3" rx="5" />
+    <text x="526" y="455" fill="#2f6f8f" font-size="10.5px" font-weight="600" text-anchor="middle">Why this?</text>
+
+    <rect x="84" y="472" width="496" height="92" fill="#fbfcfd" stroke="#ccd2da" stroke-width="1.2" rx="6" />
+    <circle cx="102" cy="494" r="9" fill="#c05746" /><text x="102" y="497" fill="#ffffff" font-size="9px" font-weight="700" text-anchor="middle">2</text>
+    <text x="118" y="498" font-size="11.5px" fill="#1f2630" font-weight="700">Stadsbiblioteket</text>
+    <text x="566" y="498" font-size="11.5px" text-anchor="end" fill="#1f2630" font-weight="700">81/100</text>
+    <text x="118" y="516" fill="#5a6472" font-size="10px">Tue 25 Nov · 14:00 – 16:00 · open until 19:00</text>
+    <text x="118" y="540" fill="#78828f" font-size="9px">Mia</text>
+    <rect x="144" y="532" width="56" height="8" fill="#dfe4ea" rx="2" /><rect x="144" y="532" width="17" height="8" fill="#2f6f8f" rx="2" />
+    <text x="206" y="540" fill="#78828f" font-size="9px">Noor</text>
+    <rect x="238" y="532" width="56" height="8" fill="#dfe4ea" rx="2" /><rect x="238" y="532" width="32" height="8" fill="#2f6f8f" rx="2" />
+    <text x="300" y="540" fill="#78828f" font-size="9px">Elias</text>
+    <rect x="328" y="532" width="56" height="8" fill="#dfe4ea" rx="2" /><rect x="328" y="532" width="46" height="8" fill="#2f6f8f" rx="2" />
+    <text x="390" y="540" fill="#78828f" font-size="9px">Sam</text>
+    <rect x="416" y="532" width="56" height="8" fill="#dfe4ea" rx="2" /><rect x="416" y="532" width="56" height="8" fill="#9a5b00" rx="2" />
+    <text x="118" y="556" fill="#9a5b00" font-size="9.5px">⚠ Sam 41 min — over his 35 min limit</text>
+    <rect x="486" y="544" width="80" height="22" fill="#ffffff" stroke="#2f6f8f" stroke-width="1.3" rx="5" />
+    <text x="526" y="559" fill="#2f6f8f" font-size="10.5px" font-weight="600" text-anchor="middle">Why this?</text>
+
+    <rect x="84" y="576" width="496" height="72" fill="#fbfcfd" stroke="#ccd2da" stroke-width="1.2" rx="6" />
+    <circle cx="102" cy="598" r="9" fill="#c05746" /><text x="102" y="601" fill="#ffffff" font-size="9px" font-weight="700" text-anchor="middle">3</text>
+    <text x="118" y="602" font-size="11.5px" fill="#1f2630" font-weight="700">Café Primo</text>
+    <text x="566" y="602" text-anchor="end" fill="#5a6472" font-size="10px">score incomplete</text>
+    <text x="118" y="620" fill="#9a5b00" font-size="9.5px">⚠ weather data unavailable — travel and space data still shown</text>
+    <text x="118" y="638" fill="#78828f" font-size="9px">Mia 14 · Noor 22 · Elias 19 · Sam 33 min</text>
+    <rect x="486" y="612" width="80" height="22" fill="#ffffff" stroke="#2f6f8f" stroke-width="1.3" rx="5" />
+    <text x="526" y="627" fill="#2f6f8f" font-size="10.5px" font-weight="600" text-anchor="middle">Retry</text>
+
+    
+    <rect x="84" y="664" width="130" height="30" fill="#ffffff" stroke="#2f6f8f" stroke-width="1.3" rx="5" />
+    <text x="149" y="683" fill="#2f6f8f" font-size="10.5px" font-weight="600" text-anchor="middle">+ Add a space</text>
+    <rect x="450" y="664" width="130" height="30" fill="#2f6f8f" rx="5" />
+    <text x="515" y="684" fill="#ffffff" font-size="11px" font-weight="600" text-anchor="middle">Start voting →</text>
+
+    <line x1="84" y1="712" x2="580" y2="712" stroke="#e3e7ec" stroke-width="1" />
+    <text x="84" y="732" fill="#8d97a4" font-size="9px">Responsive change: the mobile Map / List tab switch disappears — there is room for both, so selecting</text>
+    <text x="84" y="746" fill="#8d97a4" font-size="9px">a pin and reading its numbers no longer costs a tap. Each card still shows one bar per member.</text>
+    <text x="84" y="766" fill="#8d97a4" font-size="9px">A failing source still degrades a single card (option 3), never the whole screen.</text>
+  </g>
+
+  
+  <g id="T04-Detail-Vote" data-name="T04-Detail-Vote" transform="translate(700,980)">
+    <text x="0" y="-10" fill="#2f4858" font-size="14px" font-weight="700">T4 · Option detail beside live voting</text>
+    <rect width="600" height="800" rx="8" fill="#ffffff" stroke="#b9bec7" stroke-width="2" />
+
+    <rect x="1" y="1" width="63" height="798" rx="7" fill="#eceef1" />
+    <rect x="40" y="1" width="24" height="798" fill="#eceef1" />
+    <circle cx="32" cy="30" r="13" fill="#2f4858" />
+    <text x="32" y="35" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">C</text>
+    <rect x="8" y="66" width="48" height="42" rx="7" fill="#dbe3e8" />
+    <rect x="24" y="74" width="16" height="14" rx="2" fill="#2f4858" />
+    <text x="32" y="102" fill="#2f4858" font-size="8px" font-weight="600" text-anchor="middle">Home</text>
+    <rect x="24" y="130" width="16" height="12" rx="2" fill="none" stroke="#5a6472" stroke-width="1.6" />
+    <text x="32" y="158" fill="#5a6472" font-size="8px" font-weight="600" text-anchor="middle">Invites</text>
+    <circle cx="32" cy="192" r="8" fill="none" stroke="#5a6472" stroke-width="1.6" />
+    <text x="32" y="214" fill="#5a6472" font-size="8px" font-weight="600" text-anchor="middle">Profile</text>
+
+    <rect x="64" y="1" width="535" height="46" fill="#2f4858" />
+    <rect x="560" y="1" width="39" height="46" rx="7" fill="#2f4858" />
+    <text x="84" y="29" font-size="12px" fill="#ffffff" font-weight="600">← KTH Library</text>
+    <text x="566" y="29" text-anchor="end" fill="#ffffff" font-size="12px" font-weight="600">closes 18:00</text>
+
+    
+    <text x="84" y="80" fill="#1f2630" font-size="11.5px" font-weight="700">Suitability</text>
+    <text x="374" y="82" font-size="14px" text-anchor="end" fill="#2f4858" font-weight="700">88 / 100</text>
+    <rect x="84" y="90" width="290" height="8" fill="#dfe4ea" rx="2" />
+    <rect x="84" y="90" width="255" height="8" fill="#2f6f8f" rx="2" />
+
+    <text x="84" y="124" fill="#1f2630" font-size="11.5px" font-weight="700">Travel time per member</text>
+    <text x="84" y="146" fill="#1f2630" font-size="11px">Mia</text>
+    <rect x="134" y="137" width="180" height="9" fill="#dfe4ea" rx="2" /><rect x="134" y="137" width="74" height="9" fill="#2f6f8f" rx="2" />
+    <text x="374" y="146" text-anchor="end" fill="#1f2630" font-size="11px">12 min</text>
+    <text x="84" y="166" fill="#1f2630" font-size="11px">Noor</text>
+    <rect x="134" y="157" width="180" height="9" fill="#dfe4ea" rx="2" /><rect x="134" y="157" width="112" height="9" fill="#2f6f8f" rx="2" />
+    <text x="374" y="166" text-anchor="end" fill="#1f2630" font-size="11px">18 min</text>
+    <text x="84" y="186" fill="#1f2630" font-size="11px">Elias</text>
+    <rect x="134" y="177" width="180" height="9" fill="#dfe4ea" rx="2" /><rect x="134" y="177" width="131" height="9" fill="#2f6f8f" rx="2" />
+    <text x="374" y="186" text-anchor="end" fill="#1f2630" font-size="11px">21 min</text>
+    <text x="84" y="206" fill="#1f2630" font-size="11px">Sam</text>
+    <rect x="134" y="197" width="180" height="9" fill="#dfe4ea" rx="2" /><rect x="134" y="197" width="180" height="9" fill="#2f6f8f" rx="2" />
+    <text x="374" y="206" text-anchor="end" fill="#2d6a4f" font-size="9.5px">29 min ✓</text>
+    <text x="84" y="226" fill="#5a6472" font-size="10px">average 20 · worst 29 · group limit 35</text>
+
+    <line x1="84" y1="242" x2="374" y2="242" stroke="#e3e7ec" stroke-width="1" />
+    <text x="84" y="264" fill="#1f2630" font-size="11.5px" font-weight="700">How we got to 88</text>
+    <text x="84" y="286" fill="#1f2630" font-size="11px">average travel</text><text x="374" y="286" text-anchor="end" fill="#1f2630" font-size="11px">−20</text>
+    <text x="84" y="306" fill="#1f2630" font-size="11px">worst journey (× 0.7)</text><text x="374" y="306" text-anchor="end" fill="#1f2630" font-size="11px">−20</text>
+    <text x="84" y="326" fill="#1f2630" font-size="11px">everyone free</text><text x="374" y="326" text-anchor="end" fill="#2d6a4f" font-size="9.5px">4 of 4 ok</text>
+    <text x="84" y="346" fill="#1f2630" font-size="11px">step-free entrance</text><text x="374" y="346" text-anchor="end" fill="#2d6a4f" font-size="9.5px">ok</text>
+    <text x="84" y="366" fill="#1f2630" font-size="11px">open until 20:00</text><text x="374" y="366" text-anchor="end" fill="#2d6a4f" font-size="9.5px">ok</text>
+    <text x="84" y="386" fill="#1f2630" font-size="11px">rain 13:30 · 10%</text><text x="374" y="386" text-anchor="end" fill="#1f2630" font-size="11px">−2</text>
+
+    <line x1="84" y1="402" x2="374" y2="402" stroke="#e3e7ec" stroke-width="1" />
+    <text x="84" y="424" fill="#1f2630" font-size="11.5px" font-weight="700">Space — from OpenStreetMap</text>
+    <text x="84" y="444" fill="#1f2630" font-size="11px">Wi-Fi ✓    Power ✓    Step-free ✓    Quiet ✓</text>
+    <text x="84" y="462" fill="#9a5b00" font-size="9.5px">ⓘ Opening hours may be incomplete</text>
+    <text x="84" y="480" fill="#78828f" font-size="9px">travel data fetched 14:32 · weather 14:30</text>
+
+    <rect x="84" y="500" width="290" height="28" fill="#ffffff" stroke="#2f6f8f" stroke-width="1.3" rx="5" />
+    <text x="229" y="518" fill="#2f6f8f" font-size="10.5px" font-weight="600" text-anchor="middle">Weigh fairness higher ▾</text>
+    <text x="84" y="546" fill="#78828f" font-size="9px">The app recommends — the group decides. You can always vote for a lower-ranked option.</text>
+
+    
+    <text x="84" y="578" fill="#1f2630" font-size="11.5px" font-weight="700">Your route</text>
+    <text x="374" y="578" text-anchor="end" fill="#5a6472" font-size="10px">18 min · leave by 13:38</text>
+    <rect x="84" y="588" width="290" height="110" rx="6" fill="#dde7ec" stroke="#c0ccd4" stroke-width="1" />
+    <circle cx="116" cy="668" r="5" fill="#5a6472" />
+    <text x="128" y="672" fill="#78828f" font-size="9px">Odenplan</text>
+    <path d="M120 662 Q200 630 290 614" stroke="#2f6f8f" stroke-width="3" fill="none" stroke-dasharray="6 4" />
+    <circle cx="300" cy="610" r="11" fill="#c05746" /><text x="300" y="614" fill="#ffffff" font-size="9px" font-weight="700" text-anchor="middle">1</text>
+    <text x="252" y="634" fill="#78828f" font-size="9px">KTH Library</text>
+    <text x="96" y="606" fill="#78828f" font-size="9px">MapLibre GL — same component, smaller frame</text>
+
+    
+    <line x1="396" y1="62" x2="396" y2="700" stroke="#e3e7ec" stroke-width="1" />
+    <text x="414" y="80" fill="#1f2630" font-size="11.5px" font-weight="700">Vote</text>
+    <text x="580" y="80" text-anchor="end" fill="#5a6472" font-size="10px">3 of 4</text>
+    <rect x="414" y="90" width="166" height="8" fill="#dfe4ea" rx="2" />
+    <rect x="414" y="90" width="125" height="8" fill="#2f6f8f" rx="2" />
+
+    <rect x="414" y="110" width="166" height="70" fill="#fbfcfd" stroke="#2f6f8f" stroke-width="2" rx="6" />
+    <circle cx="430" cy="130" r="8" fill="#c05746" /><text x="430" y="133" fill="#ffffff" font-size="9px" font-weight="700" text-anchor="middle">1</text>
+    <text x="444" y="134" fill="#1f2630" font-size="11.5px" font-weight="700">KTH Library</text>
+    <text x="568" y="134" text-anchor="end" fill="#78828f" font-size="9px">88</text>
+    <circle cx="430" cy="150" r="6" fill="#2f6f8f" />
+    <circle cx="444" cy="150" r="6" fill="#2f6f8f" />
+    <circle cx="458" cy="150" r="6" fill="#2f6f8f" />
+    <text x="472" y="154" fill="#78828f" font-size="9px">Mia · Noor · Elias</text>
+    <rect x="426" y="160" width="100" height="16" rx="4" fill="#2d6a4f" />
+    <text x="476" y="172" font-size="11px" fill="#ffffff" font-weight="600" text-anchor="middle">✓ Your vote</text>
+
+    <rect x="414" y="190" width="166" height="56" fill="#fbfcfd" stroke="#ccd2da" stroke-width="1.2" rx="6" />
+    <circle cx="430" cy="210" r="8" fill="#c05746" /><text x="430" y="213" fill="#ffffff" font-size="9px" font-weight="700" text-anchor="middle">2</text>
+    <text x="444" y="214" fill="#1f2630" font-size="11.5px" font-weight="700">Stadsbiblioteket</text>
+    <circle cx="430" cy="232" r="6" fill="#fff" stroke="#aeb6c0" />
+    <text x="444" y="236" fill="#78828f" font-size="9px">no votes yet</text>
+    <rect x="520" y="224" width="52" height="18" fill="#ffffff" stroke="#2f6f8f" stroke-width="1.3" rx="5" />
+    <text x="546" y="237" fill="#2f6f8f" font-size="10.5px" font-weight="600" text-anchor="middle">Vote</text>
+
+    <rect x="414" y="256" width="166" height="56" fill="#fbfcfd" stroke="#ccd2da" stroke-width="1.2" rx="6" />
+    <circle cx="430" cy="276" r="8" fill="#c05746" /><text x="430" y="279" fill="#ffffff" font-size="9px" font-weight="700" text-anchor="middle">3</text>
+    <text x="444" y="280" fill="#1f2630" font-size="11.5px" font-weight="700">Café Primo</text>
+    <circle cx="430" cy="298" r="6" fill="#fff" stroke="#aeb6c0" />
+    <text x="444" y="302" fill="#78828f" font-size="9px">no votes yet</text>
+    <rect x="520" y="290" width="52" height="18" fill="#ffffff" stroke="#2f6f8f" stroke-width="1.3" rx="5" />
+    <text x="546" y="303" fill="#2f6f8f" font-size="10.5px" font-weight="600" text-anchor="middle">Vote</text>
+
+    <rect x="414" y="326" width="166" height="56" fill="#f1f5f8" stroke="#ccd2da" stroke-width="1.2" rx="6" />
+    <text x="426" y="346" fill="#1f2630" font-size="11px">⟳ Sam voted just now</text>
+    <text x="426" y="362" fill="#78828f" font-size="9px">live via Firestore onSnapshot</text>
+    <text x="426" y="376" fill="#78828f" font-size="9px">no reload, no refresh button</text>
+
+    <text x="414" y="406" fill="#5a6472" font-size="10px">You can change your vote until 18:00.</text>
+    <text x="414" y="424" fill="#78828f" font-size="9px">Each vote is stored under your own user id,</text>
+    <text x="414" y="438" fill="#78828f" font-size="9px">so nobody can overwrite anybody else.</text>
+
+    <line x1="414" y1="456" x2="580" y2="456" stroke="#e3e7ec" stroke-width="1" />
+    <text x="414" y="476" fill="#9a5b00" font-size="9.5px">Organiser only</text>
+    <rect x="414" y="486" width="166" height="32" fill="#2f6f8f" rx="5" />
+    <text x="497" y="507" fill="#ffffff" font-size="11px" font-weight="600" text-anchor="middle">Close vote &amp; confirm</text>
+    <text x="414" y="534" fill="#78828f" font-size="9px">asks for confirmation first</text>
+
+    <rect x="414" y="556" width="166" height="76" fill="#eef6f1" stroke="#9ec9b2" stroke-width="1.2" rx="6" />
+    <text x="426" y="576" fill="#1f2630" font-size="11.5px" font-weight="700">Decision readiness</text>
+    <text x="426" y="594" fill="#2d6a4f" font-size="9.5px">✓ 4 of 4 responded</text>
+    <text x="426" y="610" fill="#2d6a4f" font-size="9.5px">✓ no unmet access needs</text>
+    <text x="426" y="626" fill="#9a5b00" font-size="9.5px">⚠ 1 vote outstanding</text>
+
+    <line x1="84" y1="712" x2="580" y2="712" stroke="#e3e7ec" stroke-width="1" />
+    <text x="84" y="732" fill="#8d97a4" font-size="9px">Responsive change: mobile screens 6 and 7 (detail, then vote) become one screen. You can read the</text>
+    <text x="84" y="746" fill="#8d97a4" font-size="9px">reasoning and cast the vote without navigating, which is where most of the mobile back-and-forth went.</text>
+    <text x="84" y="766" fill="#8d97a4" font-size="9px">Same components, same copy — only the arrangement differs.</text>
+  </g>
+
+</svg>

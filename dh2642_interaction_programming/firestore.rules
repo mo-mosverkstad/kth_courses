@@ -1,0 +1,92 @@
+rules_version = '2';
+
+// Security rules for Catch Up!
+//
+// These enforce the two guarantees the UI relies on, rather than trusting the
+// UI to hide buttons:
+//   1. A member may only write their OWN availability, preferences and vote.
+//      This is what makes simultaneous editing safe.
+//   2. Only the organiser may change the meeting itself or confirm a result.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // Per-user profile and recurring defaults.
+    match /catchupUsers/{uid} {
+      allow read: if signedIn();
+      allow write: if isSelf(uid);
+    }
+
+    match /catchupMeetups/{meetupId} {
+
+      function meetup() {
+        return resource.data;
+      }
+      function isMember() {
+        return signedIn() && request.auth.uid in meetup().memberIds;
+      }
+      function isOrganiser() {
+        return signedIn() && request.auth.uid == meetup().organizerId;
+      }
+
+      // Anyone signed in may read a meeting, so that an invite code can be
+      // resolved before joining. Only the organiser may edit it, except for
+      // joining, which may only append the joiner's own uid to memberIds.
+      allow read: if signedIn();
+      allow create: if signedIn()
+                    && request.resource.data.organizerId == request.auth.uid;
+      allow update: if isOrganiser()
+                    || (isMember() && request.resource.data.organizerId == meetup().organizerId)
+                    || (signedIn()
+                        && request.resource.data.diff(meetup()).affectedKeys()
+                             .hasOnly(['memberIds'])
+                        && request.auth.uid in request.resource.data.memberIds);
+      allow delete: if isOrganiser();
+
+      function parentMeetup() {
+        return get(/databases/$(database)/documents/catchupMeetups/$(meetupId)).data;
+      }
+      function memberOfParent() {
+        return signedIn() && request.auth.uid in parentMeetup().memberIds;
+      }
+      function organiserOfParent() {
+        return signedIn() && request.auth.uid == parentMeetup().organizerId;
+      }
+
+      // One document per user per concern. A member can only write their own.
+      match /participants/{uid} {
+        allow read: if memberOfParent();
+        allow write: if isSelf(uid) || organiserOfParent();
+      }
+      match /availability/{uid} {
+        allow read: if memberOfParent();
+        allow write: if isSelf(uid);
+      }
+      match /votes/{uid} {
+        allow read: if memberOfParent();
+        allow write: if isSelf(uid);
+      }
+
+      // Candidate options are shared state: any member may add or refresh
+      // them, because any member may trigger a search.
+      match /options/{optionId} {
+        allow read: if memberOfParent();
+        allow write: if memberOfParent();
+      }
+
+      // Activity log is append-only.
+      match /activity/{eventId} {
+        allow read: if memberOfParent();
+        allow create: if memberOfParent();
+        allow update, delete: if false;
+      }
+    }
+  }
+}

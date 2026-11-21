@@ -1,0 +1,7 @@
+Your name: Piglet
+Email: pigletwthepooh@gmail.com
+Password: 123456
+
+Your name: Christoffer Robin
+Email: robinchristofferwthepooh@gmail.com
+Password: letmein

@@ -1,0 +1,245 @@
+PROJECT PROPOSAL
+Catch Up! - a collaborative meeting-space planner
+Course: DH2642 / ID2216 HT26
+
+
+1. GROUP MEMBERS
+
+<name>, Canvas ID <id>
+<name>, Canvas ID <id>
+<name>, Canvas ID <id>
+<name>, Canvas ID <id>
+
+
+2. PROJECT OVERVIEW
+
+Catch Up! is a collaborative meeting-space planner for groups of 2-6 people.
+It helps students find a meeting time and location that works for everyone.
+
+Each participant provides:
+
+- Availability.
+- Approximate starting location.
+- Maximum travel time.
+- Space requirements, for example accessibility, quietness and power outlets.
+
+The application combines these preferences with external data about public
+transport, available spaces and weather. It then ranks possible meeting
+alternatives and explains why each is recommended. Participants vote on
+alternatives, and the organiser confirms the final decision.
+
+The main objective is to simplify group coordination by combining scheduling,
+location discovery and individual travel considerations in one application.
+
+
+3. MAIN FUNCTIONALITY
+
+1. Meeting creation: the organiser specifies the meeting purpose, duration,
+   candidate dates and decision deadline.
+2. Availability: participants enter their available time intervals.
+3. Personal preferences: participants specify their starting area, travel
+   limits and space requirements.
+4. Space discovery: the application retrieves suitable locations from
+   OpenStreetMap.
+5. Travel estimation: public transport travel times are calculated
+   individually for each participant.
+6. Alternative ranking: candidate locations are ranked using travel times,
+   availability, accessibility, opening hours and weather.
+7. Explainable recommendations: each alternative displays individual travel
+   times and a breakdown of its suitability score.
+8. Voting: participants vote on their preferred alternatives, with results
+   synchronised in real time.
+9. Confirmation: the organiser confirms the meeting, making the result
+   available to everyone.
+
+The recommendation model considers both average and maximum individual travel
+times, to avoid favouring alternatives that are convenient for most
+participants but inconvenient for one.
+
+
+4. TECHNOLOGIES AND FRAMEWORKS
+
+Language:         JavaScript (JSX)
+Build tool:       Vite
+UI:               React 18
+State management: Redux Toolkit with react-redux
+Navigation:       react-router-dom
+Authentication:   Firebase Authentication
+Persistence:      Cloud Firestore
+Maps:             MapLibre GL JS
+Styling:          CSS Modules
+
+Redux Toolkit will manage application state, actions, reducers and selectors.
+External requests and persistence will be handled separately from the views.
+
+
+5. EXTERNAL APIS AND DATA SOURCES
+
+The application will integrate three primary external data sources.
+
+1. Public transport - Trafiklab ResRobot
+   https://www.trafiklab.se/api/our-apis/resrobot-v21/
+   Used to calculate public transport travel times and itineraries between
+   each participant's starting area and the candidate locations.
+
+2. Locations - OpenStreetMap
+   Overpass API, to retrieve candidate meeting spaces and their attributes:
+   https://wiki.openstreetmap.org/wiki/Overpass_API
+   Nominatim, to resolve approximate starting locations into coordinates:
+   https://nominatim.org/release-docs/latest/api/Overview/
+   Relevant attributes include opening hours, wheelchair accessibility and
+   available facilities. Since OpenStreetMap data may be incomplete, the
+   application will display the data source and avoid claiming that
+   unverified information is guaranteed.
+
+3. Weather - Open-Meteo
+   https://open-meteo.com/en/docs
+   Provides precipitation, temperature and wind forecasts for the proposed
+   meeting times.
+
+Firebase additionally provides authentication, data persistence and real-time
+updates.
+
+Each external API will have its own source module, normalising provider
+responses into a common internal data structure. This allows individual
+providers to be replaced without changing the application logic.
+
+
+6. APPLICATION DATA
+
+The application handles three categories of data.
+
+External data:
+
+- Candidate locations and their attributes.
+- Approximate participant coordinates.
+- Individual travel times and itineraries.
+- Weather forecasts and map data.
+
+Persisted application data, in Firestore:
+
+- User profiles and default preferences.
+- Meeting information and invitation codes.
+- Participant availability and individual preferences.
+- Candidate alternatives and their calculated scores.
+- Votes and confirmed meeting details.
+
+Derived application state:
+
+- Availability overlaps.
+- Individual constraint satisfaction.
+- Suitability scores and rankings.
+- Voting status and decision readiness.
+
+Derived values will be calculated through Redux selectors rather than stored
+redundantly. Participant availability and votes will be stored as separate
+documents per participant, so that simultaneous updates cannot overwrite each
+other.
+
+For privacy, starting locations are stored at neighbourhood or transit-stop
+level rather than as home addresses. Participants control whether their
+starting areas are shared.
+
+
+7. DESIGN AND RESPONSIVE LAYOUT
+
+The application will use a mobile-first responsive design with three layouts.
+
+- Mobile: bottom navigation, separate map and alternative views.
+- Tablet: left navigation rail, map above the alternative list.
+- Desktop: sidebar with the alternative list, map and recommendation details
+  shown simultaneously.
+
+The same functionality will be available across all screen sizes.
+
+Low-fidelity wireframes have been prepared for all three layouts:
+
+- CatchUp_Mobile_390.png - 390 x 844, ten screens.
+- CatchUp_TabletPortrait_834.png - 834 x 1112, four screens.
+- CatchUp_Desktop_1280.png - 1280 x 800, four screens.
+
+The application will also support keyboard navigation, visible focus
+indicators, semantic HTML, accessible form labels and sufficient colour
+contrast.
+
+
+8. SCOPE AND IMPLEMENTATION PLAN
+
+The essential deliverable is one complete working workflow:
+
+1. User authentication.
+2. Meeting creation and invitations.
+3. Availability and preference collection.
+4. Retrieval of candidate locations and travel times.
+5. Alternative comparison and explainable ranking.
+6. Voting and meeting confirmation.
+7. Persistent data and synchronisation across devices.
+
+Optional functionality, implemented only after the essential workflow works,
+includes weather integration, calendar export, recurring preferences,
+notifications and manually added locations.
+
+The following are outside the project scope: chat functionality, a full
+calendar replacement, Ladok or Canvas integration, room-booking integration
+and machine-learning recommendations.
+
+Implementation phases:
+
+1. Foundation: test the APIs, create the wireframes, implement
+   authentication and Firestore, and make an initial deployment.
+2. Core functionality: implement meetings, invitations, availability,
+   alternatives, ranking and voting.
+3. Evaluation: conduct user studies, improve the interface, and complete the
+   responsive layouts and the accessibility work.
+4. Finalisation: test error handling, security, persistence and integration,
+   and complete the documentation.
+
+At least two user-study stages are planned: an initial evaluation of the
+wireframes and a later evaluation of the deployed application. The findings
+and the resulting design changes will be documented.
+
+
+9. RISKS AND MITIGATION
+
+ResRobot API access, CORS or rate limits.
+   Test during the first week and prepare an OpenStreetMap-based fallback.
+
+Incomplete OpenStreetMap attributes.
+   Display data sources and missing information, and allow manual additions.
+
+Excessive project scope.
+   Complete the essential workflow before starting any optional feature.
+
+Conflicting simultaneous updates.
+   Use separate Firestore documents per participant and appropriate security
+   rules.
+
+Unclear recommendation scores.
+   Display individual travel times and explain the score components.
+
+Location privacy.
+   Store approximate starting areas and minimise shared personal data.
+
+
+10. OPEN QUESTIONS
+
+The following need verification during the first implementation phase:
+
+- Whether ResRobot can be accessed directly from the browser or requires a
+  proxy.
+- Which map tile provider will be used, and its usage terms.
+- Whether the proposed essential scope is appropriate for the course.
+- Whether recommendation fairness or collaborative functionality should
+  receive greater implementation emphasis.
+
+
+11. PROJECT LINKS AND ATTACHMENTS
+
+GitHub repository:    <insert repository URL>
+Deployed application: <insert URL>
+Mobile wireframes:    CatchUp_Mobile_390.png
+Tablet wireframes:    CatchUp_TabletPortrait_834.png
+Desktop wireframes:   CatchUp_Desktop_1280.png
+
+Editable SVG sources and Figma-compatible copies are included alongside the
+wireframes.

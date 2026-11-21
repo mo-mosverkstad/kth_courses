@@ -1,0 +1,61 @@
+1. Project Overview:
+  Catch Up! is a collaborative meeting-space planner for groups of 2–6 people. It helps students find a meeting time and location that works for everyone.
+  Each participant provides:
+  - Availability.
+  - Approximate starting location.
+  - Maximum travel time.
+  - Space requirements (e.g. accessibility, quietness and power outlets).
+  The application combines these preferences with external data about public transport, available spaces and weather. It then ranks possible meeting alternatives and explains why each is recommended. Participants can vote on alternatives, and the organiser confirms the final decision. The main objective is to simplify group coordination by combining scheduling, location discovery and individual travel considerations in one application.
+
+2. Main Functionality:
+  The application will provide the following functionality:
+  1. Meeting creation: The organiser specifies the meeting purpose, duration, candidate dates and decision deadline.
+  2. Availability: Participants enter their available time intervals.
+  3. Personal preferences: Participants specify their starting area, travel limits and space requirements.
+  4. Space discovery: The application retrieves suitable locations from OpenStreetMap.
+  5. Travel estimation: Public transport travel times are calculated individually for each participant.
+  6. Alternative ranking: Candidate locations are ranked using travel times, availability, accessibility, opening hours and weather.
+  7. Explainable recommendations: Each alternative displays individual travel times and a breakdown of its suitability score.
+  8. Voting: Participants vote on their preferred alternatives, with results synchronised in real time.
+  9. Confirmation: The organiser confirms the meeting, making the result available to everyone.
+  The recommendation model considers both average and maximum individual travel times to avoid favouring alternatives that are convenient for most but inconvenient for one participant.
+
+3. Technologies and Frameworks: The application will use the following technologies:
+  Language: JavaScript (JSX)
+  Build tool: Vite
+  UI: React/Vue
+  State management: Redux, Recoil, etc. Redux Toolkit will manage application state, actions, reducers and selectors. External requests and persistence will be handled separately from the views.
+  Authentication: Firebase Authentication
+  Maps: MapLibre GL JS
+
+4. External APIs and Data Sources:
+  The application will integrate three primary external data sources:
+  1. Public transport – Trafiklab ResRobot: https://www.trafiklab.se/api/our-apis/resrobot-v21/, Used to calculate public transport travel times and itineraries between each participant's starting area and candidate locations.
+  2. Locations – OpenStreetMap: (https://wiki.openstreetmap.org/wiki/Overpass_API): Retrieve candidate meeting spaces and their attributes, Nominatim(https://nominatim.org/release-docs/latest/api/Overview/): Resolve approximate starting locations into coordinates.
+  Relevant attributes include opening hours, wheelchair accessibility and available facilities. Since OpenStreetMap data may be incomplete, the application will display the data source and avoid claiming that unverified information is guaranteed.
+  3. Weather – Open-Meteo: [Open-Meteo API documentation](https://open-meteo.com/en/docs)
+  
+  Provides precipitation, temperature and wind forecasts for proposed meeting times.
+  Firebase additionally provides authentication, data persistence and real-time updates.
+  Each external API will have its own source module, normalising provider responses into a common internal data structure. This allows individual providers to be replaced without changing the application logic.
+
+5. Application Data
+  The application handles 3 categories of data:
+  1. External data
+  - Candidate locations and their attributes.
+  - Approximate participant coordinates.
+  - Individual travel times and itineraries.
+  - Weather forecasts and map data.
+  2. Persisted application data (Firestore)
+  - User profiles and default preferences.
+  - Meeting information and invitation codes.
+  - Participant availability and individual preferences.
+  - Candidate alternatives and their calculated scores.
+  - Votes and confirmed meeting details.
+  3. Derived application state
+  - Availability overlaps.
+  - Individual constraint satisfaction.
+  - Suitability scores and rankings.
+  - Voting status and decision readiness.
+  Derived values will be calculated through Redux selectors rather than stored redundantly.
+  For privacy, starting locations are stored at neighbourhood or transit-stop level rather than as home addresses. Participants control whether their starting areas are shared.

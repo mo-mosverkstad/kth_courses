@@ -1,0 +1,561 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1984" height="1372" viewBox="0 0 1984 1372" font-family="Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-label="Catch Up! meeting space planner wireframes for laptop and tablet landscape, 1280 pixels wide">
+  <title>Catch Up! — desktop and tablet-landscape wireframes (1280 px)</title>
+  <desc>Four frames at 1280 by 800: home with a labelled dark sidebar, the create wizard with a side summary panel, the options screen as a three-pane list, map and detail layout, and the voting screen with a decision-readiness panel.</desc>
+
+  <defs>
+    <style><![CDATA[
+      .bg     { fill:#f4f5f7; }
+      .frame  { fill:#ffffff; stroke:#b9bec7; stroke-width:2; }
+      .side   { fill:#2f4858; }
+      .sidepill { fill:#42586a; }
+      .sidetxt{ fill:#ffffff; font-size:11px; font-weight:600; }
+      .sidedim{ fill:#9fb0bd; font-size:11px; }
+      .sidemin{ fill:#7e919f; font-size:9px; }
+      .topbar { fill:#f7f8f9; }
+      .lbl    { fill:#5a6472; font-size:10px; }
+      .txt    { fill:#1f2630; font-size:11px; }
+      .txtb   { fill:#1f2630; font-size:11.5px; font-weight:700; }
+      .small  { fill:#78828f; font-size:9px; }
+      .cap    { fill:#2f4858; font-size:14px; font-weight:700; }
+      .capn   { fill:#8d97a4; font-size:11px; }
+      .card   { fill:#fbfcfd; stroke:#ccd2da; stroke-width:1.2; rx:6; }
+      .field  { fill:#ffffff; stroke:#aeb6c0; stroke-width:1.2; rx:4; }
+      .btn    { fill:#2f6f8f; rx:5; }
+      .btntxt { fill:#ffffff; font-size:11px; font-weight:600; text-anchor:middle; }
+      .btn2   { fill:#ffffff; stroke:#2f6f8f; stroke-width:1.3; rx:5; }
+      .btn2t  { fill:#2f6f8f; font-size:10.5px; font-weight:600; text-anchor:middle; }
+      .map    { fill:#dde7ec; stroke:#c0ccd4; stroke-width:1; }
+      .bar    { fill:#2f6f8f; rx:2; }
+      .barbg  { fill:#dfe4ea; rx:2; }
+      .warn   { fill:#9a5b00; font-size:9.5px; }
+      .ok     { fill:#2d6a4f; font-size:9.5px; }
+      .skel   { fill:#e6eaee; rx:3; }
+      .pin    { fill:#c05746; }
+      .pintxt { fill:#ffffff; font-size:9px; font-weight:700; text-anchor:middle; }
+      .div    { stroke:#e3e7ec; stroke-width:1; }
+      .note   { fill:#8d97a4; font-size:9px; }
+      .panedv { stroke:#dfe4ea; stroke-width:1.5; }
+    ]]></style>
+  </defs>
+
+  <rect class="bg" width="1984" height="1372"/>
+
+  <text x="40" y="44" class="cap" font-size="22">Catch Up! — meeting space planner · LAPTOP / TABLET LANDSCAPE 1280 px</text>
+  <text x="40" y="66" class="capn">breakpoint 3 of 3 · the dark mobile top bar becomes a labelled left sidebar · Options becomes a three-pane list + map + detail with no navigation</text>
+
+  <!-- ============================ D1 · HOME ============================ -->
+  <g id="D01-Home" data-name="D01-Home" transform="translate(40,110)">
+    <text x="0" y="-10" class="cap">D1 · Home — My Catch Ups</text>
+    <rect class="frame" width="922" height="576" rx="8"/>
+
+    <!-- sidebar -->
+    <rect class="side" x="1" y="1" width="149" height="574" rx="7"/>
+    <rect class="side" x="120" y="1" width="30" height="574"/>
+    <circle cx="28" cy="30" r="13" fill="#4a7b94"/>
+    <text x="28" y="35" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">C</text>
+    <text x="48" y="28" class="sidetxt" font-size="13">Catch Up!</text>
+    <text x="48" y="41" class="sidemin">meeting space planner</text>
+
+    <rect class="sidepill" x="10" y="70" width="130" height="28" rx="6"/>
+    <rect x="22" y="78" width="12" height="11" rx="2" fill="#ffffff"/>
+    <text x="44" y="88" class="sidetxt">Home</text>
+    <rect x="22" y="112" width="12" height="10" rx="2" fill="none" stroke="#9fb0bd" stroke-width="1.5"/>
+    <text x="44" y="122" class="sidedim">Invites</text>
+    <circle cx="128" cy="118" r="7" fill="#c05746"/>
+    <text x="128" y="121" fill="#ffffff" font-size="8.5" font-weight="700" text-anchor="middle">1</text>
+    <circle cx="28" cy="150" r="6" fill="none" stroke="#9fb0bd" stroke-width="1.5"/>
+    <text x="44" y="154" class="sidedim">Profile</text>
+
+    <line x1="12" y1="176" x2="138" y2="176" stroke="#43586a" stroke-width="1"/>
+    <rect x="12" y="190" width="126" height="30" rx="5" fill="#ffffff"/>
+    <text x="75" y="209" class="btn2t">+ New Catch Up</text>
+
+    <text x="14" y="248" class="sidemin">SAVED DEFAULTS</text>
+    <text x="14" y="266" class="sidedim" font-size="10">Odenplan · 35 min</text>
+    <text x="14" y="282" class="sidedim" font-size="10">quiet · power outlets</text>
+    <text x="14" y="300" class="sidemin">applied to every new plan</text>
+
+    <circle cx="24" cy="548" r="11" fill="#5a7585"/>
+    <text x="24" y="552" fill="#ffffff" font-size="9" font-weight="700" text-anchor="middle">M</text>
+    <text x="42" y="546" class="sidedim" font-size="10">Mia Andersson</text>
+    <text x="42" y="558" class="sidemin">mia@kth.se</text>
+
+    <!-- content header -->
+    <rect class="topbar" x="150" y="1" width="771" height="48"/>
+    <line class="div" x1="150" y1="49" x2="921" y2="49"/>
+    <text x="170" y="31" class="cap" font-size="16">My Catch Ups</text>
+    <rect class="field" x="700" y="14" width="200" height="24"/>
+    <text x="710" y="30" class="lbl">Search your Catch Ups…</text>
+
+    <!-- needs you banner -->
+    <rect class="card" x="170" y="68" width="732" height="62" style="stroke:#c05746;stroke-width:1.6"/>
+    <rect x="170" y="68" width="4" height="62" fill="#c05746"/>
+    <text x="188" y="90" class="txtb" font-size="12.5">⚡ Project kickoff needs your availability</text>
+    <text x="188" y="108" class="lbl">Invited by Mia · decide by Mon 18:00 · 3 of 4 responded</text>
+    <rect class="barbg" x="188" y="116" width="220" height="6"/>
+    <rect class="bar" x="188" y="116" width="165" height="6"/>
+    <rect class="btn" x="740" y="84" width="146" height="30"/>
+    <text x="813" y="104" class="btntxt">Add my availability</text>
+
+    <!-- upcoming: three across -->
+    <text x="170" y="158" class="txtb">Upcoming</text>
+    <text x="902" y="158" class="small" text-anchor="end">synced live across your devices</text>
+
+    <rect class="card" x="170" y="168" width="232" height="112"/>
+    <text x="184" y="190" class="txtb">✓ DH2642 project sync</text>
+    <text x="184" y="208" class="lbl">Tue 25 Nov · 14:00 – 16:00</text>
+    <text x="184" y="224" class="txt">KTH Library</text>
+    <text x="184" y="242" class="ok">Confirmed · step-free ✓</text>
+    <line class="div" x1="184" y1="252" x2="388" y2="252"/>
+    <text x="184" y="268" class="small">Your trip 18 min · leave by 13:38</text>
+
+    <rect class="card" x="420" y="168" width="232" height="112"/>
+    <text x="434" y="190" class="txtb">✓ Design review</text>
+    <text x="434" y="208" class="lbl">Thu 27 Nov · 10:00 – 11:30</text>
+    <text x="434" y="224" class="txt">Studio 4, Borggården</text>
+    <text x="434" y="242" class="ok">Confirmed · everyone notified</text>
+    <line class="div" x1="434" y1="252" x2="638" y2="252"/>
+    <text x="434" y="268" class="small">Your trip 24 min · leave by 09:36</text>
+
+    <rect class="card" x="670" y="168" width="232" height="112"/>
+    <text x="684" y="190" class="txtb">✓ Sprint planning</text>
+    <text x="684" y="208" class="lbl">Fri 28 Nov · 13:00 – 15:00</text>
+    <text x="684" y="224" class="txt">Ångdomen, KTH</text>
+    <text x="684" y="242" class="warn">⚠ 1 member has not seen this yet</text>
+    <line class="div" x1="684" y1="252" x2="888" y2="252"/>
+    <text x="684" y="268" class="small">Your trip 11 min · leave by 12:49</text>
+
+    <!-- voting now -->
+    <text x="170" y="310" class="txtb">Voting now</text>
+    <rect class="card" x="170" y="320" width="232" height="102"/>
+    <text x="184" y="342" class="txtb">⏱ Coffee before lecture</text>
+    <text x="184" y="360" class="lbl">closes in 4 h · 2 of 3 voted</text>
+    <rect class="barbg" x="184" y="370" width="140" height="6"/>
+    <rect class="bar" x="184" y="370" width="93" height="6"/>
+    <text x="184" y="392" class="small">⟳ updates live, no reload</text>
+    <rect class="btn" x="184" y="398" width="90" height="24"/>
+    <text x="229" y="414" class="btntxt">Vote now</text>
+
+    <rect class="card" x="420" y="320" width="232" height="102"/>
+    <text x="434" y="342" class="txtb">⏱ Thesis check-in</text>
+    <text x="434" y="360" class="lbl">closes tomorrow · 1 of 4 voted</text>
+    <rect class="barbg" x="434" y="370" width="140" height="6"/>
+    <rect class="bar" x="434" y="370" width="35" height="6"/>
+    <text x="434" y="392" class="warn">⚠ waiting on 2 availabilities</text>
+    <rect class="btn2" x="434" y="398" width="90" height="24"/>
+    <text x="479" y="414" class="btn2t">Open</text>
+
+    <rect class="card" x="670" y="320" width="232" height="102" style="fill:#f7f8f9;stroke-dasharray:4 3"/>
+    <text x="786" y="360" class="lbl" text-anchor="middle">Nothing else open right now.</text>
+    <rect class="btn2" x="726" y="374" width="120" height="28"/>
+    <text x="786" y="392" class="btn2t">Start a Catch Up</text>
+
+    <line class="div" x1="170" y1="448" x2="902" y2="448"/>
+    <text x="170" y="468" class="note">Responsive change: the mobile dark top bar and the bottom tab bar merge into one labelled left sidebar, which also surfaces the saved defaults</text>
+    <text x="170" y="482" class="note">and the signed-in identity permanently. Cards go from one column (mobile) to two (tablet) to three. Same cards, same copy, same type scale.</text>
+    <text x="170" y="502" class="note">This frame also covers tablet landscape — 1024 px and up gets the sidebar; below that the icon rail is used instead.</text>
+  </g>
+
+  <!-- ============================ D2 · CREATE ============================ -->
+  <g id="D02-Create" data-name="D02-Create" transform="translate(1022,110)">
+    <text x="0" y="-10" class="cap">D2 · Create — form plus a persistent summary panel</text>
+    <rect class="frame" width="922" height="576" rx="8"/>
+
+    <rect class="side" x="1" y="1" width="149" height="574" rx="7"/>
+    <rect class="side" x="120" y="1" width="30" height="574"/>
+    <circle cx="28" cy="30" r="13" fill="#4a7b94"/>
+    <text x="28" y="35" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">C</text>
+    <text x="48" y="28" class="sidetxt" font-size="13">Catch Up!</text>
+    <text x="48" y="41" class="sidemin">meeting space planner</text>
+    <rect class="sidepill" x="10" y="70" width="130" height="28" rx="6"/>
+    <rect x="22" y="78" width="12" height="11" rx="2" fill="#ffffff"/>
+    <text x="44" y="88" class="sidetxt">Home</text>
+    <rect x="22" y="112" width="12" height="10" rx="2" fill="none" stroke="#9fb0bd" stroke-width="1.5"/>
+    <text x="44" y="122" class="sidedim">Invites</text>
+    <circle cx="28" cy="150" r="6" fill="none" stroke="#9fb0bd" stroke-width="1.5"/>
+    <text x="44" y="154" class="sidedim">Profile</text>
+    <line x1="12" y1="176" x2="138" y2="176" stroke="#43586a" stroke-width="1"/>
+    <rect x="12" y="190" width="126" height="30" rx="5" fill="#4a7b94"/>
+    <text x="75" y="209" class="btntxt">+ New Catch Up</text>
+    <text x="14" y="244" class="sidemin">creating now…</text>
+
+    <rect class="topbar" x="150" y="1" width="771" height="48"/>
+    <line class="div" x1="150" y1="49" x2="921" y2="49"/>
+    <text x="170" y="31" class="cap" font-size="16">New Catch Up</text>
+    <text x="902" y="31" class="lbl" text-anchor="end">Step 1 of 3</text>
+
+    <!-- stepper -->
+    <line x1="230" y1="76" x2="560" y2="76" stroke="#ccd2da" stroke-width="2"/>
+    <circle cx="230" cy="76" r="8" fill="#2f6f8f"/>
+    <circle cx="395" cy="76" r="8" fill="#ffffff" stroke="#ccd2da" stroke-width="2"/>
+    <circle cx="560" cy="76" r="8" fill="#ffffff" stroke="#ccd2da" stroke-width="2"/>
+    <text x="230" y="96" class="txtb" text-anchor="middle" font-size="10">Details</text>
+    <text x="395" y="96" class="lbl" text-anchor="middle">Invite</text>
+    <text x="560" y="96" class="lbl" text-anchor="middle">Collect</text>
+    <line class="div" x1="170" y1="112" x2="640" y2="112"/>
+
+    <!-- form col 1 -->
+    <text x="170" y="136" class="lbl">What is it?</text>
+    <rect class="field" x="170" y="144" width="215" height="28"/>
+    <text x="182" y="163" class="txt">Project kickoff</text>
+
+    <text x="170" y="196" class="lbl">Purpose</text>
+    <circle cx="180" cy="212" r="5" fill="#2f6f8f"/><text x="192" y="216" class="txt">Meeting</text>
+    <circle cx="180" cy="234" r="5" fill="#fff" stroke="#aeb6c0"/><text x="192" y="238" class="txt">Study session</text>
+    <circle cx="180" cy="256" r="5" fill="#fff" stroke="#aeb6c0"/><text x="192" y="260" class="txt">Social</text>
+
+    <text x="170" y="292" class="lbl">How long?</text>
+    <rect class="field" x="170" y="300" width="100" height="26"/>
+    <text x="180" y="318" class="txt">2 h  ▾</text>
+
+    <text x="170" y="350" class="lbl">Stay within</text>
+    <rect class="field" x="170" y="358" width="100" height="26"/>
+    <text x="180" y="376" class="txt">35 min ▾</text>
+    <text x="278" y="376" class="small">of the group</text>
+
+    <!-- form col 2 -->
+    <text x="425" y="136" class="lbl">Possible days</text>
+    <rect class="card" x="425" y="144" width="215" height="28"/>
+    <text x="437" y="162" class="txt">☑ Tue 25   12:00 – 18:00</text>
+    <text x="628" y="162" class="txt" text-anchor="end">✎</text>
+    <rect class="card" x="425" y="180" width="215" height="28"/>
+    <text x="437" y="198" class="txt">☑ Wed 26   09:00 – 14:00</text>
+    <text x="628" y="198" class="txt" text-anchor="end">✎</text>
+    <rect class="btn2" x="425" y="216" width="110" height="26"/>
+    <text x="480" y="233" class="btn2t">+ add a day</text>
+
+    <text x="425" y="276" class="lbl">Decide by</text>
+    <rect class="field" x="425" y="284" width="140" height="26"/>
+    <text x="435" y="302" class="txt">Mon 18:00</text>
+    <text x="425" y="322" class="small">Voting closes automatically then.</text>
+
+    <text x="425" y="350" class="lbl">Search area</text>
+    <rect class="field" x="425" y="358" width="215" height="26"/>
+    <text x="435" y="376" class="txt">Central Stockholm + KTH ▾</text>
+
+    <!-- invite chips -->
+    <line class="div" x1="170" y1="404" x2="640" y2="404"/>
+    <text x="170" y="426" class="txtb">Invite people now</text>
+    <text x="282" y="426" class="small">optional — the link works later too</text>
+    <rect class="field" x="170" y="436" width="300" height="28"/>
+    <rect x="178" y="443" width="88" height="15" rx="7" fill="#e3ebf0"/>
+    <text x="222" y="454" class="small" text-anchor="middle" style="fill:#2f4858">noor@kth.se ✕</text>
+    <rect x="272" y="443" width="88" height="15" rx="7" fill="#e3ebf0"/>
+    <text x="316" y="454" class="small" text-anchor="middle" style="fill:#2f4858">elias@kth.se ✕</text>
+    <text x="368" y="455" class="lbl">add another…</text>
+    <rect class="btn2" x="482" y="436" width="110" height="28"/>
+    <text x="537" y="454" class="btn2t">Copy link</text>
+
+    <!-- summary panel -->
+    <line class="panedv" x1="660" y1="60" x2="660" y2="500"/>
+    <text x="680" y="136" class="txtb">What happens next</text>
+    <circle cx="686" cy="158" r="8" fill="#2f6f8f"/><text x="686" y="161" class="pintxt">1</text>
+    <text x="702" y="162" class="txt">Members add their own</text>
+    <text x="702" y="176" class="txt">availability and travel limit.</text>
+    <circle cx="686" cy="198" r="8" fill="#2f6f8f"/><text x="686" y="201" class="pintxt">2</text>
+    <text x="702" y="202" class="txt">We fetch spaces, travel</text>
+    <text x="702" y="216" class="txt">times and weather, then score.</text>
+    <circle cx="686" cy="238" r="8" fill="#2f6f8f"/><text x="686" y="241" class="pintxt">3</text>
+    <text x="702" y="242" class="txt">The group votes, you confirm,</text>
+    <text x="702" y="256" class="txt">every device updates live.</text>
+
+    <line class="div" x1="680" y1="278" x2="902" y2="278"/>
+    <rect class="card" x="680" y="294" width="222" height="96" style="fill:#f7f9fa"/>
+    <text x="694" y="314" class="txtb">Live preview</text>
+    <text x="694" y="332" class="txt">Project kickoff · 2 h</text>
+    <text x="694" y="348" class="lbl">Tue 25 or Wed 26</text>
+    <text x="694" y="364" class="lbl">within 35 min of the group</text>
+    <text x="694" y="380" class="small">4 people · Central Stockholm + KTH</text>
+
+    <rect class="card" x="680" y="402" width="222" height="60" style="fill:#eef6f1;stroke:#9ec9b2"/>
+    <text x="694" y="422" class="ok">Defaults applied from your profile</text>
+    <text x="694" y="438" class="small">Odenplan · 35 min · quiet, power</text>
+    <text x="694" y="453" class="small">Change them once, not per meeting.</text>
+
+    <!-- action bar -->
+    <line class="div" x1="170" y1="486" x2="902" y2="486"/>
+    <rect class="btn2" x="170" y="498" width="90" height="30"/>
+    <text x="215" y="517" class="btn2t">Back</text>
+    <text x="276" y="517" class="small">Nothing is saved to the group until you continue.</text>
+    <rect class="btn" x="782" y="498" width="120" height="30"/>
+    <text x="842" y="518" class="btntxt">Continue →</text>
+
+    <text x="170" y="552" class="note">Responsive change: the third of the screen that mobile cannot spare becomes a permanent summary panel, so the consequences of the form are</text>
+    <text x="170" y="566" class="note">visible while filling it in. The form itself is the same fields in the same order.</text>
+  </g>
+
+  <!-- ============================ D3 · OPTIONS 3-PANE ============================ -->
+  <g id="D03-Options-ThreePane" data-name="D03-Options-ThreePane" transform="translate(40,780)">
+    <text x="0" y="-10" class="cap">D3 · Options — three panes, no navigation needed  ◀ the layout this breakpoint exists for</text>
+    <rect class="frame" width="922" height="576" rx="8"/>
+
+    <rect class="side" x="1" y="1" width="149" height="574" rx="7"/>
+    <rect class="side" x="120" y="1" width="30" height="574"/>
+    <circle cx="28" cy="30" r="13" fill="#4a7b94"/>
+    <text x="28" y="35" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">C</text>
+    <text x="48" y="28" class="sidetxt" font-size="13">Catch Up!</text>
+    <text x="48" y="41" class="sidemin">meeting space planner</text>
+    <rect class="sidepill" x="10" y="70" width="130" height="28" rx="6"/>
+    <rect x="22" y="78" width="12" height="11" rx="2" fill="#ffffff"/>
+    <text x="44" y="88" class="sidetxt">Home</text>
+    <rect x="22" y="112" width="12" height="10" rx="2" fill="none" stroke="#9fb0bd" stroke-width="1.5"/>
+    <text x="44" y="122" class="sidedim">Invites</text>
+    <circle cx="28" cy="150" r="6" fill="none" stroke="#9fb0bd" stroke-width="1.5"/>
+    <text x="44" y="154" class="sidedim">Profile</text>
+    <line x1="12" y1="176" x2="138" y2="176" stroke="#43586a" stroke-width="1"/>
+
+    <text x="14" y="200" class="sidemin">THIS CATCH UP</text>
+    <text x="14" y="218" class="sidetxt" font-size="10">Project kickoff</text>
+    <text x="14" y="234" class="sidedim" font-size="10">4 of 4 responded</text>
+    <text x="14" y="250" class="sidedim" font-size="10">voting not open yet</text>
+    <text x="14" y="272" class="sidemin">Overview</text>
+    <text x="14" y="290" class="sidemin">Availability</text>
+    <text x="14" y="308" class="sidetxt" font-size="10">Options</text>
+    <text x="14" y="326" class="sidemin">Vote</text>
+    <text x="14" y="344" class="sidemin">Result</text>
+
+    <!-- content top bar -->
+    <rect class="topbar" x="150" y="1" width="771" height="44"/>
+    <line class="div" x1="150" y1="45" x2="921" y2="45"/>
+    <text x="168" y="27" class="cap" font-size="14">Options for Project kickoff</text>
+    <rect class="skel" x="600" y="12" width="110" height="20"/>
+    <text x="655" y="26" class="small" text-anchor="middle">travel 3 of 4 ⟳</text>
+    <rect class="btn" x="724" y="10" width="178" height="26"/>
+    <text x="813" y="27" class="btntxt">Start voting →</text>
+
+    <!-- PANE A: list -->
+    <line class="panedv" x1="372" y1="45" x2="372" y2="575"/>
+    <text x="166" y="66" class="txtb">3 options</text>
+    <rect class="field" x="258" y="54" width="100" height="20"/>
+    <text x="266" y="68" class="small">Best overall ▾</text>
+
+    <rect class="card" x="162" y="80" width="196" height="92" style="stroke:#2f6f8f;stroke-width:2"/>
+    <circle class="pin" cx="178" cy="98" r="9"/><text x="178" y="101" class="pintxt">1</text>
+    <text x="194" y="102" class="txtb">KTH Library</text>
+    <text x="346" y="102" class="txtb" text-anchor="end">88</text>
+    <text x="178" y="120" class="lbl">Tue 14:00 – 16:00</text>
+    <rect class="bar" x="178" y="138" width="9" height="10"/>
+    <rect class="bar" x="190" y="134" width="9" height="14"/>
+    <rect class="bar" x="202" y="132" width="9" height="16"/>
+    <rect class="bar" x="214" y="126" width="9" height="22"/>
+    <text x="232" y="147" class="small">12·18·21·29 min</text>
+    <text x="178" y="163" class="ok">4 of 4 free · step-free ✓</text>
+
+    <rect class="card" x="162" y="182" width="196" height="92"/>
+    <circle class="pin" cx="178" cy="200" r="9"/><text x="178" y="203" class="pintxt">2</text>
+    <text x="194" y="204" class="txtb">Stadsbiblioteket</text>
+    <text x="346" y="204" class="txtb" text-anchor="end">81</text>
+    <text x="178" y="222" class="lbl">Tue 14:00 – 16:00</text>
+    <rect class="bar" x="178" y="242" width="9" height="8"/>
+    <rect class="bar" x="190" y="238" width="9" height="12"/>
+    <rect class="bar" x="202" y="234" width="9" height="16"/>
+    <rect class="bar" x="214" y="228" width="9" height="22" style="fill:#9a5b00"/>
+    <text x="232" y="249" class="small">9·17·24·41 min</text>
+    <text x="178" y="265" class="warn">⚠ Sam over his 35 min limit</text>
+
+    <rect class="card" x="162" y="284" width="196" height="74"/>
+    <circle class="pin" cx="178" cy="302" r="9"/><text x="178" y="305" class="pintxt">3</text>
+    <text x="194" y="306" class="txtb">Café Primo</text>
+    <text x="346" y="306" class="lbl" text-anchor="end">—</text>
+    <text x="178" y="324" class="warn">⚠ weather unavailable</text>
+    <rect class="btn2" x="284" y="312" width="62" height="20"/>
+    <text x="315" y="326" class="btn2t">Retry</text>
+    <text x="178" y="344" class="small">travel + space data still shown</text>
+
+    <rect class="btn2" x="162" y="372" width="130" height="28"/>
+    <text x="227" y="390" class="btn2t">+ Add a space</text>
+    <text x="162" y="422" class="small">One bar per member, never just</text>
+    <text x="162" y="436" class="small">the average. A failing source</text>
+    <text x="162" y="450" class="small">degrades one card, not the pane.</text>
+    <line class="div" x1="162" y1="466" x2="358" y2="466"/>
+    <text x="162" y="486" class="small">Selecting a card pans the map</text>
+    <text x="162" y="500" class="small">and swaps the detail pane.</text>
+    <text x="162" y="514" class="small">Keyboard: ↑ ↓ moves selection.</text>
+
+    <!-- PANE B: map -->
+    <rect class="map" x="372" y="45" width="300" height="530"/>
+    <text x="384" y="64" class="small">MapLibre GL — user-visible third-party component</text>
+    <circle class="pin" cx="470" cy="180" r="13"/><text x="470" y="184" class="pintxt">1</text>
+    <circle cx="470" cy="180" r="21" fill="none" stroke="#2f6f8f" stroke-width="2"/>
+    <text x="470" y="217" class="txtb" text-anchor="middle">KTH Library</text>
+    <circle class="pin" cx="590" cy="300" r="13"/><text x="590" y="304" class="pintxt">2</text>
+    <text x="590" y="326" class="txt" text-anchor="middle">Stadsbiblioteket</text>
+    <circle class="pin" cx="440" cy="380" r="13"/><text x="440" y="384" class="pintxt">3</text>
+    <text x="462" y="384" class="txt">Café Primo</text>
+    <circle cx="410" cy="250" r="5" fill="#5a6472"/>
+    <circle cx="630" cy="200" r="5" fill="#5a6472"/>
+    <circle cx="520" cy="440" r="5" fill="#5a6472"/>
+    <circle cx="400" cy="420" r="5" fill="#5a6472"/>
+    <path d="M410 250 Q440 215 462 190" stroke="#2f6f8f" stroke-width="2" fill="none" stroke-dasharray="5 3"/>
+    <path d="M630 200 Q560 185 490 180" stroke="#2f6f8f" stroke-width="2" fill="none" stroke-dasharray="5 3"/>
+    <path d="M520 440 Q500 310 478 200" stroke="#2f6f8f" stroke-width="2" fill="none" stroke-dasharray="5 3"/>
+    <path d="M400 420 Q420 300 455 198" stroke="#2f6f8f" stroke-width="2" fill="none" stroke-dasharray="5 3"/>
+    <rect x="384" y="500" width="170" height="58" rx="5" fill="#ffffff" opacity="0.92" stroke="#c0ccd4"/>
+    <text x="394" y="518" class="small">● group starting points (area level)</text>
+    <text x="394" y="532" class="small">— — route to selected space</text>
+    <text x="394" y="548" class="small">Selected: KTH Library</text>
+
+    <!-- PANE C: detail -->
+    <line class="panedv" x1="672" y1="45" x2="672" y2="575"/>
+    <text x="690" y="68" class="txtb" font-size="12.5">KTH Library</text>
+    <text x="902" y="68" class="cap" font-size="15" text-anchor="end">88 / 100</text>
+    <rect class="barbg" x="690" y="76" width="212" height="8"/>
+    <rect class="bar" x="690" y="76" width="187" height="8"/>
+
+    <text x="690" y="106" class="txtb">Travel time per member</text>
+    <text x="690" y="126" class="txt">Mia</text>
+    <rect class="barbg" x="730" y="117" width="118" height="9"/><rect class="bar" x="730" y="117" width="49" height="9"/>
+    <text x="902" y="126" class="txt" text-anchor="end">12 min</text>
+    <text x="690" y="144" class="txt">Noor</text>
+    <rect class="barbg" x="730" y="135" width="118" height="9"/><rect class="bar" x="730" y="135" width="73" height="9"/>
+    <text x="902" y="144" class="txt" text-anchor="end">18 min</text>
+    <text x="690" y="162" class="txt">Elias</text>
+    <rect class="barbg" x="730" y="153" width="118" height="9"/><rect class="bar" x="730" y="153" width="86" height="9"/>
+    <text x="902" y="162" class="txt" text-anchor="end">21 min</text>
+    <text x="690" y="180" class="txt">Sam</text>
+    <rect class="barbg" x="730" y="171" width="118" height="9"/><rect class="bar" x="730" y="171" width="118" height="9"/>
+    <text x="902" y="180" class="ok" text-anchor="end">29 min ✓</text>
+    <text x="690" y="198" class="lbl">average 20 · worst 29 · limit 35</text>
+
+    <line class="div" x1="690" y1="212" x2="902" y2="212"/>
+    <text x="690" y="232" class="txtb">How we got to 88</text>
+    <text x="690" y="252" class="txt">average travel</text><text x="902" y="252" class="txt" text-anchor="end">−20</text>
+    <text x="690" y="270" class="txt">worst journey (× 0.7)</text><text x="902" y="270" class="txt" text-anchor="end">−20</text>
+    <text x="690" y="288" class="txt">everyone free</text><text x="902" y="288" class="ok" text-anchor="end">4 of 4 ok</text>
+    <text x="690" y="306" class="txt">step-free entrance</text><text x="902" y="306" class="ok" text-anchor="end">ok</text>
+    <text x="690" y="324" class="txt">open until 20:00</text><text x="902" y="324" class="ok" text-anchor="end">ok</text>
+    <text x="690" y="342" class="txt">rain 13:30 · 10%</text><text x="902" y="342" class="txt" text-anchor="end">−2</text>
+
+    <line class="div" x1="690" y1="356" x2="902" y2="356"/>
+    <text x="690" y="376" class="txtb">Space — from OpenStreetMap</text>
+    <text x="690" y="394" class="txt">Wi-Fi ✓   Power ✓   Step-free ✓</text>
+    <text x="690" y="410" class="txt">Quiet ✓   Food nearby ✗</text>
+    <text x="690" y="428" class="warn">ⓘ Opening hours may be incomplete</text>
+    <text x="690" y="444" class="small">travel fetched 14:32 · weather 14:30</text>
+
+    <rect class="btn2" x="690" y="462" width="212" height="26"/>
+    <text x="796" y="479" class="btn2t">Weigh fairness higher ▾</text>
+    <rect class="btn" x="690" y="496" width="212" height="30"/>
+    <text x="796" y="516" class="btntxt">Vote for this option</text>
+    <text x="796" y="542" class="small" text-anchor="middle">The app recommends — the group decides.</text>
+    <text x="796" y="556" class="small" text-anchor="middle">Lower-ranked options stay selectable.</text>
+  </g>
+
+  <!-- ============================ D4 · VOTE & RESULT ============================ -->
+  <g id="D04-Vote-Result" data-name="D04-Vote-Result" transform="translate(1022,780)">
+    <text x="0" y="-10" class="cap">D4 · Vote — live votes beside decision readiness</text>
+    <rect class="frame" width="922" height="576" rx="8"/>
+
+    <rect class="side" x="1" y="1" width="149" height="574" rx="7"/>
+    <rect class="side" x="120" y="1" width="30" height="574"/>
+    <circle cx="28" cy="30" r="13" fill="#4a7b94"/>
+    <text x="28" y="35" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">C</text>
+    <text x="48" y="28" class="sidetxt" font-size="13">Catch Up!</text>
+    <text x="48" y="41" class="sidemin">meeting space planner</text>
+    <rect class="sidepill" x="10" y="70" width="130" height="28" rx="6"/>
+    <rect x="22" y="78" width="12" height="11" rx="2" fill="#ffffff"/>
+    <text x="44" y="88" class="sidetxt">Home</text>
+    <rect x="22" y="112" width="12" height="10" rx="2" fill="none" stroke="#9fb0bd" stroke-width="1.5"/>
+    <text x="44" y="122" class="sidedim">Invites</text>
+    <circle cx="28" cy="150" r="6" fill="none" stroke="#9fb0bd" stroke-width="1.5"/>
+    <text x="44" y="154" class="sidedim">Profile</text>
+    <line x1="12" y1="176" x2="138" y2="176" stroke="#43586a" stroke-width="1"/>
+    <text x="14" y="200" class="sidemin">THIS CATCH UP</text>
+    <text x="14" y="218" class="sidetxt" font-size="10">Project kickoff</text>
+    <text x="14" y="240" class="sidemin">Overview</text>
+    <text x="14" y="258" class="sidemin">Availability</text>
+    <text x="14" y="276" class="sidemin">Options</text>
+    <text x="14" y="294" class="sidetxt" font-size="10">Vote</text>
+    <text x="14" y="312" class="sidemin">Result</text>
+    <text x="14" y="340" class="sidemin">ORGANISER</text>
+    <text x="14" y="358" class="sidedim" font-size="10">You created this</text>
+
+    <rect class="topbar" x="150" y="1" width="771" height="44"/>
+    <line class="div" x1="150" y1="45" x2="921" y2="45"/>
+    <text x="168" y="27" class="cap" font-size="14">Vote — Project kickoff</text>
+    <text x="902" y="27" class="lbl" text-anchor="end">closes today 18:00 · 3 of 4 voted</text>
+
+    <!-- left: vote list -->
+    <text x="170" y="72" class="txtb">3 of 4 voted</text>
+    <text x="596" y="72" class="small" text-anchor="end">updates live, no reload</text>
+    <rect class="barbg" x="170" y="80" width="426" height="8"/>
+    <rect class="bar" x="170" y="80" width="320" height="8"/>
+
+    <rect class="card" x="170" y="100" width="426" height="76" style="stroke:#2f6f8f;stroke-width:2"/>
+    <circle class="pin" cx="188" cy="122" r="9"/><text x="188" y="125" class="pintxt">1</text>
+    <text x="204" y="126" class="txtb" font-size="12.5">KTH Library</text>
+    <text x="582" y="126" class="txtb" text-anchor="end">88/100</text>
+    <text x="204" y="144" class="lbl">Tue 25 Nov · 14:00 – 16:00 · avg 20 min, worst 29</text>
+    <circle cx="190" cy="160" r="8" fill="#2f6f8f"/><text x="190" y="163" class="pintxt">M</text>
+    <circle cx="208" cy="160" r="8" fill="#2f6f8f"/><text x="208" y="163" class="pintxt">N</text>
+    <circle cx="226" cy="160" r="8" fill="#2f6f8f"/><text x="226" y="163" class="pintxt">E</text>
+    <text x="244" y="164" class="small">Mia · Noor · Elias</text>
+    <rect x="484" y="150" width="98" height="20" rx="4" fill="#2d6a4f"/>
+    <text x="533" y="164" class="btntxt" font-size="10">✓ Your vote</text>
+
+    <rect class="card" x="170" y="186" width="426" height="64"/>
+    <circle class="pin" cx="188" cy="208" r="9"/><text x="188" y="211" class="pintxt">2</text>
+    <text x="204" y="212" class="txtb" font-size="12.5">Stadsbiblioteket</text>
+    <text x="582" y="212" class="txtb" text-anchor="end">81/100</text>
+    <text x="204" y="230" class="warn">⚠ Sam 41 min — over his limit</text>
+    <circle cx="190" cy="238" r="8" fill="#ffffff" stroke="#aeb6c0"/>
+    <text x="206" y="242" class="small">no votes yet</text>
+    <rect class="btn2" x="520" y="228" width="62" height="20"/>
+    <text x="551" y="242" class="btn2t">Vote</text>
+
+    <rect class="card" x="170" y="260" width="426" height="64"/>
+    <circle class="pin" cx="188" cy="282" r="9"/><text x="188" y="285" class="pintxt">3</text>
+    <text x="204" y="286" class="txtb" font-size="12.5">Café Primo</text>
+    <text x="582" y="286" class="lbl" text-anchor="end">score incomplete</text>
+    <text x="204" y="304" class="warn">⚠ weather unavailable — comparison partial</text>
+    <circle cx="190" cy="312" r="8" fill="#ffffff" stroke="#aeb6c0"/>
+    <text x="206" y="316" class="small">no votes yet</text>
+    <rect class="btn2" x="520" y="302" width="62" height="20"/>
+    <text x="551" y="316" class="btn2t">Vote</text>
+
+    <rect class="card" x="170" y="336" width="426" height="60" style="fill:#f1f5f8"/>
+    <text x="184" y="356" class="txt">⟳ Activity</text>
+    <text x="184" y="372" class="small">14:41  Sam voted for KTH Library</text>
+    <text x="184" y="386" class="small">14:32  Travel times refreshed for 3 spaces</text>
+    <text x="582" y="356" class="small" text-anchor="end">Firestore onSnapshot</text>
+
+    <text x="170" y="420" class="lbl">You can change your vote until 18:00.</text>
+    <text x="170" y="438" class="small">Each vote is stored under your own user id, so two people voting at the same moment cannot overwrite</text>
+    <text x="170" y="452" class="small">each other. Only the organiser can close the vote.</text>
+
+    <!-- right: readiness + result preview -->
+    <line class="panedv" x1="616" y1="58" x2="616" y2="500"/>
+    <text x="636" y="72" class="txtb">Decision readiness</text>
+    <rect class="card" x="636" y="82" width="266" height="96" style="fill:#eef6f1;stroke:#9ec9b2"/>
+    <text x="650" y="102" class="ok">✓  4 of 4 added availability</text>
+    <text x="650" y="120" class="ok">✓  no unmet accessibility needs</text>
+    <text x="650" y="138" class="ok">✓  a window works for everyone</text>
+    <text x="650" y="156" class="warn">⚠  1 vote still outstanding</text>
+    <text x="650" y="171" class="small">Closing now would decide on 3 votes.</text>
+
+    <text x="636" y="206" class="txtb">If you close now</text>
+    <rect class="card" x="636" y="216" width="266" height="170"/>
+    <text x="650" y="236" class="txtb">KTH Library</text>
+    <text x="888" y="236" class="small" text-anchor="end">3 of 3 votes</text>
+    <text x="650" y="254" class="txt">Tue 25 Nov · 14:00 – 16:00</text>
+    <text x="650" y="270" class="lbl">Osquars backe 31</text>
+    <rect class="map" x="650" y="280" width="238" height="60" rx="5"/>
+    <circle cx="676" cy="326" r="4" fill="#5a6472"/>
+    <path d="M680 322 Q740 300 800 294" stroke="#2f6f8f" stroke-width="2.5" fill="none" stroke-dasharray="5 3"/>
+    <circle class="pin" cx="808" cy="292" r="9"/><text x="808" y="295" class="pintxt">1</text>
+    <text x="650" y="356" class="txt">Your trip 18 min · leave by 13:38</text>
+    <text x="650" y="372" class="small">🌧 light rain 13:30 · 10%</text>
+
+    <rect class="btn" x="636" y="402" width="266" height="32"/>
+    <text x="769" y="423" class="btntxt">Close vote &amp; confirm</text>
+    <text x="769" y="446" class="small" text-anchor="middle">Asks for confirmation. Everyone is notified.</text>
+    <rect class="btn2" x="636" y="458" width="266" height="26"/>
+    <text x="769" y="475" class="btn2t">Extend the deadline instead</text>
+
+    <line class="div" x1="170" y1="508" x2="902" y2="508"/>
+    <text x="170" y="528" class="note">Responsive change: mobile shows voting and the confirmed result as two separate screens, so an organiser has to commit before seeing the</text>
+    <text x="170" y="542" class="note">outcome. At this width the result preview sits next to the votes, which is why the organiser-only action can be shown with its consequences.</text>
+    <text x="170" y="562" class="note">Readiness is derived state (selectors over responses, constraints and votes) — not a new database field.</text>
+  </g>
+
+</svg>
