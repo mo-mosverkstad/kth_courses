@@ -1,6 +1,7 @@
 package se.kth.iv1351.startup;
 
 import se.kth.iv1351.controller.CourseDBController;
+import se.kth.iv1351.integration.DatabaseConnectionException;
 import se.kth.iv1351.view.BasicView;
 
 public class Main {
