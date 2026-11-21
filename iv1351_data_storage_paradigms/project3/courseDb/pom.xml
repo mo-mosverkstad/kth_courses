@@ -16,8 +16,8 @@
         -->
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <!-- Change this when the class with the main method has been written. -->
-        <main.class>se.kth.iv1351.coursedb.startup.Main</main.class>
+        <!-- The class with the main method. Update it if the class is moved or renamed. -->
+        <main.class>se.kth.iv1351.startup.Main</main.class>
     </properties>
 
     <dependencies>
