@@ -277,6 +277,172 @@ Requirement coverage was also evaluated by going through the task description~\c
 \section{Result}
 \label{sec:result}
 
+The result of the project consists of 6 analytical SQL queries, 1 deliberately incorrect version of one of them, an insertion script that scales the database up to about millions of rows in largest table, 2 materialized views together with their indexes, and the measurements of every query before and after these views and indexes were added. All SQL scripts, bash scripts, the saved query plans and even this report are stored in the Git repository \url{https://github.com/mo-mosverkstad/kth_courses/tree/main/iv1351_data_storage_paradigms/project2}.
+
+The repository folder is divided into three parts. The folder \texttt{build\_scripts} contains the scripts that create and fill the rows of the database, the folder \texttt{query\_scripts} contains the analytical queries, and the folder \texttt{performance\_query} contains the materialized views, the optimised versions of the queries and the measurements.
+
+In the folder \texttt{query\_scripts}, the 6 analytical query scripts could be found as:
+
+\begin{itemize}
+  \item \texttt{planned-hours-calculation.sql} calculates the planned hours per course instance
+  \item \texttt{actual-hours-calculation-by-course.sql} calculates the allocated hours per teacher for one course instance
+  \item \texttt{actual-hours-calculation-by-teacher.sql} calculates the allocated hours of one teacher
+  \item \texttt{teaching-allocation.sql} lists the teachers that are allocated to more than a given number of course instances in one academic period
+  \item \texttt{teacher-load-per-period.sql} calculates the load of each teacher per academic period
+  \item \texttt{mismatches.sql} lists the course instances where the allocated hours differ more than 15\% from the planned hours, while \texttt{mismatches-wrong.sql} is the incorrect version of the same query
+\end{itemize}
+
+In terms of performance optimizations, the SQL script \texttt{base-views.sql} that creates the two materialized views and the index on the allocation table is written. An equivalent script, \texttt{drop-views.sql} removes the materialized views and indexes that was created. This script can be useful for cleaning up the optimizations. After that, the 6 analytical queries are rewritten so that they use the materialized views and the index. These files has a prefix \texttt{fast-} before the name. Additionally, a bash file \texttt{run-performance.bash} is written to automate measuring all the 6 analytical queries before and after.
+
+\subsection{Analytical queries}
+
+There are 6 analytical queries that are implemented in this project task.
+
+The first one is the query that calculates the planned hours. It returns one row each course instance of a given academic year, where the hours are broken down for each teaching activity. The planned hours are retrieved from the activity and multiplied with the multiplication factor of the activity. The breakdown for each activity is written with one aggregate \texttt{SUM} together with a \texttt{CASE} expression per activity, so that each sum only counts the rows of one activity.
+
+The second query calculates the allocated hours for a course instance and returns one row for each teacher of that course instance, with the hours broken down per teaching activity in the same way as above. The difference is that the hours are taken from \texttt{teaching\_allocation} table. Additionally, the designation of each teacher is also included there.
+
+Another similar query calculates the allocated hours of one teacher in different course instance instead of one course instance with the affiliated teachers. It proceeds similar to the query above, but the teacher is selected by the employment ID and the result is grouped by course instance of that teacher.
+
+The query that lists the teachers allocated to more than a given number of course instances in one academic period lists the employment id, name, academic year/period and the number of course instances of these teachers. The number of course instances is counted with \texttt{COUNT(DISTINCT course\_instance.id)}, which is necessary since one teacher may be allocated to several teaching activities within the same course instance.
+
+Finally, the query that calculates the teacher load per academic period returns one row for each teacher and academic period, with number of course instances and total allocated hours including multiplication factor.
+
+\subsection{The mismatch query and its incorrect version}
+
+The query that lists the course instances with a mismatch larger than 15\% can be shown in Listing~\ref{lst:mismatch}, with the incorrect version of the same query in Listing~\ref{lst:mismatchwrong}.
+
+\begin{lstlisting}[style=SQL, caption={The correct mismatch query, where each side is aggregated before they are compared (shortened)}, label={lst:mismatch}]
+SELECT
+    activity_hours.course_instance_id,
+    SUM(activity_hours.planned_activity_hours) AS planned_instance_hours,
+    SUM(activity_hours.allocated_activity_hours) AS allocated_instance_hours,
+    ...
+FROM (
+    SELECT
+        course_instance.id AS course_instance_id,
+        planned_activity.planned_hours * teaching_activity.multiplication_factor AS planned_activity_hours,
+        SUM(teaching_allocation.allocation_hours) * teaching_activity.multiplication_factor AS allocated_activity_hours
+    FROM course_instance
+    INNER JOIN planned_activity ...
+    INNER JOIN teaching_allocation ...
+    GROUP BY course_instance.id, planned_activity.id, teaching_activity.id, ...
+) AS activity_hours
+GROUP BY activity_hours.course_instance_id
+HAVING ABS(...) > .15;
+\end{lstlisting}
+
+In the correct query, the inner query produces one row for each planned activity, where the planned hours of that activity appear exactly once while the allocated hours of all its teachers are summed. The outer query then sums these rows per course instance, which means that each planned activity contributes its planned hours one single time.
+
+\begin{lstlisting}[style=SQL, caption={The incorrect mismatch query, where the planned hours are summed over the joined allocation rows (shortened)}, label={lst:mismatchwrong}]
+SELECT
+    course_instance.id AS course_instance_id,
+    SUM(planned_activity.planned_hours * teaching_activity.multiplication_factor) AS planned_instance_hours,
+    SUM(teaching_allocation.allocation_hours * teaching_activity.multiplication_factor) AS allocated_instance_hours,
+    ...
+FROM course_instance
+INNER JOIN planned_activity ...
+INNER JOIN teaching_allocation ...
+GROUP BY course_instance.id
+HAVING ABS(...) > .15;
+\end{lstlisting}
+
+On the other hand, the incorrect query has no inner query, so the planned activity is joined directly with its allocations. This means that the planned instance hours which is stored once for each teaching activity is repeated for every teaching allocation. As a result, the planned hours are counted once for every teacher than once in total. By this reason, the incorrect query shows planned hours larger than the correct one. For instance, a planned activity with 20 planned hours and three allocated teachers is reported as 60 planned hours. This leads sometimes to a larger mismatch in percentage and the wrong set of course isntance would show up as query result. 
+
+\subsection{Scaling up the database}
+
+The insertion script fills the database with about 9.9 million rows in total. The number of rows of the largest tables is given in Table~\ref{tab:rowcounts}, which shows that the requirement of at least 1,000,000 rows in the largest table is met with a good margin.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|r|}
+\hline
+\textbf{Table} & \textbf{Rows} \\
+\hline
+\texttt{teaching\_allocation} & 3,200,577 \\
+\texttt{planned\_activity} & 2,267,074 \\
+\texttt{employee} & 450,033 \\
+\texttt{course\_instance} & 400,072 \\
+\hline
+\end{tabular}
+\caption{The number of rows of the largest tables after the database has been scaled up}
+\label{tab:rowcounts}
+\end{table}
+
+Since every inserted row fires the trigger from project task 1, and because that trigger counts the existing allocations of the teacher by scanning the whole \texttt{teaching\_allocation} table, the complexity of the query is quadratic $O(n^2)$ to the number of rows in that table. Executing the dataset takes a very long time. This can be mitigated, either by setting a temporary indexing on the table, or disabling the trigger, as explained earlier.
+
+\subsection{Indexes and materialized views}
+
+As performance optimization, 2 materialized views and 1 index on a base table were introduced. The view \texttt{course\_activity\_view} contains one row for each planned activity, where the multiplication factor and the derived formula are already applied. Since its rows are given for every planned activity and not for every teacher, the planned hours cannot be counted twice through this view. The view \texttt{teacher\_period\_load\_view} contains one row for every teacher and academic period, with the number of course instances and the total allocated hours already aggregated. The index \texttt{idx\_teaching\_allocation\_employee} was created on the employee column of the allocation table.
+
+Additionally, each view was given 2 indexes: 1 unique index on the key of the view and an index on the academic year together with the period name, since every query on the views filters on exactly those two columns.
+
+The measured execution time of every query before and after these changes is given in Table~\ref{tab:performance}. Each value is the median of three runs of \texttt{EXPLAIN ANALYZE}, and the complete query plans are stored in the repository.
+
+\begin{table}[h!]
+\centering
+\footnotesize
+\begin{tabular}{|l|r|r|r|}
+\hline
+\textbf{Query (frequency)} & \textbf{Before} & \textbf{After} & \textbf{Speed-up} \\
+\hline
+Teachers above a threshold (20/day) & 906.6 ms & 73.0 ms & 12x \\
+Teacher load per period (5/day) & 3,173.3 ms & 521.7 ms & 6x \\
+Planned hours per course instance (8/day) & 1,734.5 ms & 1,109.2 ms & 1.6x \\
+Allocated hours, one course instance (12/day) & 0.8 ms & 0.5 ms & not needed \\
+Allocated hours, one teacher (12/day) & 1,677.6 ms & 0.9 ms & 1,800x \\
+Mismatch above 15\% (3/day) & 16,154.7 ms & 4,771.0 ms & 3.4x \\
+\hline
+\end{tabular}
+\caption{The execution time of each query before and after the materialized views and the index were added, as the median of three runs}
+\label{tab:performance}
+\end{table}
+
+% Furthermore, every optimised query returns exactly the same rows as its original version, which was verified by comparing the two results with \texttt{EXCEPT} in both directions. The query plans also show what has changed. For the query of one single teacher, the plan before contained a parallel sequential scan of all 3.2 million allocations, while the plan after contains an index scan that finds the employee by the employment ID and then reads only the 27 allocations of that teacher, which explains the difference between 1.7 seconds and 1 millisecond. For the two queries on the teacher load, the plan before joined and grouped the 1.5 million allocations of the year, while the plan after reads the already aggregated rows of the view through a bitmap scan. On the other hand, the gain for the planned hours is smaller, since the query still has to group the 566,769 planned activities of the year even though the view has removed the joins and the formula.
+
+\subsection{An index that PostgreSQL does not use}
+
+The unique index \texttt{course\_activity\_view\_planned\_activity} had 0 scans during the measured workload, which was read from the statistics that PostgreSQL collects for each index. The reason is that the mismatch query joins the whole view with the summed allocations, which means that all 2.27 million rows of the view are needed. When almost every row of a table is needed, the planner estimates that a sequential scan together with a hash join is cheaper than 2.27 million index lookups, since an index scan normally causes random reads. The index \texttt{teacher\_period\_load\_view\_key} was unused for the same reason.
+
+% However, forcing the index by switching off sequential scans and hash joins gave a merge join that ran in 3.9 seconds instead of 4.8 seconds in one measurement, which means that the estimate of the planner was too pessimistic in this particular case. The explanation is that the view had just been created in the order of the indexed column, so that the index scan reads the table almost sequentially instead of randomly, and that the data was already cached in memory, while the default cost settings of the planner assume random reads from disk. Even so, the index is still necessary, since \texttt{REFRESH MATERIALIZED VIEW CONCURRENTLY} requires a unique index on the view.
+
+\subsection{Out-of-date materialized view and the refresh time}
+
+A materialized view that becomes out of date could be shown by inserting one single allocation for a teacher who had one course instance in the period P2 of 2026. The three states are given in Table~\ref{tab:stale}.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Step} & \textbf{The base tables} & \textbf{\texttt{teacher\_period\_load\_view}} \\
+\hline
+Before the insert & 1 course instance & 1 course instance, 80.6 h \\
+After the insert & 2 course instances & 1 course instance, 80.6 h (out of date) \\
+After the refresh & 2 course instances & 2 course instances, 116.6 h \\
+\hline
+\end{tabular}
+\caption{A materialized view stays out of date until it is refreshed}
+\label{tab:stale}
+\end{table}
+
+The table shows that the view keeps the old value after the insert, while the base tables immediately show the new allocation. Only after the refresh does the view agree with the base tables again. The time that the refresh takes is given in Table~\ref{tab:refresh}.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|r|r|}
+\hline
+\textbf{View} & \textbf{\texttt{REFRESH}} & \textbf{\texttt{REFRESH CONCURRENTLY}} \\
+\hline
+\texttt{teacher\_period\_load\_view} & 8.6--9.0 s & 16.2 s \\
+\texttt{course\_activity\_view} & 7.7 s & 20.2 s \\
+\hline
+\end{tabular}
+\caption{The time it takes to refresh each materialized view, with and without \texttt{CONCURRENTLY}}
+\label{tab:refresh}
+\end{table}
+
+An ordinary refresh locks the view, which means that the queries on it have to wait for up to 9 seconds. On the other hand, \texttt{REFRESH MATERIALIZED VIEW CONCURRENTLY} lets the queries continue to read the old content during the refresh, but it takes about twice as long, since it has to compare the new result with the old one.
+
 \section{Discussion}
 \label{sec:discussion}
 
