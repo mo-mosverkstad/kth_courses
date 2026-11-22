@@ -219,10 +219,12 @@ For solving the task, the following tools were used:
 
 The main database management system PostgreSQL 16 was used for developing analytical SQL scripts and improving their preformance. It was executed on Ubuntu 22 in Windows Subsystem for Linux (WSL), and all scripts were written as file and then executed using the psql command-line utility with the following command:
 
-\texttt{sudo -u postgres psql -v ON_ERROR_STOP=1 -d course_database -f "<file\_name>"}.
+\texttt{sudo -u postgres psql -v ON\_ERROR\_STOP=1 -d course\_database -f "<file\_name>"}.
 
 In this case, a query can be written and modified as a text file before feeding it into the database system.
 This approach allows queries to be written, reviewed, and modified in text files before being executed by the database system. Furthermore, the \texttt{ON\_ERROR\_STOP=1} option ensures that script execution stops if an SQL error occurs, making it easier to identify and address errors during development.
+
+Additionally, common commands were also written into bash files such as \texttt{build.bash} and \texttt{benchmark.bash}. This allows common operation to be executed using a single short command without verbosly retyping commands or feeding SQL statements into the SQL interpreter.
 
 For general development, Visual Studio Code was used to write the SQL script and this report, while Git and GitHub were used for version control for storing and backing up SQL queries. The report was written and typeset with \LaTeX.
 
@@ -240,14 +242,40 @@ In order to scale up the database, the insertion script must insert more data th
 
 Additionally, some tables that relies on foreign keys can be scaled up by changing the range parameter. For instance the \texttt{academic\_period} tabl can be scaled up by widening the year range from \texttt{2023--2026} to \texttt{1970--2030}, allowing a larger number of rows to be inserted. However, the insertion queries for most tables that rely on foreign keys do not need to be changed, since they operate by joining other tables and do not depend on any specific parameters.
 
-\subsection{Improving performance}
+However, in terms of \texttt{teaching\_allocation} table, inserting a new row has a quadratic time complexity $O(n^2)$. The reason is that each time a new row is inserted, the trigger from project task 1 is fired. The trigger counts the number of course instances the teacher already has in that academic period and is itself a linear complexity operation when validating a single row. Adding it together, this means that the time increases dramatically for larger workloads on an unindexed table.
 
-The performance of the database is improved, both by 
+There are two solutions for this problem. The problem could be solved by creating a temporary hash index with constant time complexity $O(1)$. Since only equality operators are used, hash indexing becomes perfect for the usecase. This means that the trigger function does not need to scan over the table for each row validation. In order to leave the final schema unchanged, the index is dropped afterwards.
+
+Another solution is to disable the trigger and re-enable it afterwards, in order to avoid the expensive trigger function that validates every insertion row. The reason is that the logic for inserting the \texttt{teaching\_allocation} table is designed that it maximally inserts maximum four course instances for a teacher in one academic period. Because of that, the insertion statement can be trusted that it doesn't violate the teaching allocation rule.
+
+\subsection{Improving performance}
+\label{sec:improving}
+
+The performance of the database can be improved both by adding indexes and by adding materialized views. This can be carried out by measuring the different optimization cases, such as using different types of indexing and materialized views. All of the cases are measured and compared against the baseline without any optimization.
+
+The planner statistics were refreshed with \texttt{ANALYZE} before measuring since the planner would choose a plan from statistics. The stale statistics would make the baseline describe a database that no longer exists. Every query in the workload was then executed with \texttt{EXPLAIN ANALYZE}, which executes the query and reports the plan actually used together with the real time and row count of each step.
+
+In terms of measurement, each query was measured several times and the median value is chosen. A single measurement is not trustworthy, since the first execution has to fetch pages from the disk, while later ones could easily fetch from the cache, which differs with orders of magnitudes. The whole measurement was written into a bash shell script and executed alltogether rather than by hand, in order to make measurement analysis repeatable after each change.
+
+Deciding which indexes and materialized views to add was primarily driven by the given frequencies of the requirements in Section~\ref{sec:requirements}, as well as the measured cost of each query. This means that the query that is both frequent with multiple optimization alternatives was treated as the best candidate, and a query that was already fast (without possible optimization alternatives) was left alone. For each query the baseline plan was read to find what the database actually spent its time on. A sequential linear scan over millions of rows in order to return a handful of them indicates a missing index, whereas repeatedly joining and grouping the same large set of rows into a much smaller summary indicates a candidate for a materialized view. The choice was therefore made per query from its plan, and not by adding indexes as much as possible.
+
+Additionally, two further checks were implemented as well. The first one concerns the correctness of the optimized queries. The result of the optimised query and the result of the original query were compared with \texttt{EXCEPT} in both directions, since a comparison in only one direction does not detect extra rows in the other result. The second check concerns whether an index is used at all, since an index that exists in the database is not necessarily an index that the query planner chooses. In order to detect it, the number of index scans was read from the statistics that PostgreSQL collects for each index. These stastistics were reset immediately before the measured runs, so that the counts belong only to the measured workload and not to earlier experiments.
+
+% Finally, the staleness of a materialized view was demonstrated instead of merely being asserted. One single allocation was inserted for a teacher, while both the base tables and the materialized view were queried three times, namely before the insert, after the insert and after the view had been refreshed. In this way, the three states could be compared directly with each other. The insert was executed inside a transaction which was rolled back afterwards, so that the demonstration does not permanently change the database that the performance is measured on. Additionally, the teacher was chosen in such a way that the extra allocation still respects the rule of maximum four course instances per academic period. Otherwise, the trigger from project task 1 would reject the insert, and the demonstration would not show anything at all. Both the ordinary refresh and the concurrent refresh were timed using the timing facility of the psql command-line utility.
 
 \subsection{Evaluation}
 
+The solution was evaluated for correctness, both before and after performance optimization.
+
+The correctness of queries was first manually checked and evaluated on the small database from project task 1, where the number of rows is small enough that the expected result can be computed by hand from the sample data and compared with what the query returned. After scaling the database, the queries were run again, this time comparing them against their optimised counterparts with \texttt{EXCEPT} rather than by hand, which checks that scaling and optimisation did not produce other results than without optimization.
+
+The performance was evaluated by comparing the before and after state on the same machine, with the same data and the same queries, using the median of repeated runs. However, this method may introduce several limitations. Because the measurements come from a single machine with specific amount of memory, the times cannot be treated as transferable over other machines. Only the relative comparison between before and after remains meaningful. Additionally, caching also plays a vital role, since subsequent runs of the same query in a warm database are faster than the initial one during cold start.
+
+Requirement coverage was also evaluated by going through the task description~\cite{task2} and the assessment criteria for seminar 2~\cite{criteria2}.
+
 
 \section{Result}
+\label{sec:result}
 
 \section{Discussion}
 \label{sec:discussion}
