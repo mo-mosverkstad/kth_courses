@@ -21,12 +21,7 @@ SELECT
     course_instance.num_students AS num_students,
     teaching_activity.activity_name AS activity_name,
     teaching_activity.multiplication_factor AS multiplication_factor,
-    COALESCE(
-        planned_activity.planned_hours,
-        derived_activity_formula.base_hours
-        + derived_activity_formula.hours_per_student * course_instance.num_students
-        + derived_activity_formula.hours_per_hp * course_layout.hp
-    ) * teaching_activity.multiplication_factor AS planned_hours
+    planned_activity.planned_hours * teaching_activity.multiplication_factor AS planned_hours
 
 FROM planned_activity
 INNER JOIN course_instance
@@ -41,8 +36,6 @@ INNER JOIN period
     ON period.id = academic_period.period_id
 INNER JOIN teaching_activity
     ON teaching_activity.id = planned_activity.teaching_activity_id
-LEFT JOIN derived_activity_formula
-    ON derived_activity_formula.teaching_activity_id = teaching_activity.id
 
 WITH DATA;
 
