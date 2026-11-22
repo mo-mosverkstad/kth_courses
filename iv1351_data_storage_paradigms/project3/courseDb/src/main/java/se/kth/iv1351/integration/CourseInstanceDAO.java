@@ -1,68 +1,62 @@
 package se.kth.iv1351.integration;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class CourseInstanceDAO {
-    private DatabaseConnection databaseConnection;
+    private final DatabaseConnection databaseConnection;
     private PreparedStatement plannedHoursByInstanceStmt;
-    public CourseInstanceDAO(DatabaseConnection databaseConnection) throws SQLException{
+
+    public CourseInstanceDAO(DatabaseConnection databaseConnection) throws CourseDBException{
         this.databaseConnection = databaseConnection;
-        prepareStatements();
+        try{
+            prepareStatements();
+        }
+        catch (SQLException sqlException){
+            throw new CourseDBException("Could not prepare the statements of "
+                                        + getClass().getSimpleName(), sqlException);
+        }
     }
 
-    public int findPlannedHoursByCourseInstance(String courseInstanceId) throws CourseDBException {
+    public BigDecimal findPlannedHoursByCourseInstance(String courseInstanceId)
+            throws CourseDBException {
         String failureMsg = "Could not search for specific course instance";
         ResultSet result = null;
         try{
             plannedHoursByInstanceStmt.setString(1, courseInstanceId);
             result = plannedHoursByInstanceStmt.executeQuery();
             if (result.next()){
-                return result.getInt("total_planned_hours");
+                return result.getBigDecimal("total_planned_hours");
             }
         }
         catch (SQLException sqlException){
-            handleException(failureMsg, sqlException);
+            throw new CourseDBException(failureMsg, sqlException);
         }
         finally{
             closeResultSet(failureMsg, result);
         }
-        return 0;
+        return BigDecimal.ZERO;
     }
 
     private void prepareStatements() throws SQLException {
         Connection connection = databaseConnection.getConnection();
-        plannedHoursByInstanceStmt = connection.prepareStatement("SELECT\r\n" + //
-                        "    COALESCE(\r\n" + //
-                        "        SUM(\r\n" + //
-                        "            planned_activity.planned_hours * teaching_activity.multiplication_factor\r\n" + //
-                        "        ),\r\n" + //
-                        "        0\r\n" + //
-                        "    ) AS total_planned_hours\r\n" + //
-                        "FROM course_instance\r\n" + //
-                        "INNER JOIN planned_activity\r\n" + //
-                        "ON course_instance.id = planned_activity.course_instance_id\r\n" + //
-                        "INNER JOIN teaching_activity\r\n" + //
-                        "ON teaching_activity.id = planned_activity.teaching_activity_id\r\n" + //
-                        "WHERE course_instance.instance_id = ?");
-    }
-
-    private void handleException(String failureMsg, Exception cause) throws CourseDBException {
-        String completeFailureMsg = failureMsg;
-        try {
-            databaseConnection.getConnection().rollback();
-        } catch (SQLException rollbackExc) {
-            completeFailureMsg = completeFailureMsg +
-                    ". Also failed to rollback transaction because of: " + rollbackExc.getMessage();
-        }
-
-        if (cause != null) {
-            throw new CourseDBException(completeFailureMsg, cause);
-        } else {
-            throw new CourseDBException(completeFailureMsg);
-        }
+        plannedHoursByInstanceStmt = connection.prepareStatement("""
+            SELECT
+                COALESCE(
+                    SUM(
+                        planned_activity.planned_hours * teaching_activity.multiplication_factor
+                    ),
+                    0
+                ) AS total_planned_hours
+            FROM course_instance
+            INNER JOIN planned_activity
+            ON course_instance.id = planned_activity.course_instance_id
+            INNER JOIN teaching_activity
+            ON teaching_activity.id = planned_activity.teaching_activity_id
+            WHERE course_instance.instance_id = ?""");
     }
 
     private void closeResultSet(String failureMsg, ResultSet result) throws CourseDBException {
@@ -71,8 +65,8 @@ public class CourseInstanceDAO {
         }
         try {
             result.close();
-        } catch (Exception e) {
-            throw new CourseDBException(failureMsg + " Could not close result set.", e);
+        } catch (Exception exception) {
+            throw new CourseDBException(failureMsg + " Could not close result set.", exception);
         }
     }
 }

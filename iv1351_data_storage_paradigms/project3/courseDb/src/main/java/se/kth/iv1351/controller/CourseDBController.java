@@ -1,6 +1,6 @@
 package se.kth.iv1351.controller;
 
-import java.sql.SQLException;
+import java.math.BigDecimal;
 
 import se.kth.iv1351.config.Config;
 import se.kth.iv1351.integration.CourseDBException;
@@ -14,20 +14,32 @@ public class CourseDBController {
 
     public CourseDBController(){
         try{
-            dbConnection = new DatabaseConnection(Config.USERNAME, Config.PASSWORD);
+            dbConnection = new DatabaseConnection(Config.DATABASE_NAME, Config.USERNAME,
+                                                  Config.PASSWORD);
             courseInstanceDAO = new CourseInstanceDAO(dbConnection);
         }
-        catch (DatabaseConnectionException | SQLException exception){
+        catch (DatabaseConnectionException | CourseDBException exception){
             throw new RuntimeException(exception);
         }
     }
 
     public void test(){
         try {
-            int hours = courseInstanceDAO.findPlannedHoursByCourseInstance("2026-50000011");
+            BigDecimal hours = courseInstanceDAO.findPlannedHoursByCourseInstance("2026-50000011");
+            dbConnection.commit();
             System.out.println(hours);
-        } catch (CourseDBException e) {
-            e.printStackTrace();
+        } catch (CourseDBException | DatabaseConnectionException exception) {
+            rollback();
+            exception.printStackTrace();
+        }
+    }
+
+    private void rollback(){
+        try{
+            dbConnection.rollback();
+        }
+        catch (DatabaseConnectionException exception){
+            exception.printStackTrace();
         }
     }
 }

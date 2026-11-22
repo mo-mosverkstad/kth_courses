@@ -4,27 +4,49 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import se.kth.iv1351.integration.DatabaseConnectionException;
-
 public class DatabaseConnection {
+    private static final String URL_PREFIX = "jdbc:postgresql://localhost:5432/";
+
     private Connection connection;
-    public DatabaseConnection(String user, String password) throws DatabaseConnectionException{
+
+    public DatabaseConnection(String databaseName, String user, String password)
+            throws DatabaseConnectionException{
         try{
-            connect(user, password);
+            connect(databaseName, user, password);
         }
-        catch (ClassNotFoundException | SQLException exception){
-            throw new DatabaseConnectionException(exception);
+        catch (SQLException exception){
+            throw new DatabaseConnectionException("Could not connect to the database: "
+                                                  + databaseName, exception);
         }
     }
 
-    private void connect(String user, String password) throws ClassNotFoundException, SQLException {
-        connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/course_database",
-                user, password);
+    private void connect(String databaseName, String user, String password)
+            throws SQLException {
+        connection = DriverManager.getConnection(URL_PREFIX + databaseName, user, password);
         connection.setAutoCommit(false);
     }
 
-    public Connection getConnection(){
+    Connection getConnection(){
         return connection;
     }
 
+    public void commit() throws DatabaseConnectionException {
+        try{
+            connection.commit();
+        }
+        catch (SQLException exception){
+            throw new DatabaseConnectionException("Could not commit the transaction.",
+                                                  exception);
+        }
+    }
+
+    public void rollback() throws DatabaseConnectionException {
+        try{
+            connection.rollback();
+        }
+        catch (SQLException exception){
+            throw new DatabaseConnectionException("Could not roll back the transaction.",
+                                                  exception);
+        }
+    }
 }
