@@ -11,5 +11,6 @@ public class BasicView implements View {
 
     public void start(){
         System.out.println("Basic view started!");
+        controller.test();
     }
 }

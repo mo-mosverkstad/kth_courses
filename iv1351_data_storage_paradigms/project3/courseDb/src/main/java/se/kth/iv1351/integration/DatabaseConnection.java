@@ -18,11 +18,8 @@ public class DatabaseConnection {
     }
 
     private void connect(String user, String password) throws ClassNotFoundException, SQLException {
-        connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/bankdb",
+        connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/course_database",
                 user, password);
-        // connection =
-        // DriverManager.getConnection("jdbc:mysql://localhost:3306/bankdb",
-        // "mysql", "mysql");
         connection.setAutoCommit(false);
     }
 
