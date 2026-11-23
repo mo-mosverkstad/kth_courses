@@ -2,7 +2,7 @@
 -- and measures how long the refresh takes. This is the fourth point of the "make it fast"
 -- requirement, and it is the only script here that is about write cost rather than read speed.
 --
--- Run it manually, against candidate D:
+-- Run it manually, against optimization D:
 --     sudo -u postgres psql -d course_database -f refresh-stale-view.sql
 --
 -- Part one is the demonstration, and runs in one transaction that is rolled back, so the data

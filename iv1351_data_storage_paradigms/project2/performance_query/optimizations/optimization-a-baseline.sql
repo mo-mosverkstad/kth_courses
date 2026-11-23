@@ -1,8 +1,9 @@
--- Candidate A: no optimisation at all. This is the baseline that every other candidate
--- is compared against. The workload queries in query_scripts/ read the base tables only.
+-- Optimization A: the baseline, that is no optimization at all. Every other optimization is
+-- measured against this state. The workload queries in ../../query_scripts/ read the base
+-- tables only, with no materialized view and no extra index.
 --
--- Switching to this state removes every object that the other candidates create, so the
--- file can be run at any time regardless of which candidate is active.
+-- This file also serves as the way back: it removes every object that any of the other
+-- optimizations create, so it can be run at any time regardless of which one is active.
 
 DROP MATERIALIZED VIEW IF EXISTS teacher_period_load_view;
 DROP MATERIALIZED VIEW IF EXISTS course_instance_planned_view;

@@ -1,16 +1,23 @@
--- Candidate D: materialized views at the grain of the result of each query.
--- This is the candidate that was chosen, so this file is also the solution.
+-- Optimization E: like optimization D, but no teaching activity name is written in the view.
 --
--- Every view stores one row per row of the result of the query that reads it, which means
--- that the query has no grouping left to do at all. That is the reason D is the only
--- candidate that changes the order of magnitude. Candidate C stores one row per planned
--- activity instead, which is the grain of the table it reads from, so it can only remove
--- joins and never the aggregation. See RESULTS.md.
+-- optimization D pivots the planned hours into one fixed column per teaching activity, which
+-- means that every activity name is hardcoded in the view as a string literal. That has two
+-- consequences. A teaching activity that is added to the table teaching_activity afterwards
+-- gets no column, and it is not counted in total_hours either, since that sum also lists the
+-- seven names. The project description requires the database to be flexible enough to add
+-- more activities, so the view contradicts the schema it is built on.
 --
--- Queries: performance_query/queries/fast-*.sql
--- Run candidate-a-no-optimisation.sql to remove everything again.
+-- E stores the same data as one key-value map per course instance instead, where the keys are
+-- whatever names exist in teaching_activity. Adding a new activity needs no change to the
+-- view at all, and it is included in total_hours automatically. The activity names appear
+-- only in the query that reads the view, when it picks the keys it wants to display.
 --
--- Can be re-run at any time, and does not care which candidate is active.
+-- Everything apart from the planned hours view is identical to optimization D, so that the
+-- comparison measures only this one difference.
+--
+-- Queries: ../queries/query-e-planned-hours.sql (planned hours)
+--          ../queries/query-d-mismatches.sql  (unchanged from D)
+-- Run optimization-a-baseline.sql to remove everything again.
 
 DROP MATERIALIZED VIEW IF EXISTS teacher_period_load_view;
 DROP MATERIALIZED VIEW IF EXISTS course_instance_planned_view;
@@ -21,10 +28,11 @@ DROP INDEX IF EXISTS idx_teaching_allocation_employee;
 DROP INDEX IF EXISTS idx_course_instance_academic_period;
 
 
--- One row per course instance, with the planned hours already summed per teaching activity.
+-- One row per course instance. The planned hours of every teaching activity are stored in
+-- a JSONB map, keyed by the activity name as it is spelled in the table teaching_activity.
 -- Used by: planned hours per course instance (8/day)
 
-CREATE MATERIALIZED VIEW course_instance_planned_view AS
+CREATE MATERIALIZED VIEW course_instance_planned_json_view AS
 SELECT
     course_instance.id AS course_instance_id,
     course.course_code AS course_code,
@@ -34,55 +42,18 @@ SELECT
     period.period_name AS period_number,
     course_instance.num_students AS num_students,
 
-    SUM(CASE
-        WHEN teaching_activity.activity_name = 'Lecture'
-        THEN planned_activity.planned_hours * teaching_activity.multiplication_factor
-        ELSE 0
-    END) AS lecture_hours,
+    COALESCE(
+        jsonb_object_agg(
+            teaching_activity.activity_name,
+            planned_activity.planned_hours * teaching_activity.multiplication_factor
+        ) FILTER (WHERE teaching_activity.activity_name IS NOT NULL),
+        '{}'::jsonb
+    ) AS hours_per_activity,
 
-    SUM(CASE
-        WHEN teaching_activity.activity_name = 'Tutorial'
-        THEN planned_activity.planned_hours * teaching_activity.multiplication_factor
-        ELSE 0
-    END) AS tutorial_hours,
-
-    SUM(CASE
-        WHEN teaching_activity.activity_name = 'Lab'
-        THEN planned_activity.planned_hours * teaching_activity.multiplication_factor
-        ELSE 0
-    END) AS lab_hours,
-
-    SUM(CASE
-        WHEN teaching_activity.activity_name = 'Seminar'
-        THEN planned_activity.planned_hours * teaching_activity.multiplication_factor
-        ELSE 0
-    END) AS seminar_hours,
-
-    SUM(CASE
-        WHEN teaching_activity.activity_name = 'Others'
-        THEN planned_activity.planned_hours * teaching_activity.multiplication_factor
-        ELSE 0
-    END) AS other_overhead_hours,
-
-    SUM(CASE
-        WHEN teaching_activity.activity_name = 'Administration'
-        THEN planned_activity.planned_hours * teaching_activity.multiplication_factor
-        ELSE 0
-    END) AS admin_hours,
-
-    SUM(CASE
-        WHEN teaching_activity.activity_name = 'Examination'
-        THEN planned_activity.planned_hours * teaching_activity.multiplication_factor
-        ELSE 0
-    END) AS exam_hours,
-
-    SUM(CASE
-        WHEN teaching_activity.activity_name IN
-             ('Lecture', 'Tutorial', 'Lab', 'Seminar', 'Others',
-              'Administration', 'Examination')
-        THEN planned_activity.planned_hours * teaching_activity.multiplication_factor
-        ELSE 0
-    END) AS total_hours
+    COALESCE(
+        SUM(planned_activity.planned_hours * teaching_activity.multiplication_factor),
+        0
+    ) AS total_hours
 
 FROM course_instance
 INNER JOIN course_layout
@@ -109,16 +80,13 @@ GROUP BY
 
 WITH DATA;
 
-CREATE UNIQUE INDEX course_instance_planned_view_key
-    ON course_instance_planned_view (course_instance_id);
-CREATE INDEX course_instance_planned_view_year_period
-    ON course_instance_planned_view (academic_year, period_number);
+CREATE UNIQUE INDEX course_instance_planned_json_view_key
+    ON course_instance_planned_json_view (course_instance_id);
+CREATE INDEX course_instance_planned_json_view_year_period
+    ON course_instance_planned_json_view (academic_year, period_number);
 
 
--- One row per course instance, with the planned and the allocated hours already summed.
--- Only planned activities that have at least one allocation are included, which is the
--- same set of rows that the mismatch query compares.
--- Used by: course instances where planned and allocated hours differ by more than 15% (3/day)
+-- Identical to optimization D from here on.
 
 CREATE MATERIALIZED VIEW course_instance_mismatch_view AS
 SELECT
@@ -147,9 +115,6 @@ WITH DATA;
 CREATE UNIQUE INDEX course_instance_mismatch_view_key
     ON course_instance_mismatch_view (course_instance_id);
 
-
--- One row per teacher and academic period.
--- Used by: teacher load per period (5/day), teachers with more than N instances (20/day)
 
 CREATE MATERIALIZED VIEW teacher_period_load_view AS
 SELECT
@@ -195,14 +160,10 @@ CREATE INDEX teacher_period_load_view_year_period
     ON teacher_period_load_view (academic_year, period_number);
 
 
--- Index on the base table for the per-teacher lookups (12/day).
--- planned_activity.course_instance_id is already the first column of
--- UNIQUE (course_instance_id, teaching_activity_id), so it needs no extra index.
-
 CREATE INDEX idx_teaching_allocation_employee
     ON teaching_allocation (employee_id);
 
-ANALYZE course_instance_planned_view;
+ANALYZE course_instance_planned_json_view;
 ANALYZE course_instance_mismatch_view;
 ANALYZE teacher_period_load_view;
 ANALYZE teaching_allocation;

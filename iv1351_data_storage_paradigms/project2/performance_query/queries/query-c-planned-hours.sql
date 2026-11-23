@@ -1,4 +1,4 @@
--- Candidate: planned hours per course instance read from course_activity_view,
+-- optimization: planned hours per course instance read from course_activity_view,
 -- which is stored at the grain of planned_activity. The query still has to group.
 
 SELECT

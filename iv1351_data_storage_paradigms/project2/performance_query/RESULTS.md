@@ -1,13 +1,13 @@
 # Performance results, comparison and analysis
 
-All measurements in one place: the chosen solution against no optimisation, the five
-candidates against each other, index usage, refresh cost, and the conclusions drawn from them.
+All measurements in one place: the chosen solution against no optimization, the five
+optimizations against each other, index usage, refresh cost, and the conclusions drawn from them.
 
 - Environment: PostgreSQL 16, Ubuntu on WSL 2, 8 cores, 15 GB RAM
 - Dataset: 3,200,577 teaching allocations, 2,267,074 planned activities, 400,072 course
   instances, 450,033 employees
 - Every figure is the **median of 3 runs** of `EXPLAIN ANALYZE`
-- Raw evidence: `results/` and `candidates/results/`
+- Raw evidence: `results/`
 - Insert and bulk load performance is a separate topic, in `../insertion-performance.md`
 
 ---
@@ -23,7 +23,7 @@ candidates against each other, index usage, refresh cost, and the conclusions dr
 | Allocated hours per teacher, one instance | 12/day | nothing | Already 0.9 ms. Every join follows a primary key or `UNIQUE` index. A view would only add refresh cost. |
 | Allocated hours of one teacher | 12/day | `idx_teaching_allocation_employee` | Without it, all 3.2 million allocations are scanned to find one teacher's rows. |
 
-## 2. The solution against no optimisation
+## 2. The solution against no optimization
 
 Measured by `run-performance.bash`. Plans in `results/before-*.txt` and `results/after-*.txt`.
 
@@ -36,7 +36,7 @@ Measured by `run-performance.bash`. Plans in `results/before-*.txt` and `results
 | Allocated hours, one teacher (12/day) | 3,235.7 ms | 0.5 ms | 6,600x |
 | Mismatch above 15 % (3/day) | 8,782.0 ms | 159.8 ms | 55x |
 
-Building all three views and the index takes about 24 s. Every optimised query returns
+Building all three views and the index takes about 24 s. Every optimized query returns
 exactly the same rows as its original, checked with `EXCEPT` in both directions for all six
 pairs, 0 differing rows.
 
@@ -52,12 +52,12 @@ What the plans show:
 - **One course instance**: already fast. PostgreSQL pushes `HAVING course_code = 'IV1351'`
   into the scan, because it only refers to a grouping column, and uses `course_course_code_key`.
 
-## 3. The five candidates
+## 3. The five optimizations
 
-Measured by `candidates/run-candidates.bash` on all six workload queries. Plans in
-`candidates/results/`, 30 files, six per candidate.
+Measured by `optimizations/run-optimizations.bash` on all six workload queries. Plans in
+`results/`, 30 files, six per optimization.
 
-Which query text each candidate runs depends on what it actually provides. A and B add no
+Which query text each optimization runs depends on what it actually provides. A and B add no
 view, so they run the original queries in `query_scripts/`. C provides a view only for the
 planned hours and the mismatch report, so the other four queries run the originals as well,
 since there is no view for them to read. D runs the rewritten queries in `queries/`, and E
@@ -67,21 +67,22 @@ runs the same except for the planned hours, which unpacks the JSONB map.
 |---|---|---|
 | A | nothing | `../query_scripts/*.sql` |
 | B | index on `course_instance (academic_period_id)` | `../query_scripts/*.sql` |
-| C | `course_activity_view`, one row per planned activity | `candidates/queries/cand-*-activity-grain.sql` |
-| D | `course_instance_planned_view` + `course_instance_mismatch_view`, one row per course instance | `queries/fast-*.sql` |
-| E | as D, but planned hours in a JSONB map keyed by activity name | `candidates/queries/cand-planned-hours-json.sql` |
+| C | `course_activity_view`, one row per planned activity | `queries/query-c-*.sql` |
+| D | `course_instance_planned_view` + `course_instance_mismatch_view`, one row per course instance | `queries/query-d-*.sql` |
+| E | as D, but planned hours in a JSONB map keyed by activity name | `queries/query-e-planned-hours.sql` |
 
-Execution time in ms, median of 3 runs. The fastest candidate per query is in bold.
+Execution time in ms, median of 3 runs, from the run saved in `results/summary-optimizations.txt`
+and `results/measurements.csv`. The fastest optimization per query is in bold.
 
 | Query (frequency) | A | B | C | D | E |
 |---|---|---|---|---|---|
-| Teachers above a threshold (20/day) | 2,625.5 | 959.8 | 2,398.2 | **51.0** | 105.3 |
-| Allocated hours, one instance (12/day) | 1.06 | 1.05 | 0.86 | 1.34 | **0.78** |
-| Allocated hours, one teacher (12/day) | 3,008.2 | 2,804.7 | 4,343.9 | 1.45 | **0.67** |
-| Planned hours per instance (8/day) | 3,139.0 | 1,794.0 | 3,239.5 | 254.6 | **165.3** |
-| Teacher load per period (5/day) | 5,389.6 | 5,686.2 | 6,406.3 | 633.3 | **591.0** |
-| Mismatch above 15 % (3/day) | 10,693.8 | 10,462.8 | 8,599.1 | 350.8 | **259.4** |
-| Build time (s) | 2.6 | **0.3** | 18.5 | 30.7 | 32.8 |
+| Teachers above a threshold (20/day) | 1,258.6 | 1,283.7 | 1,920.6 | **41.2** | 53.2 |
+| Allocated hours, one instance (12/day) | 0.89 | 1.06 | 0.82 | 0.69 | **0.56** |
+| Allocated hours, one teacher (12/day) | 3,401.6 | 2,429.0 | 1,945.7 | 1.06 | **0.74** |
+| Planned hours per instance (8/day) | 2,725.9 | 1,747.9 | 1,882.7 | **89.2** | 138.8 |
+| Teacher load per period (5/day) | 5,071.6 | 4,389.1 | 4,169.4 | **519.2** | 558.4 |
+| Mismatch above 15 % (3/day) | 12,991.2 | 9,630.0 | 7,176.1 | **177.0** | 216.3 |
+| Build time (s) | 4.2 | **0.7** | 11.3 | 25.2 | 29.9 |
 
 Storage:
 
@@ -96,28 +97,29 @@ Storage:
 ### How large is the measurement error
 
 D and E use **identical objects and identical query text for five of the six queries**, so any
-difference on those five is pure run-to-run variation. Measured: 51.0 against 105.3 ms,
-1.45 against 0.67 ms, 633.3 against 591.0 ms, 350.8 against 259.4 ms. That is a built-in
-control, and it says the error bar is roughly a factor of two on the fast queries and some
-tens of percent on the slow ones. Only differences much larger than that are meaningful.
+difference on those five is pure run-to-run variation. Measured: 41.2 against 53.2 ms, 0.69
+against 0.56 ms, 1.06 against 0.74 ms, 519.2 against 558.4 ms, 177.0 against 216.3 ms. That is
+a built-in control, and it says the error bar is roughly 30 % even between two states that are
+byte for byte the same. Only differences much larger than that are meaningful.
 
-### Replication across three runs
+### Replication across four runs
 
-The planned hours query, the one query where D and E genuinely differ:
+The planned hours query, measured four times:
 
-| State | run 1 | run 2 | run 3 |
-|---|---|---|---|
-| A | 2,109.1 | 2,555.9 | 3,139.0 |
-| B | 1,455.5 | 2,208.3 | 1,794.0 |
-| C | 1,683.8 | 3,173.8 | 3,239.5 |
-| D | 112.7 | 212.2 | 254.6 |
-| E | – | 204.9 | 165.3 |
+| State | run 1 | run 2 | run 3 | run 4 |
+|---|---|---|---|---|
+| A | 2,109.1 | 2,555.9 | 3,139.0 | 2,725.9 |
+| B | 1,455.5 | 2,208.3 | 1,794.0 | 1,747.9 |
+| C | 1,683.8 | 3,173.8 | 3,239.5 | 1,882.7 |
+| D | 112.7 | 212.2 | 254.6 | 89.2 |
+| E | – | 204.9 | 165.3 | 138.8 |
 
 Absolute times vary by 20 to 40 %. The separation between A, B, C on one side and D, E on the
-other is a factor of ten or more in every run, so that is solid. The ordering *within* each
-group is not stable, and no conclusion is drawn from it.
+other is a factor of ten or more in every run, so that conclusion is solid. The ordering
+*within* the A, B, C group is not stable across runs and no conclusion is drawn from it, and
+the same is true of D against E.
 
-## 4. Analysis: why the candidates behave as they do
+## 4. Analysis: why the optimizations behave as they do
 
 **The grain of the view decides everything.** A, B and C are all the same order of magnitude,
 between 1.6 s and 2.5 s. Only D and E are different, by more than a factor of ten. The reason
@@ -128,22 +130,26 @@ and `course_activity_view` only removes the joins. Neither removes the grouping.
 one row per course instance, which is the grain of the result, so there is nothing left to
 aggregate.
 
-**Candidate C is a net loss across the workload.** Measuring all six queries instead of two
-shows something a narrower comparison hid. C helps exactly one query, the mismatch report,
-8,599 ms against 10,694 ms. On three others it is *slower than doing nothing at all*: the
-allocated hours of one teacher, 4,343.9 against 3,008.2 ms, the planned hours, 3,239.5
-against 3,139.0 ms, and the teacher load, 6,406.3 against 5,389.6 ms. The reason is that its
-295 MB occupy buffer cache that the base tables of those queries need, while offering them
-nothing in return, since C creates no view they can read. An optimisation is not neutral for
-the queries it does not serve.
+**A, B and C cannot be separated from each other.** This is worth stating plainly, because it
+is tempting to read a ranking into the numbers. Across four runs the order of A, B and C
+changes every time. In the saved run C is faster than A on four of the six queries; in the
+previous run it was slower than A on three of them. optimization B improved the most frequent
+query by a factor of nearly three in one run and not at all in another. None of these
+differences survives repetition, and the reason is structural: all three optimizations still
+group the 566,769 planned activities of the academic year on every execution, so they differ
+only in how cheaply they reach those rows, which is the small part of the cost.
 
-**A plain index is the better cheap option.** B costs about 9 MB and no refresh at all, and it
-is the only candidate besides D and E that improves the most frequent query, 959.8 against
-2,625.5 ms. It also beat C on the planned hours in all three runs. The cheapest candidate
-outperformed the most expensive one.
+The one difference within that group that *does* replicate is the mismatch report, where C is
+the fastest of the three in every run, 7,176 ms against 12,991 for A in the saved run. That is
+the one query which genuinely joins 2.27 million rows, which is the work C removes.
+
+**The cheap optimization is not worse than the expensive one.** B costs about 9 MB and no refresh
+at all, against C's 295 MB and 13 s per refresh, and it is indistinguishable from C across the
+workload. Spending 33 times the storage and a refresh cycle bought nothing measurable outside
+the mismatch report.
 
 **The query that needed nothing confirms it needed nothing.** The allocated hours for one
-course instance stays at about 1 ms in all five candidates, from 0.78 to 1.34 ms, even though
+course instance stays at about 1 ms in all five optimizations, from 0.78 to 1.34 ms, even though
 it runs 12 times a day. Every join already follows a primary key or a `UNIQUE` index. Adding
 a view for it would have added refresh cost for no gain, and the measurement across all five
 states is the evidence for that choice.
@@ -167,7 +173,7 @@ the view removes those joins. It is only worthless for the planned hours, where 
 removed had already been removed by the triggers of project task 1 that store the derived
 hours in `planned_activity`.
 
-**Candidate E costs disk, not query time.** D writes the seven activity names into the view as
+**optimization E costs disk, not query time.** D writes the seven activity names into the view as
 string literals, so a teaching activity added to `teaching_activity` afterwards gets no column
 and is not counted in `total_hours` either. That contradicts the requirement in the project
 description that the database must be flexible enough to add more activities. E removes every
@@ -246,21 +252,22 @@ the old one. Refreshing all three costs about 25 s in total.
   allocation trigger, which filters on the same column. Its cost is extra work on every insert
   into `teaching_allocation`, which the bulk load measurements in
   `../insertion-performance.md` quantify.
-- **An optimisation is only valid for the schema and workload it was measured against.**
+- **An optimization is only valid for the schema and workload it was measured against.**
   `course_activity_view` was justified when the planned hours had to be computed from the
   formula on every read. The triggers added in project task 1 moved that work to write time
   and silently invalidated the view, which only showed up because it was measured again.
 - **If the workload changed**, for example to many allocation changes during planning and few
   reports, the views should be refreshed on a schedule rather than on demand, or dropped in
   favour of indexes. If the reports had to be exact at every moment, materialized views could
-  not be used for them at all, and candidate B would be the only acceptable option.
+  not be used for them at all, and optimization B would be the only acceptable option.
 
 ## 8. Where the raw evidence is
 
 | Path | Contents |
 |---|---|
-| `results/summary.txt` | printed before/after summary and index usage |
+| `results/summary-performance.txt` | printed before/after summary and index usage |
 | `results/before-*.txt`, `results/after-*.txt` | full plans, 6 queries before and after |
-| `candidates/results/summary.txt` | printed A to E comparison |
-| `candidates/results/{A,B,C,D,E}-*.txt` | full plans, every candidate and both queries |
+| `results/summary-optimizations.txt` | printed A to E comparison |
+| `results/measurements.csv` | `optimization,query,milliseconds`, one line per measurement |
+| `results/{A,B,C,D,E}-*.txt` | full plans, every optimization and every workload query |
 | `../insertion-performance.md` | bulk load: trigger with a temporary index against disabled trigger |

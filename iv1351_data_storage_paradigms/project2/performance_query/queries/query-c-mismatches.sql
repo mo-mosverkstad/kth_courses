@@ -1,4 +1,4 @@
--- Candidate: the mismatch query with the planned side read from course_activity_view.
+-- optimization: the mismatch query with the planned side read from course_activity_view.
 -- The allocations are summed per planned activity first, then joined with the view, so
 -- the query still joins 2.27 million rows and aggregates them per course instance.
 

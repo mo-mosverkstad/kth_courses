@@ -1,42 +1,41 @@
 #!/usr/bin/env bash
 #
-# Measures the whole workload, all six queries, against all five candidates.
+# Measures the whole workload, all six queries, against all five optimizations.
 #
-#   A  no optimisation                   candidate-a-no-optimisation.sql
-#   B  one index on course_instance      candidate-b-index-course-instance.sql
-#   C  view at planned_activity grain    candidate-c-course-activity-view.sql
-#   D  views at course instance grain    candidate-d-course-instance-views.sql
-#   E  as D, activity names data driven  candidate-e-data-driven-activities.sql
+#   A  no optimization                   optimization-a-baseline.sql
+#   B  one index on course_instance      optimization-b-index-course-instance.sql
+#   C  view at planned_activity grain    optimization-c-course-activity-view.sql
+#   D  views at course instance grain    optimization-d-course-instance-views.sql
+#   E  as D, activity names data driven  optimization-e-data-driven-activities.sql
 #
-# Which query text a candidate runs depends on what that candidate actually provides.
-# Candidates A and B add no view, so they run the original queries. Candidate C provides a
-# view only for the planned hours and for the mismatch report, so its other four queries are
-# the originals as well, because there is no view for them to read. Candidates D and E run
-# the rewritten queries, except that E unpacks the JSONB map for the planned hours.
+# An optimization can only be measured with a query it is able to run. Optimizations A and B add no
+# view, so they run the original queries in ../query_scripts/. optimization C provides a view
+# only for the planned hours and the mismatch report, so its other four queries are the
+# originals as well, because there is no view for them to read. optimizations D and E read their
+# own query files, query-d-*.sql and query-e-*.sql.
 #
-# Every candidate file starts by removing everything the other candidates create, so the
-# candidates are independent of the order they are applied in. Candidate D is applied again
+# Every optimization file starts by removing everything the other optimizations create, so the
+# optimizations are independent of the order they are applied in. optimization D is applied again
 # at the end, since it is the chosen solution.
 #
 # Output:
-#   results/summary.txt       everything this script prints
-#   results/measurements.csv  candidate,query,milliseconds, one line per measurement
-#   results/<candidate>-<query>.txt   the last EXPLAIN ANALYZE plan of that combination
+#   results/summary-optimizations.txt    everything this script prints
+#   results/measurements.csv          optimization,query,milliseconds, one line per measurement
+#   results/<optimization>-<query>.txt   the last EXPLAIN ANALYZE plan of that combination
 
 set -euo pipefail
 
 
 # ----------------------------------------------------------------- configuration
 
-CANDIDATE_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-PERFORMANCE_DIR="$(cd -- "$CANDIDATE_DIR/.." && pwd)"
-ORIGINAL_QUERY_DIR="$(cd -- "$PERFORMANCE_DIR/../query_scripts" && pwd)"
-CANDIDATE_QUERY_DIR="$CANDIDATE_DIR/queries"
-OPTIMISED_QUERY_DIR="$PERFORMANCE_DIR/queries"
-RESULT_DIR="$CANDIDATE_DIR/results"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+ORIGINAL_QUERY_DIR="$(cd -- "$SCRIPT_DIR/../query_scripts" && pwd)"
+OPTIMIZATION_DIR="$SCRIPT_DIR/optimizations"
+QUERY_DIR="$SCRIPT_DIR/queries"
+RESULT_DIR="$SCRIPT_DIR/results"
 
 MEASUREMENTS_CSV="$RESULT_DIR/measurements.csv"
-SUMMARY_FILE="$RESULT_DIR/summary.txt"
+SUMMARY_FILE="$RESULT_DIR/summary-optimizations.txt"
 
 DATABASE="course_database"
 RUNS_PER_QUERY=3
@@ -87,11 +86,11 @@ median_of_three() {
 # A single run is not trustworthy, because the first run of a query reads pages from disk
 # while later runs find them in cache. Three runs are made and the middle one is kept.
 measure_median_execution_time() {
-    local candidate="$1"
+    local optimization="$1"
     local query_name="$2"
     local query_file="$3"
 
-    local plan_file="$RESULT_DIR/$candidate-$query_name.txt"
+    local plan_file="$RESULT_DIR/$optimization-$query_name.txt"
     local sql
     sql="$(read_query_without_trailing_semicolon "$query_file")"
 
@@ -106,40 +105,40 @@ measure_median_execution_time() {
 }
 
 remember_measurement() {
-    local candidate="$1"
+    local optimization="$1"
     local query_name="$2"
     local milliseconds="$3"
 
-    printf '%s,%s,%s\n' "$candidate" "$query_name" "$milliseconds" >> "$MEASUREMENTS_CSV"
+    printf '%s,%s,%s\n' "$optimization" "$query_name" "$milliseconds" >> "$MEASUREMENTS_CSV"
 }
 
 recall_measurement() {
-    local candidate="$1"
+    local optimization="$1"
     local query_name="$2"
 
     awk --field-separator=, \
-        --assign wanted_candidate="$candidate" \
+        --assign wanted_optimization="$optimization" \
         --assign wanted_query="$query_name" \
-        '$1 == wanted_candidate && $2 == wanted_query { print $3 }' \
+        '$1 == wanted_optimization && $2 == wanted_query { print $3 }' \
         "$MEASUREMENTS_CSV"
 }
 
-# Measures one query for one candidate, stores the result and prints one progress line.
+# Measures one query for one optimization, stores the result and prints one progress line.
 measure_query() {
-    local candidate="$1"
+    local optimization="$1"
     local query_name="$2"
     local description="$3"
     local query_file="$4"
 
     local milliseconds
-    milliseconds="$(measure_median_execution_time "$candidate" "$query_name" "$query_file")"
+    milliseconds="$(measure_median_execution_time "$optimization" "$query_name" "$query_file")"
 
-    remember_measurement "$candidate" "$query_name" "$milliseconds"
+    remember_measurement "$optimization" "$query_name" "$milliseconds"
     printf '  %-40s %12s ms   (%s)\n' "$description" "$milliseconds" "$(basename "$query_file")"
 }
 
 
-# ----------------------------------------------------------------- applying a candidate
+# ----------------------------------------------------------------- applying an optimization
 
 seconds_now() {
     date +%s.%N
@@ -150,28 +149,28 @@ seconds_since() {
     printf '%.1f' "$(echo "$(seconds_now) - $started_at" | bc)"
 }
 
-apply_candidate() {
-    local candidate="$1"
+apply_optimization() {
+    local optimization="$1"
     local description="$2"
-    local candidate_file="$3"
+    local optimization_file="$3"
 
-    echo "=============== candidate $candidate: $description ==============="
+    echo "=============== Optimization $optimization: $description ==============="
 
     local started_at
     started_at="$(seconds_now)"
-    run_psql --file "$CANDIDATE_DIR/$candidate_file" 2> /dev/null
+    run_psql --file "$SCRIPT_DIR/$optimization_file" 2> /dev/null
     local build_seconds
     build_seconds="$(seconds_since "$started_at")"
 
-    remember_measurement "$candidate" "build-seconds" "$build_seconds"
+    remember_measurement "$optimization" "build-seconds" "$build_seconds"
     echo "build time : $build_seconds s"
 }
 
 
-# ----------------------------------------------------------------- the five candidates
+# ----------------------------------------------------------------- the five optimizations
 
-measure_candidate_a() {
-    apply_candidate A "no optimisation" candidate-a-no-optimisation.sql
+measure_optimization_a() {
+    apply_optimization A "no optimization" optimization-a-baseline.sql
 
     measure_query A threshold     "teachers above a threshold (20/day)"     "$ORIGINAL_QUERY_DIR/teaching-allocation.sql"
     measure_query A one-instance  "allocated hours, one instance (12/day)"  "$ORIGINAL_QUERY_DIR/actual-hours-calculation-by-course.sql"
@@ -182,10 +181,10 @@ measure_candidate_a() {
     echo
 }
 
-measure_candidate_b() {
-    apply_candidate B "index on course_instance" candidate-b-index-course-instance.sql
+measure_optimization_b() {
+    apply_optimization B "index on course_instance" optimization-b-index-course-instance.sql
 
-    # An index needs no rewritten query, so these are the same files as candidate A.
+    # An index needs no rewritten query, so these are the same files as optimization A.
     measure_query B threshold     "teachers above a threshold (20/day)"     "$ORIGINAL_QUERY_DIR/teaching-allocation.sql"
     measure_query B one-instance  "allocated hours, one instance (12/day)"  "$ORIGINAL_QUERY_DIR/actual-hours-calculation-by-course.sql"
     measure_query B one-teacher   "allocated hours, one teacher (12/day)"   "$ORIGINAL_QUERY_DIR/actual-hours-calculation-by-teacher.sql"
@@ -195,31 +194,31 @@ measure_candidate_b() {
     echo
 }
 
-measure_candidate_c() {
-    apply_candidate C "view per planned activity" candidate-c-course-activity-view.sql
+measure_optimization_c() {
+    apply_optimization C "view per planned activity" optimization-c-course-activity-view.sql
 
     # Only the planned hours and the mismatch report can read course_activity_view.
     # The other four queries have no view to read, so they stay as they are.
     measure_query C threshold     "teachers above a threshold (20/day)"     "$ORIGINAL_QUERY_DIR/teaching-allocation.sql"
     measure_query C one-instance  "allocated hours, one instance (12/day)"  "$ORIGINAL_QUERY_DIR/actual-hours-calculation-by-course.sql"
     measure_query C one-teacher   "allocated hours, one teacher (12/day)"   "$ORIGINAL_QUERY_DIR/actual-hours-calculation-by-teacher.sql"
-    measure_query C planned-hours "planned hours per instance (8/day)"      "$CANDIDATE_QUERY_DIR/cand-planned-hours-activity-grain.sql"
+    measure_query C planned-hours "planned hours per instance (8/day)"      "$QUERY_DIR/query-c-planned-hours.sql"
     measure_query C teacher-load  "teacher load per period (5/day)"         "$ORIGINAL_QUERY_DIR/teacher-load-per-period.sql"
-    measure_query C mismatches    "mismatch above 15% (3/day)"              "$CANDIDATE_QUERY_DIR/cand-mismatches-activity-grain.sql"
+    measure_query C mismatches    "mismatch above 15% (3/day)"              "$QUERY_DIR/query-c-mismatches.sql"
 
     echo "  course_activity_view              : $(size_and_rows_of course_activity_view)"
     echo
 }
 
-measure_candidate_d() {
-    apply_candidate D "views per course instance" candidate-d-course-instance-views.sql
+measure_optimization_d() {
+    apply_optimization D "views per course instance" optimization-d-course-instance-views.sql
 
-    measure_query D threshold     "teachers above a threshold (20/day)"     "$OPTIMISED_QUERY_DIR/fast-teaching-allocation.sql"
-    measure_query D one-instance  "allocated hours, one instance (12/day)"  "$OPTIMISED_QUERY_DIR/fast-actual-hours-by-course.sql"
-    measure_query D one-teacher   "allocated hours, one teacher (12/day)"   "$OPTIMISED_QUERY_DIR/fast-actual-hours-by-teacher.sql"
-    measure_query D planned-hours "planned hours per instance (8/day)"      "$OPTIMISED_QUERY_DIR/fast-planned-hours.sql"
-    measure_query D teacher-load  "teacher load per period (5/day)"         "$OPTIMISED_QUERY_DIR/fast-teacher-load-per-period.sql"
-    measure_query D mismatches    "mismatch above 15% (3/day)"              "$OPTIMISED_QUERY_DIR/fast-mismatches.sql"
+    measure_query D threshold     "teachers above a threshold (20/day)"     "$QUERY_DIR/query-d-threshold.sql"
+    measure_query D one-instance  "allocated hours, one instance (12/day)"  "$QUERY_DIR/query-d-one-instance.sql"
+    measure_query D one-teacher   "allocated hours, one teacher (12/day)"   "$QUERY_DIR/query-d-one-teacher.sql"
+    measure_query D planned-hours "planned hours per instance (8/day)"      "$QUERY_DIR/query-d-planned-hours.sql"
+    measure_query D teacher-load  "teacher load per period (5/day)"         "$QUERY_DIR/query-d-teacher-load.sql"
+    measure_query D mismatches    "mismatch above 15% (3/day)"              "$QUERY_DIR/query-d-mismatches.sql"
 
     echo "  course_instance_planned_view      : $(size_and_rows_of course_instance_planned_view)"
     echo "  course_instance_mismatch_view     : $(size_and_rows_of course_instance_mismatch_view)"
@@ -227,17 +226,17 @@ measure_candidate_d() {
     echo
 }
 
-measure_candidate_e() {
-    apply_candidate E "same, activities data driven" candidate-e-data-driven-activities.sql
+measure_optimization_e() {
+    apply_optimization E "same, activities data driven" optimization-e-data-driven-activities.sql
 
-    # Everything except the planned hours is identical to candidate D, so that the
+    # Everything except the planned hours is identical to optimization D, so that the
     # comparison measures only the one difference between them.
-    measure_query E threshold     "teachers above a threshold (20/day)"     "$OPTIMISED_QUERY_DIR/fast-teaching-allocation.sql"
-    measure_query E one-instance  "allocated hours, one instance (12/day)"  "$OPTIMISED_QUERY_DIR/fast-actual-hours-by-course.sql"
-    measure_query E one-teacher   "allocated hours, one teacher (12/day)"   "$OPTIMISED_QUERY_DIR/fast-actual-hours-by-teacher.sql"
-    measure_query E planned-hours "planned hours per instance (8/day)"      "$CANDIDATE_QUERY_DIR/cand-planned-hours-json.sql"
-    measure_query E teacher-load  "teacher load per period (5/day)"         "$OPTIMISED_QUERY_DIR/fast-teacher-load-per-period.sql"
-    measure_query E mismatches    "mismatch above 15% (3/day)"              "$OPTIMISED_QUERY_DIR/fast-mismatches.sql"
+    measure_query E threshold     "teachers above a threshold (20/day)"     "$QUERY_DIR/query-d-threshold.sql"
+    measure_query E one-instance  "allocated hours, one instance (12/day)"  "$QUERY_DIR/query-d-one-instance.sql"
+    measure_query E one-teacher   "allocated hours, one teacher (12/day)"   "$QUERY_DIR/query-d-one-teacher.sql"
+    measure_query E planned-hours "planned hours per instance (8/day)"      "$QUERY_DIR/query-e-planned-hours.sql"
+    measure_query E teacher-load  "teacher load per period (5/day)"         "$QUERY_DIR/query-d-teacher-load.sql"
+    measure_query E mismatches    "mismatch above 15% (3/day)"              "$QUERY_DIR/query-d-mismatches.sql"
 
     echo "  course_instance_planned_json_view : $(size_and_rows_of course_instance_planned_json_view)"
     echo "  course_instance_mismatch_view     : $(size_and_rows_of course_instance_mismatch_view)"
@@ -278,21 +277,21 @@ print_summary() {
 # ----------------------------------------------------------------- main
 
 main() {
-    echo "run-candidates.bash, $(date '+%Y-%m-%d %H:%M:%S')"
+    echo "run-optimizations.bash, $(date '+%Y-%m-%d %H:%M:%S')"
     echo
 
-    measure_candidate_a
-    measure_candidate_b
-    measure_candidate_c
-    measure_candidate_d
-    measure_candidate_e
+    measure_optimization_a
+    measure_optimization_b
+    measure_optimization_c
+    measure_optimization_d
+    measure_optimization_e
 
     print_summary
 
     echo
-    echo "=============== restoring the chosen solution (candidate D) ==============="
-    run_psql --file "$CANDIDATE_DIR/candidate-d-course-instance-views.sql" 2> /dev/null
-    echo "Database left in candidate D."
+    echo "=============== restoring the chosen solution (optimization D) ==============="
+    run_psql --file "$OPTIMIZATION_DIR/optimization-d-course-instance-views.sql" 2> /dev/null
+    echo "Database left in optimization D."
 }
 
 mkdir -p "$RESULT_DIR"

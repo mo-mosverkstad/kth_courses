@@ -1,4 +1,4 @@
--- Candidate C: a materialized view at the grain of planned_activity.
+-- Optimization C: a materialized view at the grain of planned_activity.
 --
 -- This was the first solution. It stores one row per planned activity, with the
 -- multiplication factor applied and the lookup tables already joined in, which removes
@@ -9,8 +9,8 @@
 -- while its own rows are 67 bytes against 16 bytes in planned_activity, so reading one
 -- academic year out of it moves more data than reading the base tables. See RESULTS.md.
 --
--- Queries: candidates/queries/cand-planned-hours-activity-grain.sql
---          candidates/queries/cand-mismatches-activity-grain.sql
+-- Queries: ../queries/query-c-planned-hours.sql
+--          ../queries/query-c-mismatches.sql
 
 DROP MATERIALIZED VIEW IF EXISTS teacher_period_load_view;
 DROP MATERIALIZED VIEW IF EXISTS course_instance_planned_view;
