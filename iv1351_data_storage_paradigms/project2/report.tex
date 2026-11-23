@@ -373,9 +373,13 @@ Since every inserted row fires the trigger from project task 1, and because that
 
 \subsection{Indexes and materialized views}
 
-As performance optimization, 2 materialized views and 1 index on a base table were introduced. The view \texttt{course\_activity\_view} contains one row for each planned activity, where the multiplication factor is already applied and where the seven joins of the original query are already carried out. Since its rows are given for every planned activity and not for every teacher, the planned hours cannot be counted twice through this view. The view \texttt{teacher\_period\_load\_view} contains one row for every teacher and academic period, with the number of course instances and the total allocated hours already aggregated. The index \texttt{idx\_teaching\_allocation\_employee} was created on the employee column of the allocation table.
+As performance optimization, 3 materialized views and 1 index on a base table were introduced. Every view is stored at the same grain as the result of the query that uses it, which means that the query does not have to aggregate anything at all. This principle is what decides whether a view helps, and it is discussed further in Chapter~\ref{sec:discussion}.
 
-Additionally, each view was given 2 indexes: 1 unique index on the key of the view and an index on the academic year together with the period name, since every query on the views filters on exactly those two columns.
+The view \texttt{course\_instance\_planned\_view} contains one row for every course instance, where the planned hours are already summed per teaching activity and where the multiplication factor is already applied. The view \texttt{course\_instance\_mismatch\_view} contains one row for every course instance, with both the planned and the allocated hours already summed, so that the two can be compared directly. The view \texttt{teacher\_period\_load\_view} contains one row for every teacher and academic period, with the number of course instances and the total allocated hours already aggregated. Furthermore, the index \texttt{idx\_teaching\_allocation\_employee} was created on the employee column of the allocation table.
+
+Additionally, each view was given a unique index on its key, which is required by \texttt{REFRESH MATERIALIZED VIEW CONCURRENTLY}, while the two views that are filtered by time also were given an index on the academic year together with the period name.
+
+An earlier version of the solution used a view \texttt{course\_activity\_view} with one row for every planned activity instead. That view was measured to give no performance gain at all for the planned hours per course instance, which is the reason why it was replaced. Since it was stored at the same grain as the table \texttt{planned\_activity} that it read from, it could only remove joins and never the grouping, and the joins it removed were against small lookup tables that were already cached. Additionally, it was larger than the table it replaced, 295 MB against 213 MB, because every one of its 2.27 million rows carried a copy of the course code, the instance ID and the activity name. In comparison, the two new views together occupy 88 MB, since one row per course instance means 400,072 rows instead of 2.27 million.
 
 The measured execution time of every query before and after these changes is given in Table~\ref{tab:performance}. Each value is the median of three runs of \texttt{EXPLAIN ANALYZE}, and the complete query plans are stored in the repository.
 
@@ -386,12 +390,12 @@ The measured execution time of every query before and after these changes is giv
 \hline
 \textbf{Query (frequency)} & \textbf{Before} & \textbf{After} & \textbf{Speed-up} \\
 \hline
-Teachers above a threshold (20/day) & 1,482.7 ms & 73.6 ms & 20x \\
-Teacher load per period (5/day) & 4,383.0 ms & 1,040.5 ms & 4.2x \\
-Planned hours per course instance (8/day) & 1,981.7 ms & 2,295.8 ms & none \\
-Allocated hours, one course instance (12/day) & 0.9 ms & 0.6 ms & not needed \\
-Allocated hours, one teacher (12/day) & 2,387.4 ms & 1.9 ms & 1,300x \\
-Mismatch above 15\% (3/day) & 11,320.1 ms & 8,045.0 ms & 1.4x \\
+Teachers above a threshold (20/day) & 1,002.3 ms & 56.8 ms & 18x \\
+Teacher load per period (5/day) & 2,950.4 ms & 540.6 ms & 5.5x \\
+Planned hours per course instance (8/day) & 1,696.6 ms & 86.6 ms & 20x \\
+Allocated hours, one course instance (12/day) & 0.9 ms & 0.4 ms & not needed \\
+Allocated hours, one teacher (12/day) & 3,235.7 ms & 0.5 ms & 6,600x \\
+Mismatch above 15\% (3/day) & 8,782.0 ms & 159.8 ms & 55x \\
 \hline
 \end{tabular}
 \caption{The execution time of each query before and after the materialized views and the index were added, as the median of three runs}
@@ -400,15 +404,41 @@ Mismatch above 15\% (3/day) & 11,320.1 ms & 8,045.0 ms & 1.4x \\
 
 % Furthermore, every optimised query returns exactly the same rows as its original version, which was verified by comparing the two results with \texttt{EXCEPT} in both directions for all six pairs. The query plans also show what has changed. For the query of one single teacher, the plan before contained a parallel sequential scan of the whole allocation table, while the plan after contains an index scan that finds the employee by the employment ID and then reads only the 27 allocations of that teacher, which explains the difference between 2.4 seconds and 2 milliseconds. For the two queries on the teacher load, the plan before scanned and grouped the whole allocation table, while the plan after reads 383,399 already aggregated rows of the view through a bitmap index scan on the academic year and the period.
 
-However, one exception is the planned hours per course instance query. In this case, the view doesn't produce any performance gain at all. The reason is that the planned hours of the derived activities in \texttt{planned\_activity} is already stored and maintained by the triggers in project task 1. Since the query only reads this stored column, the only remaining operation is to group the planned activities from the academic year. This operation requires the same amount of work regardless of whether the data is accessed through the view or directly from the base tables. Furthermore, the view must retrieve the relevant rows from the entire table through a linear scan, which explains why the measured execution time is slightly higher after introducing the view. However, this difference is small compared to the variation between individual runs.
+Every query of the workload is now faster, and the two queries that gained the least from the earlier solution are the ones that gained the most from the new views. The planned hours per course instance went from no gain at all to 20 times faster, since the query no longer groups the 566,769 planned activities of the academic year, but only reads the 100,018 rows of that year directly from the view. In the same way, the mismatch query went from 1.4 times to 55 times faster, since both the planned and the allocated hours are already summed per course instance in the view, which means that the query neither joins nor aggregates anything. Furthermore, every optimised query returns exactly the same rows as its original version, which was verified by comparing the two results with \texttt{EXCEPT} in both directions for all six pairs.
+
+On the other hand, creating all views and indexes takes about 24 seconds, and the time it takes to keep them up to date is given in Section~\ref{sec:refresh}. Whether that cost is motivated by the gain is discussed in Chapter~\ref{sec:discussion}.
 
 \subsection{An index that PostgreSQL does not use}
 
-The unique index \texttt{course\_activity\_view\_planned\_activity} had 0 scans during the measured workload, which was read from the statistics that PostgreSQL collects for each index. The reason is that the mismatch query joins the whole view with the summed allocations, which means that all 2.27 million rows of the view are needed. When almost every row of a table is needed, the planner estimates that a sequential scan together with a hash join is cheaper than 2.27 million index lookups, since an index scan normally causes random reads. The index \texttt{teacher\_period\_load\_view\_key} was unused for the same reason.
+Three indexes had 0 scans during the measured workload, which was read from the statistics that PostgreSQL collects for each index. They are the unique keys of the three views, namely \texttt{course\_instance\_planned\_view\_key}, \texttt{course\_instance\_mismatch\_view\_key} and \texttt{teacher\_period\_load\_view\_key}. The number of scans of each index is given in Table~\ref{tab:indexusage}.
+
+\begin{table}[h!]
+\centering
+\footnotesize
+\begin{tabular}{|l|l|r|}
+\hline
+\textbf{Table or view} & \textbf{Index} & \textbf{Scans} \\
+\hline
+\texttt{course\_instance\_planned\_view} & \texttt{course\_instance\_planned\_view\_key} & 0 \\
+\texttt{course\_instance\_planned\_view} & \texttt{course\_instance\_planned\_view\_year\_period} & 3 \\
+\texttt{course\_instance\_mismatch\_view} & \texttt{course\_instance\_mismatch\_view\_key} & 0 \\
+\texttt{teacher\_period\_load\_view} & \texttt{teacher\_period\_load\_view\_key} & 0 \\
+\texttt{teacher\_period\_load\_view} & \texttt{teacher\_period\_load\_view\_year\_period} & 6 \\
+\texttt{teaching\_allocation} & \texttt{idx\_teaching\_allocation\_employee} & 15 \\
+\hline
+\end{tabular}
+\caption{The number of index scans during the measured workload, where 0 means that the planner never used the index}
+\label{tab:indexusage}
+\end{table}
+
+The reason is that none of the queries looks up a single row by the key of a view. The mismatch query reads the whole \texttt{course\_instance\_mismatch\_view} in order to compare every course instance, and when almost every row of a table is needed, the planner estimates that a sequential scan is cheaper than 400,072 index lookups, since an index scan normally causes random reads. The two queries that filter by time use the index on the academic year and the period instead, which is why those indexes do have scans.
+
+However, the three unused indexes are still necessary, since \texttt{REFRESH MATERIALIZED VIEW CONCURRENTLY} requires a unique index on the view. In other words, they are not created for the queries at all, but for the refresh, which is a good example of the fact that an index can be motivated by something other than the read performance of a query.
 
 % However, forcing the index by switching off sequential scans and hash joins gave a merge join that ran in 6.8 seconds instead of 9.7 seconds in one measurement, which means that the estimate of the planner was too pessimistic in this particular case. The explanation is that the view had just been created in the order of the indexed column, so that the index scan reads the table almost sequentially instead of randomly, and that the data was already cached in memory, while the default cost settings of the planner assume random reads from disk. Even so, the index is still necessary, since \texttt{REFRESH MATERIALIZED VIEW CONCURRENTLY} requires a unique index on the view.
 
 \subsection{Out-of-date materialized view and the refresh time}
+\label{sec:refresh}
 
 A materialized view that becomes out of date could be shown by inserting one single allocation for a teacher who had one course instance in the period P2 of 2026. The three states are given in Table~\ref{tab:stale}.
 
@@ -435,15 +465,16 @@ The table shows that the view keeps the old value after the insert, while the ba
 \hline
 \textbf{View} & \textbf{\texttt{REFRESH}} & \textbf{\texttt{REFRESH CONCURRENTLY}} \\
 \hline
-\texttt{teacher\_period\_load\_view} & 11.6--12.2 s & 21.4 s \\
-\texttt{course\_activity\_view} & 9.4 s & 27.6 s \\
+\texttt{teacher\_period\_load\_view} & 11.4 s & 16.7 s \\
+\texttt{course\_instance\_planned\_view} & 5.0 s & 10.2 s \\
+\texttt{course\_instance\_mismatch\_view} & 8.8 s & 15.7 s \\
 \hline
 \end{tabular}
 \caption{The time it takes to refresh each materialized view, with and without \texttt{CONCURRENTLY}}
 \label{tab:refresh}
 \end{table}
 
-An ordinary refresh locks the view, which means that the queries on it have to wait for up to 12 seconds. On the other hand, \texttt{REFRESH MATERIALIZED VIEW CONCURRENTLY} lets the queries continue to read the old content during the refresh, but it takes two to three times as long, since it has to compare the new result with the old one.
+An ordinary refresh locks the view, which means that the queries on it have to wait for up to 11 seconds. On the other hand, \texttt{REFRESH MATERIALIZED VIEW CONCURRENTLY} lets the queries continue to read the old content during the refresh, but it takes about twice as long, since it has to compare the new result with the old one. Refreshing all three views costs about 25 seconds in total, which is the price of the gain in Table~\ref{tab:performance} and which has to be paid every time the views are to be made current again.
 
 % \subsection{Comparison between requirement and result}
 

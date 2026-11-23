@@ -1,0 +1,19 @@
+                                                                                  QUERY PLAN                                                                                   
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Gather Merge  (cost=25405.64..35199.09 rows=83938 width=264) (actual time=96.127..128.736 rows=100018 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   ->  Sort  (cost=24405.62..24510.54 rows=41969 width=264) (actual time=85.196..89.721 rows=33339 loops=3)
+         Sort Key: course_code, instance_id
+         Sort Method: external merge  Disk: 2856kB
+         Worker 0:  Sort Method: external merge  Disk: 3032kB
+         Worker 1:  Sort Method: external merge  Disk: 2928kB
+         ->  Parallel Bitmap Heap Scan on course_instance_planned_json_view  (cost=1129.04..16017.02 rows=41969 width=264) (actual time=4.163..61.858 rows=33339 loops=3)
+               Recheck Cond: (academic_year = 2025)
+               Heap Blocks: exact=3923
+               ->  Bitmap Index Scan on course_instance_planned_json_view_year_period  (cost=0.00..1103.86 rows=100725 width=0) (actual time=5.017..5.018 rows=100018 loops=1)
+                     Index Cond: (academic_year = 2025)
+ Planning Time: 0.306 ms
+ Execution Time: 132.408 ms
+(15 rows)
+

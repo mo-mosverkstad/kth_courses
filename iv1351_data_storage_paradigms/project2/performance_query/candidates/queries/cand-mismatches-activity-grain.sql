@@ -1,6 +1,6 @@
--- Course instances where planned and allocated hours differ by more than 15% (3/day).
--- Planned hours come from course_activity_view, the allocations are summed per planned
--- activity first (in primary key order of teaching_allocation) and then per course instance.
+-- Candidate: the mismatch query with the planned side read from course_activity_view.
+-- The allocations are summed per planned activity first, then joined with the view, so
+-- the query still joins 2.27 million rows and aggregates them per course instance.
 
 SELECT
     course_activity_view.course_instance_id,

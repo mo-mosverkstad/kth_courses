@@ -1,0 +1,16 @@
+                                                                          QUERY PLAN                                                                          
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=18606.30..18606.30 rows=1 width=32) (actual time=38.045..38.048 rows=1 loops=1)
+   Sort Key: teacher_name
+   Sort Method: quicksort  Memory: 25kB
+   ->  Bitmap Heap Scan on teacher_period_load_view  (cost=1270.56..18606.29 rows=1 width=32) (actual time=6.980..38.022 rows=1 loops=1)
+         Recheck Cond: ((academic_year = 2026) AND ((period_number)::text = 'P2'::text))
+         Filter: (number_of_courses > 1)
+         Rows Removed by Filter: 95862
+         Heap Blocks: exact=15663
+         ->  Bitmap Index Scan on teacher_period_load_view_year_period  (cost=0.00..1270.56 rows=94613 width=0) (actual time=4.501..4.502 rows=95863 loops=1)
+               Index Cond: ((academic_year = 2026) AND ((period_number)::text = 'P2'::text))
+ Planning Time: 0.270 ms
+ Execution Time: 38.224 ms
+(12 rows)
+

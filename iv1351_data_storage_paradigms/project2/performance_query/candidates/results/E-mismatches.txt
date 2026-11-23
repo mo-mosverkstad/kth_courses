@@ -1,0 +1,9 @@
+                                                               QUERY PLAN                                                               
+----------------------------------------------------------------------------------------------------------------------------------------
+ Seq Scan on course_instance_mismatch_view  (cost=0.00..11100.23 rows=133357 width=48) (actual time=0.015..210.192 rows=228600 loops=1)
+   Filter: (abs(((allocated_instance_hours - planned_instance_hours) / planned_instance_hours)) > 0.15)
+   Rows Removed by Filter: 171472
+ Planning Time: 0.235 ms
+ Execution Time: 216.260 ms
+(5 rows)
+

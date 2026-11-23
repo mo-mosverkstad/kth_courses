@@ -1,0 +1,66 @@
+run-candidates.bash, 2026-11-23 21:33:21
+
+=============== candidate A: no optimisation ===============
+build time : 4.2 s
+  teachers above a threshold (20/day)          1258.554 ms   (teaching-allocation.sql)
+  allocated hours, one instance (12/day)          0.890 ms   (actual-hours-calculation-by-course.sql)
+  allocated hours, one teacher (12/day)        3401.625 ms   (actual-hours-calculation-by-teacher.sql)
+  planned hours per instance (8/day)           2725.851 ms   (planned-hours-calculation.sql)
+  teacher load per period (5/day)              5071.617 ms   (teacher-load-per-period.sql)
+  mismatch above 15% (3/day)                  12991.200 ms   (mismatches.sql)
+
+=============== candidate B: index on course_instance ===============
+build time : 0.7 s
+  teachers above a threshold (20/day)          1283.654 ms   (teaching-allocation.sql)
+  allocated hours, one instance (12/day)          1.060 ms   (actual-hours-calculation-by-course.sql)
+  allocated hours, one teacher (12/day)        2429.049 ms   (actual-hours-calculation-by-teacher.sql)
+  planned hours per instance (8/day)           1747.905 ms   (planned-hours-calculation.sql)
+  teacher load per period (5/day)              4389.126 ms   (teacher-load-per-period.sql)
+  mismatch above 15% (3/day)                   9629.990 ms   (mismatches.sql)
+
+=============== candidate C: view per planned activity ===============
+build time : 11.3 s
+  teachers above a threshold (20/day)          1920.635 ms   (teaching-allocation.sql)
+  allocated hours, one instance (12/day)          0.817 ms   (actual-hours-calculation-by-course.sql)
+  allocated hours, one teacher (12/day)        1945.681 ms   (actual-hours-calculation-by-teacher.sql)
+  planned hours per instance (8/day)           1882.656 ms   (cand-planned-hours-activity-grain.sql)
+  teacher load per period (5/day)              4169.423 ms   (teacher-load-per-period.sql)
+  mismatch above 15% (3/day)                   7176.106 ms   (cand-mismatches-activity-grain.sql)
+  course_activity_view              : 295 MB, 2,267,074 rows
+
+=============== candidate D: views per course instance ===============
+build time : 25.2 s
+  teachers above a threshold (20/day)            41.170 ms   (fast-teaching-allocation.sql)
+  allocated hours, one instance (12/day)          0.689 ms   (fast-actual-hours-by-course.sql)
+  allocated hours, one teacher (12/day)           1.063 ms   (fast-actual-hours-by-teacher.sql)
+  planned hours per instance (8/day)             89.174 ms   (fast-planned-hours.sql)
+  teacher load per period (5/day)               519.196 ms   (fast-teacher-load-per-period.sql)
+  mismatch above 15% (3/day)                    176.964 ms   (fast-mismatches.sql)
+  course_instance_planned_view      : 60 MB, 400,072 rows
+  course_instance_mismatch_view     : 28 MB, 400,072 rows
+  teacher_period_load_view          : 166 MB, 1,533,600 rows
+
+=============== candidate E: same, activities data driven ===============
+build time : 29.9 s
+  teachers above a threshold (20/day)            53.185 ms   (fast-teaching-allocation.sql)
+  allocated hours, one instance (12/day)          0.560 ms   (fast-actual-hours-by-course.sql)
+  allocated hours, one teacher (12/day)           0.738 ms   (fast-actual-hours-by-teacher.sql)
+  planned hours per instance (8/day)            138.826 ms   (cand-planned-hours-json.sql)
+  teacher load per period (5/day)               558.379 ms   (fast-teacher-load-per-period.sql)
+  mismatch above 15% (3/day)                    216.260 ms   (fast-mismatches.sql)
+  course_instance_planned_json_view : 106 MB, 400,072 rows
+  course_instance_mismatch_view     : 28 MB, 400,072 rows
+  teacher_period_load_view          : 166 MB, 1,533,600 rows
+
+=============== summary: execution time in ms, median of 3 runs ===============
+query (frequency)                                  A           B           C           D           E
+teachers above a threshold (20/day)         1258.554    1283.654    1920.635      41.170      53.185
+allocated hours, one instance (12/day)         0.890       1.060       0.817       0.689       0.560
+allocated hours, one teacher (12/day)       3401.625    2429.049    1945.681       1.063       0.738
+planned hours per instance (8/day)          2725.851    1747.905    1882.656      89.174     138.826
+teacher load per period (5/day)             5071.617    4389.126    4169.423     519.196     558.379
+mismatch above 15% (3/day)                 12991.200    9629.990    7176.106     176.964     216.260
+build time (s)                                   4.2         0.7        11.3        25.2        29.9
+
+=============== restoring the chosen solution (candidate D) ===============
+Database left in candidate D.

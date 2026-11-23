@@ -1,36 +1,36 @@
                                                                                                            QUERY PLAN                                                                                                            
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- Incremental Sort  (cost=40.33..40.54 rows=2 width=355) (actual time=0.312..0.314 rows=4 loops=1)
+ Incremental Sort  (cost=40.30..40.51 rows=2 width=355) (actual time=0.301..0.303 rows=4 loops=1)
    Sort Key: course.course_code, course_instance.instance_id, (concat(person.first_name, ' ', person.last_name))
    Presorted Key: course.course_code, course_instance.instance_id
    Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 25kB  Peak Memory: 25kB
-   ->  GroupAggregate  (cost=40.19..40.45 rows=2 width=355) (actual time=0.281..0.291 rows=4 loops=1)
+   ->  GroupAggregate  (cost=40.16..40.42 rows=2 width=355) (actual time=0.273..0.283 rows=4 loops=1)
          Group Key: course.course_code, course_instance.instance_id, course_layout.hp, period.period_name, employee.id, person.first_name, person.last_name, job_title.job_title_name
-         ->  Sort  (cost=40.19..40.19 rows=2 width=86) (actual time=0.261..0.263 rows=7 loops=1)
+         ->  Sort  (cost=40.16..40.16 rows=2 width=86) (actual time=0.255..0.257 rows=7 loops=1)
                Sort Key: course.course_code, course_instance.instance_id, course_layout.hp, period.period_name, employee.id, person.first_name, person.last_name, job_title.job_title_name
                Sort Method: quicksort  Memory: 25kB
-               ->  Nested Loop  (cost=2.98..40.18 rows=2 width=86) (actual time=0.156..0.233 rows=7 loops=1)
+               ->  Nested Loop  (cost=2.98..40.15 rows=2 width=86) (actual time=0.151..0.231 rows=7 loops=1)
                      Join Filter: (academic_period.period_id = period.id)
                      Rows Removed by Join Filter: 21
-                     ->  Seq Scan on period  (cost=0.00..1.04 rows=4 width=7) (actual time=0.004..0.004 rows=4 loops=1)
-                     ->  Materialize  (cost=2.98..39.02 rows=2 width=87) (actual time=0.029..0.056 rows=7 loops=4)
-                           ->  Nested Loop  (cost=2.98..39.01 rows=2 width=87) (actual time=0.112..0.215 rows=7 loops=1)
-                                 ->  Nested Loop  (cost=2.69..38.31 rows=2 width=84) (actual time=0.106..0.203 rows=7 loops=1)
-                                       ->  Nested Loop  (cost=2.55..37.22 rows=7 width=84) (actual time=0.066..0.178 rows=27 loops=1)
-                                             ->  Nested Loop  (cost=2.26..34.98 rows=7 width=78) (actual time=0.058..0.145 rows=27 loops=1)
-                                                   ->  Nested Loop  (cost=1.84..31.85 rows=7 width=60) (actual time=0.051..0.109 rows=27 loops=1)
-                                                         ->  Nested Loop  (cost=1.70..30.81 rows=7 width=49) (actual time=0.045..0.085 rows=27 loops=1)
-                                                               ->  Nested Loop  (cost=1.27..27.51 rows=7 width=45) (actual time=0.037..0.044 rows=27 loops=1)
-                                                                     ->  Nested Loop  (cost=0.84..18.04 rows=1 width=37) (actual time=0.029..0.030 rows=1 loops=1)
+                     ->  Seq Scan on period  (cost=0.00..1.04 rows=4 width=7) (actual time=0.003..0.003 rows=4 loops=1)
+                     ->  Materialize  (cost=2.98..38.99 rows=2 width=87) (actual time=0.028..0.055 rows=7 loops=4)
+                           ->  Nested Loop  (cost=2.98..38.98 rows=2 width=87) (actual time=0.108..0.214 rows=7 loops=1)
+                                 ->  Nested Loop  (cost=2.69..38.28 rows=2 width=84) (actual time=0.101..0.201 rows=7 loops=1)
+                                       ->  Nested Loop  (cost=2.55..37.19 rows=7 width=84) (actual time=0.058..0.175 rows=27 loops=1)
+                                             ->  Nested Loop  (cost=2.26..34.95 rows=7 width=78) (actual time=0.051..0.143 rows=27 loops=1)
+                                                   ->  Nested Loop  (cost=1.84..31.82 rows=7 width=60) (actual time=0.044..0.106 rows=27 loops=1)
+                                                         ->  Nested Loop  (cost=1.70..30.78 rows=7 width=49) (actual time=0.038..0.081 rows=27 loops=1)
+                                                               ->  Nested Loop  (cost=1.27..27.49 rows=7 width=45) (actual time=0.029..0.036 rows=27 loops=1)
+                                                                     ->  Nested Loop  (cost=0.84..18.04 rows=1 width=37) (actual time=0.022..0.023 rows=1 loops=1)
                                                                            Join Filter: (job_title.id = employee.job_title_id)
                                                                            Rows Removed by Join Filter: 4
-                                                                           ->  Nested Loop  (cost=0.84..16.88 rows=1 width=22) (actual time=0.026..0.026 rows=1 loops=1)
-                                                                                 ->  Index Scan using employee_employment_id_key on employee  (cost=0.42..8.44 rows=1 width=12) (actual time=0.014..0.014 rows=1 loops=1)
+                                                                           ->  Nested Loop  (cost=0.84..16.88 rows=1 width=22) (actual time=0.018..0.019 rows=1 loops=1)
+                                                                                 ->  Index Scan using employee_employment_id_key on employee  (cost=0.42..8.44 rows=1 width=12) (actual time=0.011..0.011 rows=1 loops=1)
                                                                                        Index Cond: (employment_id = 500005)
-                                                                                 ->  Index Scan using person_pkey on person  (cost=0.42..8.44 rows=1 width=18) (actual time=0.009..0.009 rows=1 loops=1)
+                                                                                 ->  Index Scan using person_pkey on person  (cost=0.42..8.44 rows=1 width=18) (actual time=0.005..0.005 rows=1 loops=1)
                                                                                        Index Cond: (id = employee.person_id)
-                                                                           ->  Seq Scan on job_title  (cost=0.00..1.07 rows=7 width=23) (actual time=0.002..0.002 rows=5 loops=1)
-                                                                     ->  Index Scan using idx_teaching_allocation_employee on teaching_allocation  (cost=0.43..9.10 rows=38 width=12) (actual time=0.007..0.011 rows=27 loops=1)
+                                                                           ->  Seq Scan on job_title  (cost=0.00..1.07 rows=7 width=23) (actual time=0.001..0.002 rows=5 loops=1)
+                                                                     ->  Index Scan using idx_teaching_allocation_employee on teaching_allocation  (cost=0.43..9.08 rows=37 width=12) (actual time=0.006..0.010 rows=27 loops=1)
                                                                            Index Cond: (employee_id = employee.id)
                                                                ->  Index Scan using planned_activity_pkey on planned_activity  (cost=0.43..0.47 rows=1 width=12) (actual time=0.001..0.001 rows=1 loops=27)
                                                                      Index Cond: (id = teaching_allocation.planned_activity_id)
@@ -44,9 +44,9 @@
                                              Index Cond: (id = course_instance.academic_period_id)
                                              Filter: (academic_year = 2025)
                                              Rows Removed by Filter: 1
-                                 ->  Index Scan using course_pkey on course  (cost=0.29..0.35 rows=1 width=11) (actual time=0.001..0.001 rows=1 loops=7)
+                                 ->  Index Scan using course_pkey on course  (cost=0.29..0.35 rows=1 width=11) (actual time=0.002..0.002 rows=1 loops=7)
                                        Index Cond: (id = course_layout.course_id)
- Planning Time: 3.499 ms
- Execution Time: 0.531 ms
+ Planning Time: 3.562 ms
+ Execution Time: 0.493 ms
 (48 rows)
 

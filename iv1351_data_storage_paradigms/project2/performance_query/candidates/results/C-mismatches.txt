@@ -1,0 +1,24 @@
+                                                                                                QUERY PLAN                                                                                                 
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ HashAggregate  (cost=511832.93..545968.05 rows=135587 width=100) (actual time=4415.287..6542.732 rows=228600 loops=1)
+   Group Key: course_activity_view.course_instance_id
+   Filter: (abs(((sum(((allocated.allocation_hours)::numeric * course_activity_view.multiplication_factor)) - sum(course_activity_view.planned_hours)) / sum(course_activity_view.planned_hours))) > 0.15)
+   Planned Partitions: 32  Batches: 161  Memory Usage: 9361kB  Disk Usage: 128312kB
+   Rows Removed by Filter: 171472
+   ->  Hash Join  (cost=93861.60..354094.33 rows=1987258 width=23) (actual time=749.987..3299.837 rows=2267074 loops=1)
+         Hash Cond: (allocated.planned_activity_id = course_activity_view.planned_activity_id)
+         ->  Subquery Scan on allocated  (cost=0.43..222324.60 rows=1987258 width=12) (actual time=213.957..1546.546 rows=2267074 loops=1)
+               ->  GroupAggregate  (cost=0.43..202452.02 rows=1987258 width=12) (actual time=213.954..1423.351 rows=2267074 loops=1)
+                     Group Key: teaching_allocation.planned_activity_id
+                     ->  Index Scan using teaching_allocation_pkey on teaching_allocation  (cost=0.43..166576.56 rows=3200577 width=8) (actual time=0.070..771.876 rows=3200577 loops=1)
+         ->  Hash  (cost=52238.74..52238.74 rows=2267074 width=19) (actual time=535.307..535.308 rows=2267074 loops=1)
+               Buckets: 131072  Batches: 32  Memory Usage: 4749kB
+               ->  Seq Scan on course_activity_view  (cost=0.00..52238.74 rows=2267074 width=19) (actual time=0.069..246.496 rows=2267074 loops=1)
+ Planning Time: 0.561 ms
+ JIT:
+   Functions: 22
+   Options: Inlining true, Optimization true, Expressions true, Deforming true
+   Timing: Generation 1.736 ms, Inlining 82.917 ms, Optimization 103.232 ms, Emission 80.419 ms, Total 268.303 ms
+ Execution Time: 6575.182 ms
+(20 rows)
+

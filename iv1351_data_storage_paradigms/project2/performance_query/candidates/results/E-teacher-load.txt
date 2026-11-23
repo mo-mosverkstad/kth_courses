@@ -1,0 +1,14 @@
+                                                                           QUERY PLAN                                                                           
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=71477.37..72447.24 rows=387950 width=38) (actual time=449.041..511.378 rows=383399 loops=1)
+   Sort Key: period_number, teacher_name
+   Sort Method: external merge  Disk: 20896kB
+   ->  Bitmap Heap Scan on teacher_period_load_view  (cost=4327.04..24856.42 rows=387950 width=38) (actual time=10.865..83.584 rows=383399 loops=1)
+         Recheck Cond: (academic_year = 2025)
+         Heap Blocks: exact=15663
+         ->  Bitmap Index Scan on teacher_period_load_view_year_period  (cost=0.00..4230.05 rows=387950 width=0) (actual time=8.795..8.796 rows=383399 loops=1)
+               Index Cond: (academic_year = 2025)
+ Planning Time: 0.248 ms
+ Execution Time: 521.166 ms
+(10 rows)
+

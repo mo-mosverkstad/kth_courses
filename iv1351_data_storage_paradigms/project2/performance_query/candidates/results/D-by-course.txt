@@ -1,0 +1,45 @@
+                                                                                                                 QUERY PLAN                                                                                                                 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Incremental Sort  (cost=31.80..33.04 rows=8 width=353) (actual time=1.399..1.405 rows=3 loops=1)
+   Sort Key: course_instance.instance_id, (concat(person.first_name, ' ', person.last_name))
+   Presorted Key: course_instance.instance_id
+   Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 25kB  Peak Memory: 25kB
+   ->  GroupAggregate  (cost=31.66..32.68 rows=8 width=353) (actual time=1.319..1.353 rows=3 loops=1)
+         Group Key: course_instance.instance_id, course_layout.hp, employee.id, person.first_name, person.last_name, job_title.job_title_name
+         ->  Sort  (cost=31.66..31.68 rows=8 width=84) (actual time=1.221..1.228 rows=8 loops=1)
+               Sort Key: course_instance.instance_id, course_layout.hp, employee.id, person.first_name, person.last_name, job_title.job_title_name
+               Sort Method: quicksort  Memory: 25kB
+               ->  Nested Loop  (cost=3.11..31.54 rows=8 width=84) (actual time=0.373..0.578 rows=8 loops=1)
+                     ->  Nested Loop  (cost=2.98..30.35 rows=8 width=69) (actual time=0.320..0.508 rows=8 loops=1)
+                           ->  Nested Loop  (cost=2.56..26.51 rows=8 width=59) (actual time=0.302..0.459 rows=8 loops=1)
+                                 ->  Nested Loop  (cost=2.13..22.91 rows=8 width=51) (actual time=0.264..0.384 rows=8 loops=1)
+                                       ->  Nested Loop  (cost=1.70..19.68 rows=6 width=47) (actual time=0.202..0.260 rows=6 loops=1)
+                                             ->  Nested Loop  (cost=1.57..18.79 rows=6 width=36) (actual time=0.190..0.228 rows=6 loops=1)
+                                                   ->  Nested Loop  (cost=1.14..17.99 rows=1 width=32) (actual time=0.154..0.161 rows=1 loops=1)
+                                                         ->  Nested Loop  (cost=1.01..17.32 rows=4 width=36) (actual time=0.120..0.128 rows=4 loops=1)
+                                                               ->  Nested Loop  (cost=0.58..16.63 rows=1 width=18) (actual time=0.102..0.106 rows=1 loops=1)
+                                                                     ->  Index Scan using course_course_code_key on course  (cost=0.29..8.31 rows=1 width=11) (actual time=0.080..0.081 rows=1 loops=1)
+                                                                           Index Cond: ((course_code)::text = 'IV1351'::text)
+                                                                     ->  Index Scan using course_layout_course_id_version_key on course_layout  (cost=0.29..8.31 rows=1 width=15) (actual time=0.015..0.016 rows=1 loops=1)
+                                                                           Index Cond: (course_id = course.id)
+                                                               ->  Index Scan using course_instance_course_layout_id_academic_period_id_key on course_instance  (cost=0.42..0.65 rows=4 width=26) (actual time=0.015..0.017 rows=4 loops=1)
+                                                                     Index Cond: (course_layout_id = course_layout.id)
+                                                         ->  Index Scan using academic_period_pkey on academic_period  (cost=0.14..0.16 rows=1 width=4) (actual time=0.007..0.007 rows=0 loops=4)
+                                                               Index Cond: (id = course_instance.academic_period_id)
+                                                               Filter: (academic_year = (EXTRACT(year FROM CURRENT_DATE))::integer)
+                                                               Rows Removed by Filter: 1
+                                                   ->  Index Scan using planned_activity_course_instance_id_teaching_activity_id_key on planned_activity  (cost=0.43..0.75 rows=6 width=12) (actual time=0.032..0.060 rows=6 loops=1)
+                                                         Index Cond: (course_instance_id = course_instance.id)
+                                             ->  Index Scan using teaching_activity_pkey on teaching_activity  (cost=0.13..0.15 rows=1 width=19) (actual time=0.004..0.004 rows=1 loops=6)
+                                                   Index Cond: (id = planned_activity.teaching_activity_id)
+                                       ->  Index Scan using teaching_allocation_pkey on teaching_allocation  (cost=0.43..0.52 rows=2 width=12) (actual time=0.018..0.019 rows=1 loops=6)
+                                             Index Cond: (planned_activity_id = planned_activity.id)
+                                 ->  Index Scan using employee_pkey on employee  (cost=0.42..0.45 rows=1 width=12) (actual time=0.008..0.008 rows=1 loops=8)
+                                       Index Cond: (id = teaching_allocation.employee_id)
+                           ->  Index Scan using person_pkey on person  (cost=0.42..0.48 rows=1 width=18) (actual time=0.005..0.005 rows=1 loops=8)
+                                 Index Cond: (id = employee.person_id)
+                     ->  Index Scan using job_title_pkey on job_title  (cost=0.13..0.15 rows=1 width=23) (actual time=0.007..0.007 rows=1 loops=8)
+                           Index Cond: (id = employee.job_title_id)
+ Planning Time: 6.716 ms
+ Execution Time: 1.763 ms
+(42 rows)

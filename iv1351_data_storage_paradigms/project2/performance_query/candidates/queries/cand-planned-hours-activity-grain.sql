@@ -1,4 +1,5 @@
--- Planned hours per course instance (8/day), read from course_activity_view
+-- Candidate: planned hours per course instance read from course_activity_view,
+-- which is stored at the grain of planned_activity. The query still has to group.
 
 SELECT
     course_activity_view.course_code,

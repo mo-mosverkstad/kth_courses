@@ -1,0 +1,52 @@
+                                                                                              QUERY PLAN                                                                                               
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=18340.38..196520.51 rows=566768 width=291) (actual time=197.677..2688.114 rows=100018 loops=1)
+   Group Key: course.course_code, course_instance.instance_id, course_layout.hp, period.period_name, course_instance.num_students
+   ->  Nested Loop Left Join  (cost=18340.38..123549.13 rows=566768 width=54) (actual time=197.608..1401.726 rows=566769 loops=1)
+         ->  Nested Loop Left Join  (cost=18340.24..110289.63 rows=566768 width=43) (actual time=197.588..1097.766 rows=566769 loops=1)
+               ->  Gather Merge  (cost=18339.81..29738.92 rows=100018 width=39) (actual time=197.525..278.517 rows=100018 loops=1)
+                     Workers Planned: 1
+                     Workers Launched: 1
+                     ->  Sort  (cost=17339.80..17486.89 rows=58834 width=39) (actual time=188.655..209.041 rows=50009 loops=2)
+                           Sort Key: course.course_code, course_instance.instance_id, course_layout.hp, period.period_name, course_instance.num_students
+                           Sort Method: external merge  Disk: 2336kB
+                           Worker 0:  Sort Method: external merge  Disk: 2864kB
+                           ->  Hash Join  (cost=5975.15..12678.86 rows=58834 width=39) (actual time=83.912..163.578 rows=50009 loops=2)
+                                 Hash Cond: (academic_period.period_id = period.id)
+                                 ->  Hash Join  (cost=5974.06..12359.71 rows=58834 width=40) (actual time=64.087..136.967 rows=50009 loops=2)
+                                       Hash Cond: (course_layout.course_id = course.id)
+                                       ->  Hash Join  (cost=2987.66..9218.85 rows=58834 width=37) (actual time=35.065..91.942 rows=50009 loops=2)
+                                             Hash Cond: (course_instance.course_layout_id = course_layout.id)
+                                             ->  Hash Join  (cost=1.25..6078.00 rows=58834 width=30) (actual time=0.114..40.252 rows=50009 loops=2)
+                                                   Hash Cond: (course_instance.academic_period_id = academic_period.id)
+                                                   ->  Parallel Seq Scan on course_instance  (cost=0.00..5295.36 rows=235336 width=30) (actual time=0.030..18.316 rows=200036 loops=2)
+                                                   ->  Hash  (cost=1.20..1.20 rows=4 width=8) (actual time=0.062..0.064 rows=4 loops=2)
+                                                         Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                                         ->  Seq Scan on academic_period  (cost=0.00..1.20 rows=4 width=8) (actual time=0.049..0.050 rows=4 loops=2)
+                                                               Filter: (academic_year = 2025)
+                                                               Rows Removed by Filter: 12
+                                             ->  Hash  (cost=1736.18..1736.18 rows=100018 width=15) (actual time=34.485..34.486 rows=100018 loops=2)
+                                                   Buckets: 131072  Batches: 1  Memory Usage: 5713kB
+                                                   ->  Seq Scan on course_layout  (cost=0.00..1736.18 rows=100018 width=15) (actual time=0.035..11.484 rows=100018 loops=2)
+                                       ->  Hash  (cost=1736.18..1736.18 rows=100018 width=11) (actual time=28.367..28.368 rows=100018 loops=2)
+                                             Buckets: 131072  Batches: 1  Memory Usage: 5322kB
+                                             ->  Seq Scan on course  (cost=0.00..1736.18 rows=100018 width=11) (actual time=0.059..8.764 rows=100018 loops=2)
+                                 ->  Hash  (cost=1.04..1.04 rows=4 width=7) (actual time=19.788..19.789 rows=4 loops=2)
+                                       Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                       ->  Seq Scan on period  (cost=0.00..1.04 rows=4 width=7) (actual time=19.755..19.762 rows=4 loops=2)
+               ->  Index Scan using planned_activity_course_instance_id_teaching_activity_id_key on planned_activity  (cost=0.43..0.75 rows=6 width=12) (actual time=0.004..0.007 rows=6 loops=100018)
+                     Index Cond: (course_instance_id = course_instance.id)
+         ->  Memoize  (cost=0.14..0.16 rows=1 width=19) (actual time=0.000..0.000 rows=1 loops=566769)
+               Cache Key: planned_activity.teaching_activity_id
+               Cache Mode: logical
+               Hits: 566762  Misses: 7  Evictions: 0  Overflows: 0  Memory Usage: 1kB
+               ->  Index Scan using teaching_activity_pkey on teaching_activity  (cost=0.13..0.15 rows=1 width=19) (actual time=0.002..0.002 rows=1 loops=7)
+                     Index Cond: (id = planned_activity.teaching_activity_id)
+ Planning Time: 2.536 ms
+ JIT:
+   Functions: 92
+   Options: Inlining false, Optimization false, Expressions true, Deforming true
+   Timing: Generation 2.687 ms, Inlining 0.000 ms, Optimization 1.366 ms, Emission 38.381 ms, Total 42.434 ms
+ Execution Time: 2725.851 ms
+(48 rows)
+
