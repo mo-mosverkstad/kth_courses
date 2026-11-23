@@ -300,9 +300,9 @@ There are 6 analytical queries that are implemented in this project task.
 
 The first one is the query that calculates the planned hours. It returns one row each course instance of a given academic year, where the hours are broken down for each teaching activity. The planned hours are retrieved from the activity and multiplied with the multiplication factor of the activity. The breakdown for each activity is written with one aggregate \texttt{SUM} together with a \texttt{CASE} expression per activity, so that each sum only counts the rows of one activity.
 
-The second query calculates the allocated hours for a course instance and returns one row for each teacher of that course instance, with the hours broken down per teaching activity in the same way as above. The difference is that the hours are taken from \texttt{teaching\_allocation} table. Additionally, the designation of each teacher is also included there.
+The second query calculates the allocated hours for a course instance and returns one row for each teacher of that course instance, with the hours for each teaching activity of every course instance in the same way as above. The difference is that the hours are taken from \texttt{teaching\_allocation} table. Additionally, the designation of each teacher is also included there.
 
-Another similar query calculates the allocated hours of one teacher in different course instance instead of one course instance with the affiliated teachers. It proceeds similar to the query above, but the teacher is selected by the employment ID and the result is grouped by course instance of that teacher.
+Another similar query calculates the allocated hours of one teacher in different course instance instead of one course instance with the affiliated teachers. It proceeds similar to the query above, but the teacher is selected by the employment id and the result is grouped by course instance of that teacher.
 
 The query that lists the teachers allocated to more than a given number of course instances in one academic period lists the employment id, name, academic year/period and the number of course instances of these teachers. The number of course instances is counted with \texttt{COUNT(DISTINCT course\_instance.id)}, which is necessary since one teacher may be allocated to several teaching activities within the same course instance.
 
@@ -373,7 +373,7 @@ Since every inserted row fires the trigger from project task 1, and because that
 
 \subsection{Indexes and materialized views}
 
-As performance optimization, 2 materialized views and 1 index on a base table were introduced. The view \texttt{course\_activity\_view} contains one row for each planned activity, where the multiplication factor and the derived formula are already applied. Since its rows are given for every planned activity and not for every teacher, the planned hours cannot be counted twice through this view. The view \texttt{teacher\_period\_load\_view} contains one row for every teacher and academic period, with the number of course instances and the total allocated hours already aggregated. The index \texttt{idx\_teaching\_allocation\_employee} was created on the employee column of the allocation table.
+As performance optimization, 2 materialized views and 1 index on a base table were introduced. The view \texttt{course\_activity\_view} contains one row for each planned activity, where the multiplication factor is already applied and where the seven joins of the original query are already carried out. Since its rows are given for every planned activity and not for every teacher, the planned hours cannot be counted twice through this view. The view \texttt{teacher\_period\_load\_view} contains one row for every teacher and academic period, with the number of course instances and the total allocated hours already aggregated. The index \texttt{idx\_teaching\_allocation\_employee} was created on the employee column of the allocation table.
 
 Additionally, each view was given 2 indexes: 1 unique index on the key of the view and an index on the academic year together with the period name, since every query on the views filters on exactly those two columns.
 
@@ -386,25 +386,27 @@ The measured execution time of every query before and after these changes is giv
 \hline
 \textbf{Query (frequency)} & \textbf{Before} & \textbf{After} & \textbf{Speed-up} \\
 \hline
-Teachers above a threshold (20/day) & 906.6 ms & 73.0 ms & 12x \\
-Teacher load per period (5/day) & 3,173.3 ms & 521.7 ms & 6x \\
-Planned hours per course instance (8/day) & 1,734.5 ms & 1,109.2 ms & 1.6x \\
-Allocated hours, one course instance (12/day) & 0.8 ms & 0.5 ms & not needed \\
-Allocated hours, one teacher (12/day) & 1,677.6 ms & 0.9 ms & 1,800x \\
-Mismatch above 15\% (3/day) & 16,154.7 ms & 4,771.0 ms & 3.4x \\
+Teachers above a threshold (20/day) & 1,482.7 ms & 73.6 ms & 20x \\
+Teacher load per period (5/day) & 4,383.0 ms & 1,040.5 ms & 4.2x \\
+Planned hours per course instance (8/day) & 1,981.7 ms & 2,295.8 ms & none \\
+Allocated hours, one course instance (12/day) & 0.9 ms & 0.6 ms & not needed \\
+Allocated hours, one teacher (12/day) & 2,387.4 ms & 1.9 ms & 1,300x \\
+Mismatch above 15\% (3/day) & 11,320.1 ms & 8,045.0 ms & 1.4x \\
 \hline
 \end{tabular}
 \caption{The execution time of each query before and after the materialized views and the index were added, as the median of three runs}
 \label{tab:performance}
 \end{table}
 
-% Furthermore, every optimised query returns exactly the same rows as its original version, which was verified by comparing the two results with \texttt{EXCEPT} in both directions. The query plans also show what has changed. For the query of one single teacher, the plan before contained a parallel sequential scan of all 3.2 million allocations, while the plan after contains an index scan that finds the employee by the employment ID and then reads only the 27 allocations of that teacher, which explains the difference between 1.7 seconds and 1 millisecond. For the two queries on the teacher load, the plan before joined and grouped the 1.5 million allocations of the year, while the plan after reads the already aggregated rows of the view through a bitmap scan. On the other hand, the gain for the planned hours is smaller, since the query still has to group the 566,769 planned activities of the year even though the view has removed the joins and the formula.
+% Furthermore, every optimised query returns exactly the same rows as its original version, which was verified by comparing the two results with \texttt{EXCEPT} in both directions for all six pairs. The query plans also show what has changed. For the query of one single teacher, the plan before contained a parallel sequential scan of the whole allocation table, while the plan after contains an index scan that finds the employee by the employment ID and then reads only the 27 allocations of that teacher, which explains the difference between 2.4 seconds and 2 milliseconds. For the two queries on the teacher load, the plan before scanned and grouped the whole allocation table, while the plan after reads 383,399 already aggregated rows of the view through a bitmap index scan on the academic year and the period.
+
+However, the planned hours per course instance is an exception, since the view doesn't produce any gain at all for that query. The reason is the triggers of project task 1, which already store the hours of the derived activities in \texttt{planned\_activity}. Before those triggers existed, the query had to join \texttt{derived\_activity\_formula} and evaluate the formula for every row, which was the expensive part that the view removed. Now the query only reads one stored column, so what remains is the grouping of the 566,769 planned activities of the academic year, and that work is the same whether the rows come from the view or from the base tables. The view even has to read those rows out of 2.27 million rows through a bitmap index scan, which is why the measured time after is slightly higher than before. The difference is small compared to the variation between runs, which means that the honest conclusion is that the view neither helps nor harms this query.
 
 \subsection{An index that PostgreSQL does not use}
 
 The unique index \texttt{course\_activity\_view\_planned\_activity} had 0 scans during the measured workload, which was read from the statistics that PostgreSQL collects for each index. The reason is that the mismatch query joins the whole view with the summed allocations, which means that all 2.27 million rows of the view are needed. When almost every row of a table is needed, the planner estimates that a sequential scan together with a hash join is cheaper than 2.27 million index lookups, since an index scan normally causes random reads. The index \texttt{teacher\_period\_load\_view\_key} was unused for the same reason.
 
-% However, forcing the index by switching off sequential scans and hash joins gave a merge join that ran in 3.9 seconds instead of 4.8 seconds in one measurement, which means that the estimate of the planner was too pessimistic in this particular case. The explanation is that the view had just been created in the order of the indexed column, so that the index scan reads the table almost sequentially instead of randomly, and that the data was already cached in memory, while the default cost settings of the planner assume random reads from disk. Even so, the index is still necessary, since \texttt{REFRESH MATERIALIZED VIEW CONCURRENTLY} requires a unique index on the view.
+% However, forcing the index by switching off sequential scans and hash joins gave a merge join that ran in 6.8 seconds instead of 9.7 seconds in one measurement, which means that the estimate of the planner was too pessimistic in this particular case. The explanation is that the view had just been created in the order of the indexed column, so that the index scan reads the table almost sequentially instead of randomly, and that the data was already cached in memory, while the default cost settings of the planner assume random reads from disk. Even so, the index is still necessary, since \texttt{REFRESH MATERIALIZED VIEW CONCURRENTLY} requires a unique index on the view.
 
 \subsection{Out-of-date materialized view and the refresh time}
 
@@ -433,15 +435,27 @@ The table shows that the view keeps the old value after the insert, while the ba
 \hline
 \textbf{View} & \textbf{\texttt{REFRESH}} & \textbf{\texttt{REFRESH CONCURRENTLY}} \\
 \hline
-\texttt{teacher\_period\_load\_view} & 8.6--9.0 s & 16.2 s \\
-\texttt{course\_activity\_view} & 7.7 s & 20.2 s \\
+\texttt{teacher\_period\_load\_view} & 11.6--12.2 s & 21.4 s \\
+\texttt{course\_activity\_view} & 9.4 s & 27.6 s \\
 \hline
 \end{tabular}
 \caption{The time it takes to refresh each materialized view, with and without \texttt{CONCURRENTLY}}
 \label{tab:refresh}
 \end{table}
 
-An ordinary refresh locks the view, which means that the queries on it have to wait for up to 9 seconds. On the other hand, \texttt{REFRESH MATERIALIZED VIEW CONCURRENTLY} lets the queries continue to read the old content during the refresh, but it takes about twice as long, since it has to compare the new result with the old one.
+An ordinary refresh locks the view, which means that the queries on it have to wait for up to 12 seconds. On the other hand, \texttt{REFRESH MATERIALIZED VIEW CONCURRENTLY} lets the queries continue to read the old content during the refresh, but it takes two to three times as long, since it has to compare the new result with the old one.
+
+% \subsection{Comparison between requirement and result}
+
+% The requirements of project task 2, which were summarized in Section~\ref{sec:requirements}, are met as below.
+
+% The four mandatory queries are met by the first four query scripts of the list above, namely the planned hours per course instance, the allocated hours per course instance, the allocated hours per teacher and the teachers above a threshold in one academic period. In these queries, the planned hours include both the multiplication factor and the derived formula, while the number of course instances per teacher is counted with \texttt{COUNT(DISTINCT ...)} so that a teacher with several teaching activities in the same course instance is counted only once. Additionally, the query for the teacher load per academic period is met by the fifth query script of the same list.
+
+% The higher grade query is met by \texttt{mismatches.sql}, while the required incorrect version is met by \texttt{mismatches-wrong.sql}, and the reason why the incorrect version gives a wrong result is explained above together with Listing~\ref{lst:mismatch} and Listing~\ref{lst:mismatchwrong}.
+
+% The requirement that the database must be scaled up is met by the insertion script, since the largest table contains 3,200,577 rows, which is given in Table~\ref{tab:rowcounts}. Additionally, the requirement that the efficiency must be analysed with \texttt{EXPLAIN ANALYZE} is met by the measurements in Table~\ref{tab:performance}, where every query of the given workload was measured both before and after, and whose complete query plans are stored in the repository.
+
+% The requirement of suitable indexes and materialized views with a motivation for each choice is met by Table~\ref{tab:choices}, while the requirement of an index that PostgreSQL does not use is met by \texttt{course\_activity\_view\_planned\_activity}. Finally, the requirement that a materialized view must be shown to be out of date, together with the time it takes to refresh it, is met by Table~\ref{tab:stale} and Table~\ref{tab:refresh}.
 
 \section{Discussion}
 \label{sec:discussion}

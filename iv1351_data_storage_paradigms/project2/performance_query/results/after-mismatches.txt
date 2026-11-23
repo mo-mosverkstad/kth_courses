@@ -1,24 +1,24 @@
                                                                                                 QUERY PLAN                                                                                                 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- HashAggregate  (cost=479594.06..513799.31 rows=131224 width=100) (actual time=3453.129..4742.766 rows=228600 loops=1)
+ HashAggregate  (cost=522166.48..557363.04 rows=135395 width=100) (actual time=5197.098..6511.754 rows=228600 loops=1)
    Group Key: course_activity_view.course_instance_id
    Filter: (abs(((sum(((allocated.allocation_hours)::numeric * course_activity_view.multiplication_factor)) - sum(course_activity_view.planned_hours)) / sum(course_activity_view.planned_hours))) > 0.15)
-   Planned Partitions: 32  Batches: 165  Memory Usage: 8593kB  Disk Usage: 128304kB
+   Planned Partitions: 32  Batches: 161  Memory Usage: 9361kB  Disk Usage: 128312kB
    Rows Removed by Filter: 171472
-   ->  Hash Join  (cost=93797.60..319016.37 rows=2023026 width=24) (actual time=752.334..2697.830 rows=2267074 loops=1)
+   ->  Hash Join  (cost=93861.60..357134.67 rows=2079141 width=23) (actual time=876.648..4205.132 rows=2267074 loops=1)
          Hash Cond: (allocated.planned_activity_id = course_activity_view.planned_activity_id)
-         ->  Subquery Scan on allocated  (cost=0.43..186866.75 rows=2023026 width=12) (actual time=180.056..1254.397 rows=2267074 loops=1)
-               ->  GroupAggregate  (cost=0.43..166636.49 rows=2023026 width=12) (actual time=180.054..1140.129 rows=2267074 loops=1)
+         ->  Subquery Scan on allocated  (cost=0.43..224225.75 rows=2079141 width=12) (actual time=210.012..2200.972 rows=2267074 loops=1)
+               ->  GroupAggregate  (cost=0.43..203434.34 rows=2079141 width=12) (actual time=210.009..2014.857 rows=2267074 loops=1)
                      Group Key: teaching_allocation.planned_activity_id
-                     ->  Index Scan using teaching_allocation_pkey on teaching_allocation  (cost=0.43..130403.34 rows=3200577 width=8) (actual time=0.044..572.815 rows=3200577 loops=1)
-         ->  Hash  (cost=52174.74..52174.74 rows=2267074 width=20) (actual time=571.383..571.384 rows=2267074 loops=1)
+                     ->  Index Scan using teaching_allocation_pkey on teaching_allocation  (cost=0.43..166640.04 rows=3200577 width=8) (actual time=0.097..1135.374 rows=3200577 loops=1)
+         ->  Hash  (cost=52238.74..52238.74 rows=2267074 width=19) (actual time=665.605..665.607 rows=2267074 loops=1)
                Buckets: 131072  Batches: 32  Memory Usage: 4749kB
-               ->  Seq Scan on course_activity_view  (cost=0.00..52174.74 rows=2267074 width=20) (actual time=0.119..279.273 rows=2267074 loops=1)
- Planning Time: 0.623 ms
+               ->  Seq Scan on course_activity_view  (cost=0.00..52238.74 rows=2267074 width=19) (actual time=0.058..302.793 rows=2267074 loops=1)
+ Planning Time: 0.838 ms
  JIT:
    Functions: 22
    Options: Inlining true, Optimization true, Expressions true, Deforming true
-   Timing: Generation 1.185 ms, Inlining 64.564 ms, Optimization 89.271 ms, Emission 68.814 ms, Total 223.834 ms
- Execution Time: 4770.963 ms
+   Timing: Generation 2.207 ms, Inlining 95.548 ms, Optimization 103.848 ms, Emission 92.929 ms, Total 294.532 ms
+ Execution Time: 6571.967 ms
 (20 rows)
 
