@@ -17,3 +17,5 @@ latexmkrc
 
 # Built PDFs must not be tracked
 *.pdf
+
+zoomout/
