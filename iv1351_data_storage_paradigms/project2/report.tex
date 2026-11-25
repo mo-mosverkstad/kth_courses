@@ -264,7 +264,7 @@ All of the cases are measured and compared against the baseline without optimiza
 
 In terms of performance measurement, each query is measured several times (in this case 3) and the median value is chosen. The reason is that a single measurement is not trustworthy, since the first execution needs to fetch pages from disk, while later from the cache, which differs with orders of magnitudes.
 
-The indexes and materialized views for performance improvement is decided by the given frequencies of the requirements in Section~\ref{sec:requirements}, as well as the measured cost of each query. This can be determined by comparing the analytical queries and extract common part that can be cached and made into a materialized view. Additionally, the query plan for each query is also analyzed to determine the performance bottleneck. For instance, a sequential linear scan over millions of rows that returns a handful of indexes requires an index, whereas repeatedly joining and aggregating multiple large datasets into a small summary table requires a materalized view.
+The indexes and materialized views for performance improvement is decided by the given frequencies of the requirements in Section~\ref{sec:requirements}, as well as the measured cost of each query. This can be determined by comparing the analytical queries and extract common part that can be cached and made into a materialized view. Additionally, the query plan for each query is also analyzed to determine the performance bottleneck. For instance, a sequential linear scan over millions of rows that returns a handful of rows requires an index, whereas repeatedly joining and aggregating multiple large datasets into a small summary table requires a materalized view.
 
 Additionally, by checking whether an index is used, since an index that exists in the database is not necessarily the one that the query planner chooses, the number of index scans is read from the statistics that PostgreSQL collects for each index. These stastistics are reset immediately before the measured runs, so that the counts belong only to the measured workload and not to earlier experiments.
 
@@ -284,13 +284,9 @@ The result of the project consists of 6 analytical SQL queries, 1 deliberately i
 
 The repository folder is divided into three parts. The folder \texttt{build\_scripts} contains the scripts that create and fill the rows of the database, the folder \texttt{query\_scripts} contains the analytical queries, and the folder \texttt{performance\_query} contains the materialized views, the optimised versions of the queries and the measurements.
 
-***
+% In terms of performance optimizations, 5 different optimization levels are written as SQL scripts in the subfolder \texttt{optimizations}, where every file name begins with \texttt{optimization-} followed by optimization number from A to E. Each script creates its own indexes and materialized views, and starts by clearing all optimizations including indexes and materialized views, since other optimizations may leave stale indexes and materialized views that affects performance benchmark correctness. This means that any optimization can be applied at any time. The chosen optimization is \texttt{optimization-d-course-instance-views.sql}, which creates the 3 materialized views and the index on the allocation table, while \texttt{optimization-a-baseline.sql} removes all of them again and is therefore also useful for cleaning up the optimizations.
 
-In terms of performance optimizations, 5 different optimization levels are written as SQL scripts in the subfolder \texttt{optimizations}, where every file name begins with \texttt{optimization-} followed by optimization number from A to E. Each script creates its own indexes and materialized views, and starts by clearing all optimizations including indexes and materialized views, since other optimizations may leave stale indexes and materialized views that affects performance benchmark correctness. This means that any optimization can be applied at any time. The chosen optimization is \texttt{optimization-d-course-instance-views.sql}, which creates the 3 materialized views and the index on the allocation table, while \texttt{optimization-a-baseline.sql} removes all of them again and is therefore also useful for cleaning up the optimizations.
-
-After that, the 6 analytical queries are rewritten so that they use the materialized views and the index. These files are stored in the subfolder \texttt{queries} and are named after the optimization that they read, for instance \texttt{query-d-planned-hours.sql}. Additionally, a bash file \texttt{run-performance.bash} is written to automate the measuring benchmarks of all the 6 analytical queries before and after, while \texttt{run-optimizations.bash} measures all 5 optimizations against each other.
-
-***
+% After that, the 6 analytical queries are rewritten so that they use the materialized views and the index. These files are stored in the subfolder \texttt{queries} and are named after the optimization that they read, for instance \texttt{query-d-planned-hours.sql}. Additionally, a bash file \texttt{run-performance.bash} is written to automate the measuring benchmarks of all the 6 analytical queries before and after, while \texttt{run-optimizations.bash} measures all 5 optimizations against each other.
 
 \subsection{Analytical queries}
 
@@ -488,7 +484,7 @@ Every expensive query of the workload becomes order of magnitude faster in optim
 
 % On the other hand, creating all views and indexes takes about 25 seconds, and the time it takes to keep them up to date is given in Section~\ref{sec:refresh}. This produces a tradeoff between build speed and query speed, where queries are faster at the expense of build time. Whether that cost is motivated by the gain is discussed in Chapter~\ref{sec:discussion}.
 
-In candidate optimization D, there are 3 materialized views. The materialized view \texttt{course\_instance\_planned\_view} calculates the total planned hours for each teaching activity (Lecture, Tutorial, Lab, Seminar, Others, Administration, and Examination) for each course instance. The last column, \texttt{total\_hours}, contains the sum of all teaching activities. The total planned hours has already the multiplication factor applied.
+In candidate optimization D, there are 2 materialized views. The materialized view \texttt{course\_instance\_planned\_view} calculates the total planned hours for each teaching activity (Lecture, Tutorial, Lab, Seminar, Others, Administration, and Examination) for each course instance. The last column, \texttt{total\_hours}, contains the sum of all teaching activities. The total planned hours has already the multiplication factor applied.
 
 The materialized view \texttt{teacher\_period\_load\_view} counts the number of course instances and calculates the total of allocated hours with multiplication factor applied for each teacher in an academic period. Precomputing these numbers can speed up queries that checks the teaching load for every academic period.
 
@@ -498,7 +494,7 @@ Furthermore, the index \texttt{idx\_teaching\_allocation\_employee} was created 
 
 \subsection{An index that PostgreSQL does not use}
 
-3 indexes had 0 scans during the measured workload, which could be read from the statistics that PostgreSQL collects for each index. They are the unique keys of the three views, namely \texttt{course\_instance\_planned\_view\_key}, \texttt{course\_instance\_mismatch\_view\_key} and \texttt{teacher\_period\_load\_view\_key}. The number of scans of each index is given in Table~\ref{tab:indexusage}.
+3 indexes had 0 scans during the measured workload, which could be read from the statistics that PostgreSQL collects for each index. They are the unique keys of the three views, namely \texttt{course\_instance\_planned\_view}, \texttt{teacher\_period\_load\_view} and \texttt{teacher\_period\_load\_view\_key}. The number of scans of each index is given in Table~\ref{tab:indexusage}.
 
 \begin{table}[h!]
 \centering
