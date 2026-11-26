@@ -11,6 +11,7 @@ import se.kth.iv1351.dto.CourseInstanceDTO;
 /** Reads course-instance information and teaching-hour totals. */
 public class CourseInstanceDAO extends AbstractDAO {
     private PreparedStatement courseInstanceByIdStmt;
+    private PreparedStatement updateNumStudentsStmt;
     private PreparedStatement plannedHoursByInstanceStmt;
     private PreparedStatement allocatedHoursByInstanceStmt;
 
@@ -19,8 +20,7 @@ public class CourseInstanceDAO extends AbstractDAO {
     }
 
     /** Returns this year's course instance, or {@code null} if it does not exist. */
-    public CourseInstanceDTO findCurrentYearCourseInstance(String instanceId)
-            throws CourseDBException {
+    public CourseInstanceDTO findCurrentYearCourseInstance(String instanceId) throws CourseDBException {
         String failureMsg = "Could not read course instance: " + instanceId;
         ResultSet result = null;
         try {
@@ -42,6 +42,27 @@ public class CourseInstanceDAO extends AbstractDAO {
             throw new CourseDBException(failureMsg, exception);
         } finally {
             closeResultSet(failureMsg, result);
+        }
+    }
+
+    /**
+     * Updates the registered-student count of the specified course instance.
+     *
+     * @param courseInstanceDTO The course instance containing the updated student count.
+     * @throws CourseDBException If the course instance could not be updated.
+     */
+    public void updateCourseInstance(CourseInstanceDTO courseInstanceDTO) throws CourseDBException {
+        String failureMsg = "Could not update the course instance: " + courseInstanceDTO;
+        try {
+            updateNumStudentsStmt.setInt(1, courseInstanceDTO.numStudents());
+            updateNumStudentsStmt.setString(2, courseInstanceDTO.instanceId());
+            int updatedRows = updateNumStudentsStmt.executeUpdate();
+            if (updatedRows != 1) {
+                throw new CourseDBException(failureMsg + ": expected one row, updated "
+                                            + updatedRows);
+            }
+        } catch (SQLException exception) {
+            throw new CourseDBException(failureMsg, exception);
         }
     }
 
@@ -73,10 +94,20 @@ public class CourseInstanceDAO extends AbstractDAO {
               AND academic_period.academic_year = EXTRACT(YEAR FROM CURRENT_DATE)
             """);
 
+        updateNumStudentsStmt = connection.prepareStatement("""
+            UPDATE course_instance
+            SET num_students = ?
+            WHERE instance_id = ?
+              AND academic_period_id IN (
+                  SELECT id
+                  FROM academic_period
+                  WHERE academic_year = EXTRACT(YEAR FROM CURRENT_DATE)
+              )
+        """);
+
         plannedHoursByInstanceStmt = connection.prepareStatement("""
-            SELECT COALESCE(ROUND(SUM(planned_activity.planned_hours
-                                      * teaching_activity.multiplication_factor)), 0)
-                   AS total_planned_hours
+            SELECT COALESCE(SUM(planned_activity.planned_hours * teaching_activity.multiplication_factor), 0)
+                AS total_planned_hours
             FROM course_instance
             INNER JOIN planned_activity
                 ON planned_activity.course_instance_id = course_instance.id
@@ -86,9 +117,8 @@ public class CourseInstanceDAO extends AbstractDAO {
             """);
 
         allocatedHoursByInstanceStmt = connection.prepareStatement("""
-            SELECT COALESCE(ROUND(SUM(teaching_allocation.allocation_hours
-                                      * teaching_activity.multiplication_factor)), 0)
-                   AS total_allocation_hours
+            SELECT COALESCE(SUM(teaching_allocation.allocation_hours * teaching_activity.multiplication_factor), 0)
+                AS total_allocation_hours
             FROM course_instance
             INNER JOIN planned_activity
                 ON planned_activity.course_instance_id = course_instance.id

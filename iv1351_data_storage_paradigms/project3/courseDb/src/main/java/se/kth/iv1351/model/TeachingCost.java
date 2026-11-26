@@ -1,5 +1,7 @@
 package se.kth.iv1351.model;
 
+import java.math.BigDecimal;
+
 import se.kth.iv1351.dto.CourseInstanceDTO;
 import se.kth.iv1351.dto.TeachingCostDTO;
 
@@ -15,8 +17,8 @@ public class TeachingCost {
     private static final int WORKING_HOURS_PER_MONTH = 160;
 
     private final CourseInstanceDTO courseInstance;
-    private final int plannedHours;
-    private final int allocatedHours;
+    private final BigDecimal plannedHours;
+    private final BigDecimal allocatedHours;
     private final Amount averageMonthlySalary;
 
     /**
@@ -28,8 +30,8 @@ public class TeachingCost {
      *                             multiplication factors.
      * @param averageMonthlySalary The average monthly salary of a teacher.
      */
-    public TeachingCost(CourseInstanceDTO courseInstance, int plannedHours,
-                        int allocatedHours, Amount averageMonthlySalary) {
+    public TeachingCost(CourseInstanceDTO courseInstance, BigDecimal plannedHours,
+                        BigDecimal allocatedHours, Amount averageMonthlySalary) {
         this.courseInstance = courseInstance;
         this.plannedHours = plannedHours;
         this.allocatedHours = allocatedHours;
@@ -53,14 +55,14 @@ public class TeachingCost {
     /**
      * @return The planned hours the cost is based on.
      */
-    public int getPlannedHours() {
+    public BigDecimal getPlannedHours() {
         return plannedHours;
     }
 
     /**
      * @return The allocated hours the cost is based on.
      */
-    public int getAllocatedHours() {
+    public BigDecimal getAllocatedHours() {
         return allocatedHours;
     }
 
@@ -82,7 +84,7 @@ public class TeachingCost {
      * @param hours The number of teaching hours.
      * @return The cost of the specified hours.
      */
-    private Amount costOf(int hours) {
+    private Amount costOf(BigDecimal hours) {
         Amount hourlyCost = averageMonthlySalary.divide(WORKING_HOURS_PER_MONTH);
         return hourlyCost.multiply(hours);
     }

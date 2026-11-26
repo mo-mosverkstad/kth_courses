@@ -18,19 +18,18 @@ public class BasicView implements View {
     public void start() {
         controller.test();
         try {
-            printCost(controller.calculateTeachingCost(instanceId));
+            System.out.println("--- Calculating teaching cost ---");
+            System.out.println(controller.calculateTeachingCost(instanceId));
+            System.out.println();
+
+            System.out.println("--- Add 100 more students ---");
+            controller.addRegisteredStudents(instanceId, 100);
+            System.out.println("--- Calculating teaching cost again! ---");
+            System.out.println(controller.calculateTeachingCost(instanceId));
+            System.out.println();
         } catch (CourseException exception) {
             System.err.println(exception.getMessage());
             exception.printStackTrace(System.err);
         }
-    }
-
-    private void printCost(TeachingCostDTO cost) {
-        System.out.printf("%-12s %-18s %-8s %24s %22s%n", "Course Code",
-                          "Course Instance", "Period", "Planned Cost (KSEK)",
-                          "Actual Cost (KSEK)");
-        System.out.printf("%-12s %-18s %-8s %18s %17s%n", cost.courseCode(),
-                          cost.instanceId(), cost.periodName(), cost.plannedCostKSEK(),
-                          cost.actualCostKSEK());
     }
 }

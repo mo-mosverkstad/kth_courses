@@ -12,6 +12,7 @@ import se.kth.iv1351.integration.DatabaseConnectionException;
 import se.kth.iv1351.integration.EmployeeDAO;
 import se.kth.iv1351.model.Amount;
 import se.kth.iv1351.model.CourseException;
+import se.kth.iv1351.model.CourseInstance;
 import se.kth.iv1351.model.TeachingCost;
 
 /** Coordinates the teaching-cost use case and owns its transaction boundary. */
@@ -37,20 +38,15 @@ public class CourseDBController {
      */
     public TeachingCostDTO calculateTeachingCost(String instanceId) throws CourseException {
         try {
-            CourseInstanceDTO courseInstance =
-                    courseInstanceDAO.findCurrentYearCourseInstance(instanceId);
+            CourseInstanceDTO courseInstance = courseInstanceDAO.findCurrentYearCourseInstance(instanceId);
             if (courseInstance == null) {
                 throw new CourseException("No course instance for the current year: " + instanceId);
             }
 
-            int plannedHours = courseInstanceDAO.findPlannedHoursByCourseInstance(instanceId)
-                    .intValueExact();
-            int allocatedHours = courseInstanceDAO.findAllocatedHoursByCourseInstance(instanceId)
-                    .intValueExact();
+            BigDecimal plannedHours = courseInstanceDAO.findPlannedHoursByCourseInstance(instanceId);
+            BigDecimal allocatedHours = courseInstanceDAO.findAllocatedHoursByCourseInstance(instanceId);
             Amount averageTeacherSalary = new Amount(employeeDAO.findAverageTeacherSalary());
-            TeachingCostDTO result = new TeachingCost(courseInstance, plannedHours,
-                                                      allocatedHours, averageTeacherSalary)
-                    .toDTO();
+            TeachingCostDTO result = new TeachingCost(courseInstance, plannedHours, allocatedHours, averageTeacherSalary).toDTO();
             dbConnection.commit();
             return result;
         } catch (Exception exception) {
@@ -58,16 +54,33 @@ public class CourseDBController {
             if (exception instanceof CourseException courseException) {
                 throw courseException;
             }
-            throw new CourseException("Could not calculate teaching cost for " + instanceId,
-                                      exception);
+            throw new CourseException("Could not calculate teaching cost for " + instanceId, exception);
         }
     }
+
+    public void addRegisteredStudents(String instanceId, int numberOfStudents) throws CourseException {
+        try {
+            CourseInstanceDTO courseInstanceDTO = courseInstanceDAO.findCurrentYearCourseInstance(instanceId);
+            if (courseInstanceDTO == null) {
+                throw new CourseException("No course instance for the current year: " + instanceId);
+            }
+
+            CourseInstance courseInstance = new CourseInstance(courseInstanceDTO);
+            courseInstance.increaseRegisteredStudents(numberOfStudents);
+            courseInstanceDAO.updateCourseInstance(courseInstance.toDTO());
+            dbConnection.commit();
+        } catch (Exception exception) {
+            throw new CourseException("Could not add " + numberOfStudents + " registered students to: " + instanceId, exception);
+        }
+    }
+
+    
 
     /** Prints the raw values used by the teaching-cost calculation for quick testing. */
     public void test() {
         try {
-            BigDecimal hours =
-                    courseInstanceDAO.findPlannedHoursByCourseInstance("2026-50000011");
+            System.out.println("--- CONTROLLER TEST FOR BASIC PRINTOUT ---");
+            BigDecimal hours = courseInstanceDAO.findPlannedHoursByCourseInstance("2026-50000011");
             dbConnection.commit();
             System.out.println(hours);
 
@@ -80,9 +93,8 @@ public class CourseDBController {
             dbConnection.commit();
             System.out.println(salary);
 
-            TeachingCostDTO teachingCost = calculateTeachingCost("2026-50000011");
-            System.out.println(teachingCost);
-        } catch (CourseException | CourseDBException | DatabaseConnectionException exception) {
+            System.out.println();
+        } catch (CourseDBException | DatabaseConnectionException exception) {
             rollback(exception);
             exception.printStackTrace();
         }
