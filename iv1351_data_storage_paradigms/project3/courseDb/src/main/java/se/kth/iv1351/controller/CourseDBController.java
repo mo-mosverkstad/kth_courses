@@ -8,6 +8,7 @@ import se.kth.iv1351.dto.AllocationDTO;
 import se.kth.iv1351.dto.CourseInstanceDTO;
 import se.kth.iv1351.dto.EmployeeDTO;
 import se.kth.iv1351.dto.PlannedActivityDTO;
+import se.kth.iv1351.dto.TeachingActivityDTO;
 import se.kth.iv1351.dto.TeachingCostDTO;
 import se.kth.iv1351.integration.CourseDBException;
 import se.kth.iv1351.integration.CourseInstanceDAO;
@@ -161,7 +162,44 @@ public class CourseDBController {
         }
     }
 
-    
+    public List<AllocationDTO> addTeachingActivity(String activityName, BigDecimal multiplicationFactor, String instanceId, int plannedHours, int employmentId, int allocationHours) throws RejectedException, CourseException {
+        try {
+            CourseInstanceDTO courseInstance = courseInstanceDAO.findCurrentYearCourseInstance(instanceId);
+            if (courseInstance == null) {
+                throw new CourseException("No course instance for the current year: " + instanceId);
+            }
+            checkTeacherIsAvailable(employmentId, courseInstance);
+            teachingActivityDAO.createTeachingActivity(new TeachingActivityDTO(activityName, multiplicationFactor));
+            teachingActivityDAO.createPlannedActivity(instanceId, activityName, plannedHours);
+            PlannedActivityDTO plannedActivity = readPlannedActivity(instanceId, activityName);
+            teachingActivityDAO.createAllocation(plannedActivity.plannedActivityId(), employmentId, allocationHours);
+            List<AllocationDTO> allocations = teachingActivityDAO.findAllocationsByCourseInstance(instanceId);
+            dbConnection.commit();
+            return allocations;
+        } catch (RejectedException rejected) {
+            rollback(rejected);
+            throw rejected;
+        } catch (Exception exception) {
+            throw new CourseException("Could not add the teaching activity " + activityName + " to " + instanceId, exception);
+        }
+    }
+
+    /**
+     * Reads all allocations of the specified course instance.
+     *
+     * @param instanceId The business id of the course instance.
+     * @return The allocations of the course instance.
+     * @throws CourseException If unable to read the allocations.
+     */
+    public List<AllocationDTO> getAllocations(String instanceId) throws CourseException {
+        try {
+            List<AllocationDTO> allocations = teachingActivityDAO.findAllocationsByCourseInstance(instanceId);
+            dbConnection.commit();
+            return allocations;
+        } catch (Exception exception) {
+            throw new CourseException("Could not read the allocations of: " + instanceId, exception);
+        }
+    }
 
     /** Prints the raw values used by the teaching-cost calculation for quick testing. */
     public void test() {

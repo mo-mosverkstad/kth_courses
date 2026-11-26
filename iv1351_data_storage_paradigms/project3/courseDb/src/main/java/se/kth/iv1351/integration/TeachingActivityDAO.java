@@ -9,6 +9,7 @@ import java.util.List;
 
 import se.kth.iv1351.dto.AllocationDTO;
 import se.kth.iv1351.dto.PlannedActivityDTO;
+import se.kth.iv1351.dto.TeachingActivityDTO;
 
 public final class TeachingActivityDAO extends AbstractDAO {
     private PreparedStatement findAllocationsByTeacherAndPeriodStmt;
@@ -16,6 +17,8 @@ public final class TeachingActivityDAO extends AbstractDAO {
     private PreparedStatement findPlannedActivityStmt;
     private PreparedStatement createAllocationStmt;
     private PreparedStatement deleteAllocationStmt;
+    private PreparedStatement createPlannedActivityStmt;
+    private PreparedStatement createTeachingActivityStmt;
 
     private final String ALLOCATION_QUERY = """
         SELECT employee.employment_id,
@@ -189,6 +192,46 @@ public final class TeachingActivityDAO extends AbstractDAO {
         }
     }
 
+    /**
+     * Creates a planned activity of the specified teaching activity in the specified
+     * course instance.
+     *
+     * @param instanceId   The business id of the course instance.
+     * @param activityName The name of the teaching activity.
+     * @param plannedHours The planned raw hours.
+     * @throws CourseDBException If unable to create the planned activity.
+     */
+    public void createPlannedActivity(String instanceId, String activityName, int plannedHours)
+            throws CourseDBException {
+        String failureMsg = "Could not create the planned activity " + activityName + " of: " + instanceId;
+        try {
+            createPlannedActivityStmt.setInt(1, plannedHours);
+            createPlannedActivityStmt.setString(2, activityName);
+            createPlannedActivityStmt.setString(3, instanceId);
+            int updatedRows = createPlannedActivityStmt.executeUpdate();
+            if (updatedRows != 1) {
+                throw new CourseDBException(failureMsg, null);
+            }
+        } catch (SQLException exception) {
+            throw new CourseDBException(failureMsg, exception);
+        }
+    }
+
+    /** Creates the specified teaching activity. */
+    public void createTeachingActivity(TeachingActivityDTO teachingActivity) throws CourseDBException {
+        String failureMsg = "Could not create the teaching activity: " + teachingActivity;
+        try {
+            createTeachingActivityStmt.setString(1, teachingActivity.activityName());
+            createTeachingActivityStmt.setBigDecimal(2, teachingActivity.multiplicationFactor());
+            int updatedRows = createTeachingActivityStmt.executeUpdate();
+            if (updatedRows != 1) {
+                throw new CourseDBException(failureMsg, null);
+            }
+        } catch (SQLException exception) {
+            throw new CourseDBException(failureMsg, exception);
+        }
+    }
+
     protected void prepareStatements() throws SQLException{
         Connection connection = databaseConnection.getConnection();
         findAllocationsByTeacherAndPeriodStmt = connection.prepareStatement(ALLOCATION_QUERY + """
@@ -219,7 +262,19 @@ public final class TeachingActivityDAO extends AbstractDAO {
             DELETE FROM teaching_allocation
             WHERE teaching_allocation.planned_activity_id = ?
                 AND teaching_allocation.employee_id =
-                    (SELECT employee.id FROM employee WHERE employee.employment_id = ?)
+                    (SELECT employee.id FROM employee WHERE employee.employment_id = ?);
+        """);
+        createPlannedActivityStmt = connection.prepareStatement("""
+            INSERT INTO planned_activity (planned_hours, teaching_activity_id, course_instance_id)
+            VALUES (?,
+                (SELECT teaching_activity.id FROM teaching_activity
+                    WHERE teaching_activity.activity_name = ?),
+                (SELECT course_instance.id FROM course_instance
+                    WHERE course_instance.instance_id = ?));
+        """);
+        createTeachingActivityStmt = connection.prepareStatement("""
+            INSERT INTO teaching_activity (activity_name, multiplication_factor)
+            VALUES (?, ?);
         """);
     }
 }
