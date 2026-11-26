@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import se.kth.iv1351.dto.CourseInstanceDTO;
 
 /** Reads course-instance information and teaching-hour totals. */
-public class CourseInstanceDAO extends AbstractDAO {
+public final class CourseInstanceDAO extends AbstractDAO {
     private PreparedStatement courseInstanceByIdStmt;
     private PreparedStatement updateNumStudentsStmt;
     private PreparedStatement plannedHoursByInstanceStmt;

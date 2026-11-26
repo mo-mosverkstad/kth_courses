@@ -1,32 +1,45 @@
 package se.kth.iv1351.controller;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import se.kth.iv1351.config.Config;
+import se.kth.iv1351.dto.AllocationDTO;
 import se.kth.iv1351.dto.CourseInstanceDTO;
+import se.kth.iv1351.dto.EmployeeDTO;
+import se.kth.iv1351.dto.PlannedActivityDTO;
 import se.kth.iv1351.dto.TeachingCostDTO;
 import se.kth.iv1351.integration.CourseDBException;
 import se.kth.iv1351.integration.CourseInstanceDAO;
 import se.kth.iv1351.integration.DatabaseConnection;
 import se.kth.iv1351.integration.DatabaseConnectionException;
 import se.kth.iv1351.integration.EmployeeDAO;
+import se.kth.iv1351.integration.PolicyDAO;
+import se.kth.iv1351.integration.TeachingActivityDAO;
 import se.kth.iv1351.model.Amount;
 import se.kth.iv1351.model.CourseException;
 import se.kth.iv1351.model.CourseInstance;
+import se.kth.iv1351.model.RejectedException;
+import se.kth.iv1351.model.TeacherLoad;
 import se.kth.iv1351.model.TeachingCost;
 
 /** Coordinates the teaching-cost use case and owns its transaction boundary. */
 public class CourseDBController {
+    private static final String ALLOCATION_POLICY = "allocation_rule";
+
     private final DatabaseConnection dbConnection;
     private final CourseInstanceDAO courseInstanceDAO;
     private final EmployeeDAO employeeDAO;
+    private final TeachingActivityDAO teachingActivityDAO;
+    private final PolicyDAO policyDAO;
 
     public CourseDBController() {
         try {
-            dbConnection = new DatabaseConnection(Config.DATABASE_NAME, Config.USERNAME,
-                                                  Config.PASSWORD);
+            dbConnection = new DatabaseConnection(Config.DATABASE_NAME, Config.USERNAME, Config.PASSWORD);
             courseInstanceDAO = new CourseInstanceDAO(dbConnection);
             employeeDAO = new EmployeeDAO(dbConnection);
+            teachingActivityDAO = new TeachingActivityDAO(dbConnection);
+            policyDAO = new PolicyDAO(dbConnection);
         } catch (DatabaseConnectionException | CourseDBException exception) {
             throw new IllegalStateException("Could not initialize the course database", exception);
         }
@@ -74,6 +87,80 @@ public class CourseDBController {
         }
     }
 
+    /**
+     * Allocates the specified teacher to the specified teaching activity of the specified
+     * course instance. The allocation is refused if the teacher then would be involved in
+     * more course instances than allowed during one academic period.
+     *
+     * @param employmentId    The business id of the employment of the teacher.
+     * @param instanceId      The business id of the course instance.
+     * @param activityName    The name of the teaching activity.
+     * @param allocationHours The number of raw hours to allocate.
+     * @return The allocations of the course instance after the change.
+     * @throws RejectedException If the teacher is involved in too many course instances.
+     * @throws CourseException   If unable to allocate the teacher.
+     */
+    public List<AllocationDTO> allocateTeacher(int employmentId, String instanceId, String activityName, int allocationHours) throws RejectedException, CourseException {
+        try {
+            CourseInstanceDTO courseInstance = courseInstanceDAO.findCurrentYearCourseInstance(instanceId);
+            checkTeacherIsAvailable(employmentId, courseInstance);
+            PlannedActivityDTO plannedActivity = readPlannedActivity(instanceId, activityName);
+            teachingActivityDAO.createAllocation(plannedActivity.plannedActivityId(), employmentId, allocationHours);
+            List<AllocationDTO> allocations = teachingActivityDAO.findAllocationsByCourseInstance(instanceId);
+            dbConnection.commit();
+            return allocations;
+        } catch (RejectedException rejected) {
+            rollback(rejected);
+            throw rejected;
+        } catch (Exception exception) {
+            throw new CourseException("Could not allocate the employee " + employmentId + " to " + activityName + " of " + instanceId, exception);
+        }
+    }
+
+    private PlannedActivityDTO readPlannedActivity(String instanceId, String activityName) throws CourseDBException, CourseException {
+        PlannedActivityDTO plannedActivity = teachingActivityDAO.findPlannedActivity(instanceId, activityName);
+        if (plannedActivity == null) {
+            throw new CourseException("The course instance " + instanceId + " has no planned activity called " + activityName);
+        }
+        return plannedActivity;
+    }
+
+    private void checkTeacherIsAvailable(int employmentId, CourseInstanceDTO courseInstance) throws CourseDBException, RejectedException, CourseException {
+        int maxCourseInstances = policyDAO.findPolicyByName(ALLOCATION_POLICY);
+        EmployeeDTO teacher = employeeDAO.findEmployeeForUpdate(employmentId);
+        if (teacher == null) {
+            throw new CourseException("There is no employee with the employment id: " + employmentId);
+        }
+        List<AllocationDTO> allocations = teachingActivityDAO.findAllocationsByTeacherAndPeriod(employmentId, courseInstance.academicYear(), courseInstance.periodName());
+        TeacherLoad teacherLoad = new TeacherLoad(employmentId, allocations, maxCourseInstances);
+        if (!teacherLoad.canTakeAnotherInstance(courseInstance.instanceId())) {
+            throw new RejectedException("The teacher " + teacher.firstName() + " " + teacher.lastName() + " is already involved in " + teacherLoad.getNumberOfCourseInstances() + " course instances in " + courseInstance.periodName() + " " + courseInstance.academicYear() + ", which is the maximum of " + maxCourseInstances);
+        }
+    }
+
+    /**
+     * Removes the allocation of the specified teacher to the specified teaching activity
+     * of the specified course instance.
+     *
+     * @param employmentId The business id of the employment of the teacher.
+     * @param instanceId   The business id of the course instance.
+     * @param activityName The name of the teaching activity.
+     * @return The allocations of the course instance after the change.
+     * @throws CourseException If unable to remove the allocation.
+     */
+    public List<AllocationDTO> deallocateTeacher(int employmentId, String instanceId,
+                                                 String activityName) throws CourseException {
+        try {
+            PlannedActivityDTO plannedActivity = readPlannedActivity(instanceId, activityName);
+            teachingActivityDAO.deleteAllocation(plannedActivity.plannedActivityId(), employmentId);
+            List<AllocationDTO> allocations = teachingActivityDAO.findAllocationsByCourseInstance(instanceId);
+            dbConnection.commit();
+            return allocations;
+        } catch (Exception exception) {
+            throw new CourseException("Could not remove the allocation of the employee " + employmentId + " to " + activityName + " of " + instanceId, exception);
+        }
+    }
+
     
 
     /** Prints the raw values used by the teaching-cost calculation for quick testing. */
@@ -84,8 +171,7 @@ public class CourseDBController {
             dbConnection.commit();
             System.out.println(hours);
 
-            BigDecimal allocHours =
-                    courseInstanceDAO.findAllocatedHoursByCourseInstance("2026-50000011");
+            BigDecimal allocHours = courseInstanceDAO.findAllocatedHoursByCourseInstance("2026-50000011");
             dbConnection.commit();
             System.out.println(allocHours);
 
