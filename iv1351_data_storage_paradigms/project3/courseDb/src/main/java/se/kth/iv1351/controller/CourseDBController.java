@@ -52,10 +52,7 @@ public class CourseDBController {
      */
     public TeachingCostDTO calculateTeachingCost(String instanceId) throws CourseException {
         try {
-            CourseInstanceDTO courseInstance = courseInstanceDAO.findCurrentYearCourseInstance(instanceId);
-            if (courseInstance == null) {
-                throw new CourseException("No course instance for the current year: " + instanceId);
-            }
+            CourseInstanceDTO courseInstance = checkCourseInstanceNotNull(courseInstanceDAO.findCurrentYearCourseInstance(instanceId), instanceId);
 
             BigDecimal plannedHours = courseInstanceDAO.findPlannedHoursByCourseInstance(instanceId);
             BigDecimal allocatedHours = courseInstanceDAO.findAllocatedHoursByCourseInstance(instanceId);
@@ -74,11 +71,7 @@ public class CourseDBController {
 
     public void addRegisteredStudents(String instanceId, int numberOfStudents) throws CourseException {
         try {
-            CourseInstanceDTO courseInstanceDTO =
-                    courseInstanceDAO.findCurrentYearCourseInstanceForUpdate(instanceId);
-            if (courseInstanceDTO == null) {
-                throw new CourseException("No course instance for the current year: " + instanceId);
-            }
+            CourseInstanceDTO courseInstanceDTO = checkCourseInstanceNotNull(courseInstanceDAO.findCurrentYearCourseInstanceForUpdate(instanceId), instanceId);
 
             CourseInstance courseInstance = new CourseInstance(courseInstanceDTO);
             courseInstance.increaseRegisteredStudents(numberOfStudents);
@@ -104,7 +97,7 @@ public class CourseDBController {
      */
     public List<AllocationDTO> allocateTeacher(int employmentId, String instanceId, String activityName, int allocationHours) throws RejectedException, CourseException {
         try {
-            CourseInstanceDTO courseInstance = courseInstanceDAO.findCurrentYearCourseInstance(instanceId);
+            CourseInstanceDTO courseInstance = checkCourseInstanceNotNull(courseInstanceDAO.findCurrentYearCourseInstance(instanceId), instanceId);
             checkTeacherIsAvailable(employmentId, courseInstance);
             PlannedActivityDTO plannedActivity = readPlannedActivity(instanceId, activityName);
             teachingActivityDAO.createAllocation(plannedActivity.plannedActivityId(), employmentId, allocationHours);
@@ -117,6 +110,22 @@ public class CourseDBController {
         } catch (Exception exception) {
             throw new CourseException("Could not allocate the employee " + employmentId + " to " + activityName + " of " + instanceId, exception);
         }
+    }
+
+    /**
+     * Makes sure a course instance was found, so that a missing or out of scope course
+     * instance is reported as such instead of causing a NullPointerException later.
+     *
+     * @param courseInstance The course instance that was read, possibly {@code null}.
+     * @param instanceId     The business id that was searched for.
+     * @return The course instance, never {@code null}.
+     * @throws CourseException If there is no such course instance in the current year.
+     */
+    private CourseInstanceDTO checkCourseInstanceNotNull(CourseInstanceDTO courseInstance, String instanceId) throws CourseException {
+        if (courseInstance == null) {
+            throw new CourseException("No course instance for the current year: " + instanceId);
+        }
+        return courseInstance;
     }
 
     private PlannedActivityDTO readPlannedActivity(String instanceId, String activityName) throws CourseDBException, CourseException {
@@ -165,10 +174,7 @@ public class CourseDBController {
 
     public List<AllocationDTO> addTeachingActivity(String activityName, BigDecimal multiplicationFactor, String instanceId, int plannedHours, int employmentId, int allocationHours) throws RejectedException, CourseException {
         try {
-            CourseInstanceDTO courseInstance = courseInstanceDAO.findCurrentYearCourseInstance(instanceId);
-            if (courseInstance == null) {
-                throw new CourseException("No course instance for the current year: " + instanceId);
-            }
+            CourseInstanceDTO courseInstance = checkCourseInstanceNotNull(courseInstanceDAO.findCurrentYearCourseInstance(instanceId), instanceId);
             checkTeacherIsAvailable(employmentId, courseInstance);
             teachingActivityDAO.createTeachingActivity(new TeachingActivityDTO(activityName, multiplicationFactor));
             teachingActivityDAO.createPlannedActivity(instanceId, activityName, plannedHours);
