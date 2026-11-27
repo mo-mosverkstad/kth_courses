@@ -219,29 +219,6 @@ public class CourseDBController {
         }
     }
 
-    /** Prints the raw values used by the teaching-cost calculation for quick testing. */
-    public void test() {
-        try {
-            System.out.println("--- CONTROLLER TEST FOR BASIC PRINTOUT ---");
-            BigDecimal hours = courseInstanceDAO.findPlannedHoursByCourseInstance("2026-50000011");
-            dbConnection.commit();
-            System.out.println(hours);
-
-            BigDecimal allocHours = courseInstanceDAO.findAllocatedHoursByCourseInstance("2026-50000011");
-            dbConnection.commit();
-            System.out.println(allocHours);
-
-            BigDecimal salary = employeeDAO.findAverageTeacherSalary();
-            dbConnection.commit();
-            System.out.println(salary);
-
-            System.out.println();
-        } catch (CourseDBException | DatabaseConnectionException exception) {
-            rollback(exception);
-            exception.printStackTrace();
-        }
-    }
-
     private void rollback(Exception originalFailure) {
         try {
             dbConnection.rollback();

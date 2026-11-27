@@ -11,16 +11,14 @@ import se.kth.iv1351.model.RejectedException;
 /** Minimal command-line view for displaying a course instance's teaching cost. */
 public class BasicView implements View {
     private final CourseDBController controller;
-    private final String instanceId;
 
-    public BasicView(CourseDBController controller, String instanceId) {
+    public BasicView(CourseDBController controller) {
         this.controller = controller;
-        this.instanceId = instanceId;
     }
 
     @Override
     public void start() {
-        controller.test();
+        String instanceId = "2026-50000011";
         try {
             System.out.println("--- Calculating teaching cost ---");
             System.out.println(controller.calculateTeachingCost(instanceId));
