@@ -60,11 +60,11 @@ public class CourseDBController {
             TeachingCostDTO result = new TeachingCost(courseInstance, plannedHours, allocatedHours, averageTeacherSalary).toDTO();
             dbConnection.commit();
             return result;
+        } catch (CourseException known) {
+            rollback(known);
+            throw known;
         } catch (Exception exception) {
             rollback(exception);
-            if (exception instanceof CourseException courseException) {
-                throw courseException;
-            }
             throw new CourseException("Could not calculate teaching cost for " + instanceId, exception);
         }
     }
@@ -77,7 +77,11 @@ public class CourseDBController {
             courseInstance.increaseRegisteredStudents(numberOfStudents);
             courseInstanceDAO.updateCourseInstance(courseInstance.toDTO());
             dbConnection.commit();
+        } catch (CourseException known) {
+            rollback(known);
+            throw known;
         } catch (Exception exception) {
+            rollback(exception);
             throw new CourseException("Could not add " + numberOfStudents + " registered students to: " + instanceId, exception);
         }
     }
@@ -104,10 +108,11 @@ public class CourseDBController {
             List<AllocationDTO> allocations = teachingActivityDAO.findAllocationsByCourseInstance(instanceId);
             dbConnection.commit();
             return allocations;
-        } catch (RejectedException rejected) {
-            rollback(rejected);
-            throw rejected;
+        } catch (RejectedException | CourseException known) {
+            rollback(known);
+            throw known;
         } catch (Exception exception) {
+            rollback(exception);
             throw new CourseException("Could not allocate the employee " + employmentId + " to " + activityName + " of " + instanceId, exception);
         }
     }
@@ -167,7 +172,11 @@ public class CourseDBController {
             List<AllocationDTO> allocations = teachingActivityDAO.findAllocationsByCourseInstance(instanceId);
             dbConnection.commit();
             return allocations;
+        } catch (CourseException known) {
+            rollback(known);
+            throw known;
         } catch (Exception exception) {
+            rollback(exception);
             throw new CourseException("Could not remove the allocation of the employee " + employmentId + " to " + activityName + " of " + instanceId, exception);
         }
     }
@@ -183,10 +192,11 @@ public class CourseDBController {
             List<AllocationDTO> allocations = teachingActivityDAO.findAllocationsByCourseInstance(instanceId);
             dbConnection.commit();
             return allocations;
-        } catch (RejectedException rejected) {
-            rollback(rejected);
-            throw rejected;
+        } catch (RejectedException | CourseException known) {
+            rollback(known);
+            throw known;
         } catch (Exception exception) {
+            rollback(exception);
             throw new CourseException("Could not add the teaching activity " + activityName + " to " + instanceId, exception);
         }
     }
@@ -204,6 +214,7 @@ public class CourseDBController {
             dbConnection.commit();
             return allocations;
         } catch (Exception exception) {
+            rollback(exception);
             throw new CourseException("Could not read the allocations of: " + instanceId, exception);
         }
     }
