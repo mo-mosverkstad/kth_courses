@@ -67,7 +67,7 @@ public final class EmployeeDAO extends AbstractDAO {
                 SELECT DISTINCT ON (employee_salary.employee_id) employee_salary.salary
                 FROM employee_salary
                 ORDER BY employee_salary.employee_id, employee_salary.valid_from DESC
-            ) AS latest;
+            ) AS latest
         """);
         findEmployeeForUpdateStmt = connection.prepareStatement("""
             SELECT employee.employment_id,

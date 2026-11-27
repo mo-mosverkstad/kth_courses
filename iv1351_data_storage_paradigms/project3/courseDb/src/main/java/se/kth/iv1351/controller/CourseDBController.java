@@ -74,7 +74,8 @@ public class CourseDBController {
 
     public void addRegisteredStudents(String instanceId, int numberOfStudents) throws CourseException {
         try {
-            CourseInstanceDTO courseInstanceDTO = courseInstanceDAO.findCurrentYearCourseInstance(instanceId);
+            CourseInstanceDTO courseInstanceDTO =
+                    courseInstanceDAO.findCurrentYearCourseInstanceForUpdate(instanceId);
             if (courseInstanceDTO == null) {
                 throw new CourseException("No course instance for the current year: " + instanceId);
             }

@@ -238,11 +238,11 @@ public final class TeachingActivityDAO extends AbstractDAO {
             WHERE employee.employment_id = ?
             AND academic_period.academic_year = ?
             AND period.period_name = ?
-            ORDER BY course_instance.instance_id, teaching_activity.activity_name;
+            ORDER BY course_instance.instance_id, teaching_activity.activity_name
         """);
         findAllocationsByCourseInstanceStmt = connection.prepareStatement(ALLOCATION_QUERY + """
             WHERE course_instance.instance_id = ?
-            ORDER BY teacher_name, teaching_activity.activity_name;
+            ORDER BY teacher_name, teaching_activity.activity_name
         """);
         findPlannedActivityStmt = connection.prepareStatement("""
             SELECT planned_activity.id,
@@ -252,7 +252,7 @@ public final class TeachingActivityDAO extends AbstractDAO {
             FROM planned_activity
             INNER JOIN course_instance ON course_instance.id = planned_activity.course_instance_id
             INNER JOIN teaching_activity ON teaching_activity.id = planned_activity.teaching_activity_id
-            WHERE course_instance.instance_id = ? AND teaching_activity.activity_name = ?;
+            WHERE course_instance.instance_id = ? AND teaching_activity.activity_name = ?
         """);
         createAllocationStmt = connection.prepareStatement("""
             INSERT INTO teaching_allocation (planned_activity_id, employee_id, allocation_hours)

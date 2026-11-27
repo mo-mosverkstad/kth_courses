@@ -10,7 +10,29 @@ import se.kth.iv1351.dto.CourseInstanceDTO;
 
 /** Reads course-instance information and teaching-hour totals. */
 public final class CourseInstanceDAO extends AbstractDAO {
+    /**
+     * Shared by the locking and the non locking read, so that the query exists in one
+     * place only. A locking clause must be the last part of the statement, which is why
+     * it is appended instead of being written into the query.
+     */
+    private static final String COURSE_INSTANCE_QUERY = """
+        SELECT course_instance.instance_id,
+                course.course_code,
+                course.course_name,
+                period.period_name,
+                academic_period.academic_year,
+                course_layout.hp,
+                course_instance.num_students
+        FROM course_instance
+        INNER JOIN course_layout ON course_layout.id = course_instance.course_layout_id
+        INNER JOIN course ON course.id = course_layout.course_id
+        INNER JOIN academic_period ON academic_period.id = course_instance.academic_period_id
+        INNER JOIN period ON period.id = academic_period.period_id
+        WHERE course_instance.instance_id = ?
+            AND academic_period.academic_year = EXTRACT(YEAR FROM CURRENT_DATE)""";
+
     private PreparedStatement courseInstanceByIdStmt;
+    private PreparedStatement courseInstanceByIdForUpdateStmt;
     private PreparedStatement updateNumStudentsStmt;
     private PreparedStatement plannedHoursByInstanceStmt;
     private PreparedStatement allocatedHoursByInstanceStmt;
@@ -21,11 +43,27 @@ public final class CourseInstanceDAO extends AbstractDAO {
 
     /** Returns this year's course instance, or {@code null} if it does not exist. */
     public CourseInstanceDTO findCurrentYearCourseInstance(String instanceId) throws CourseDBException {
+        return findCourseInstance(instanceId, courseInstanceByIdStmt);
+    }
+
+    /**
+     * Returns this year's course instance, or {@code null} if it does not exist, and
+     * locks the course instance row until the transaction ends. Must be used when the
+     * course instance is read in order to be updated, otherwise the lost update anomaly
+     * may occur.
+     */
+    public CourseInstanceDTO findCurrentYearCourseInstanceForUpdate(String instanceId)
+            throws CourseDBException {
+        return findCourseInstance(instanceId, courseInstanceByIdForUpdateStmt);
+    }
+
+    private CourseInstanceDTO findCourseInstance(String instanceId, PreparedStatement statement)
+            throws CourseDBException {
         String failureMsg = "Could not read course instance: " + instanceId;
         ResultSet result = null;
         try {
-            courseInstanceByIdStmt.setString(1, instanceId);
-            result = courseInstanceByIdStmt.executeQuery();
+            statement.setString(1, instanceId);
+            result = statement.executeQuery();
             if (result.next()) {
                 return new CourseInstanceDTO(
                     result.getString("instance_id"),
@@ -77,22 +115,10 @@ public final class CourseInstanceDAO extends AbstractDAO {
     @Override
     protected void prepareStatements() throws SQLException {
         Connection connection = databaseConnection.getConnection();
-        courseInstanceByIdStmt = connection.prepareStatement("""
-            SELECT course_instance.instance_id,
-                   course.course_code,
-                   course.course_name,
-                   period.period_name,
-                   academic_period.academic_year,
-                   course_layout.hp,
-                   course_instance.num_students
-            FROM course_instance
-            INNER JOIN course_layout ON course_layout.id = course_instance.course_layout_id
-            INNER JOIN course ON course.id = course_layout.course_id
-            INNER JOIN academic_period ON academic_period.id = course_instance.academic_period_id
-            INNER JOIN period ON period.id = academic_period.period_id
-            WHERE course_instance.instance_id = ?
-              AND academic_period.academic_year = EXTRACT(YEAR FROM CURRENT_DATE)
-            """);
+        courseInstanceByIdStmt = connection.prepareStatement(COURSE_INSTANCE_QUERY);
+
+        courseInstanceByIdForUpdateStmt = connection.prepareStatement(
+                COURSE_INSTANCE_QUERY + " FOR NO KEY UPDATE OF course_instance");
 
         updateNumStudentsStmt = connection.prepareStatement("""
             UPDATE course_instance
@@ -102,7 +128,7 @@ public final class CourseInstanceDAO extends AbstractDAO {
                   SELECT id
                   FROM academic_period
                   WHERE academic_year = EXTRACT(YEAR FROM CURRENT_DATE)
-              )
+              );
         """);
 
         plannedHoursByInstanceStmt = connection.prepareStatement("""
