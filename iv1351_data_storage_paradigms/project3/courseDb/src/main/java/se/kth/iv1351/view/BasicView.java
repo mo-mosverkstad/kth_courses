@@ -62,15 +62,4 @@ public class BasicView implements View {
             exception.printStackTrace(System.err);
         }
     }
-
-    private void printAllocations(List<AllocationDTO> allocations) {
-        if (allocations.isEmpty()) {
-            System.out.println("No teaching allocations.");
-            return;
-        }
-        allocations.forEach(allocation -> System.out.printf(
-                "%s (%d) - %s, %s, %d hours%n",
-                allocation.teacherName(), allocation.employmentId(), allocation.instanceId(),
-                allocation.activityName(), allocation.allocationHours()));
-    }
 }

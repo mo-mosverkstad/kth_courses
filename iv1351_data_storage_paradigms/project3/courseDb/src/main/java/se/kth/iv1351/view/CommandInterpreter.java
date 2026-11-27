@@ -63,7 +63,7 @@ public class CommandInterpreter implements View {
                     break;
                 case SHOW_TEACHING_COST:
                     if (hasArguments(arguments, 1)) {
-                        printCost(controller.calculateTeachingCost(arguments.get(0)));
+                        System.out.println(controller.calculateTeachingCost(arguments.get(0)));
                     }
                     break;
                 case ADDSTUDENTS:
@@ -75,21 +75,21 @@ public class CommandInterpreter implements View {
                     break;
                 case ALLOCATE:
                     if (hasArguments(arguments, 4)) {
-                        printAllocations(controller.allocateTeacher(
+                        System.out.println(controller.allocateTeacher(
                                 Integer.parseInt(arguments.get(0)), arguments.get(1),
                                 arguments.get(2), Integer.parseInt(arguments.get(3))));
                     }
                     break;
                 case DEALLOCATE:
                     if (hasArguments(arguments, 3)) {
-                        printAllocations(controller.deallocateTeacher(
+                        System.out.println(controller.deallocateTeacher(
                                 Integer.parseInt(arguments.get(0)), arguments.get(1),
                                 arguments.get(2)));
                     }
                     break;
                 case NEWACTIVITY:
                     if (hasArguments(arguments, 6)) {
-                        printAllocations(controller.addTeachingActivity(arguments.get(0),
+                        System.out.println(controller.addTeachingActivity(arguments.get(0),
                                 new BigDecimal(arguments.get(1)), arguments.get(2),
                                 Integer.parseInt(arguments.get(3)),
                                 Integer.parseInt(arguments.get(4)),
@@ -98,7 +98,7 @@ public class CommandInterpreter implements View {
                     break;
                 case LIST:
                     if (hasArguments(arguments, 1)) {
-                        printAllocations(controller.getAllocations(arguments.get(0)));
+                        System.out.println(controller.getAllocations(arguments.get(0)));
                     }
                     break;
                 case QUIT:
@@ -127,29 +127,6 @@ public class CommandInterpreter implements View {
         }
         System.out.println("wrong number of parameters, type help for a list");
         return false;
-    }
-
-    private void printCost(TeachingCostDTO cost) {
-        System.out.printf("%-10s %-16s %-6s %14s %14s%n", "Course", "Course Instance",
-                "Period", "Planned (KSEK)", "Actual (KSEK)");
-        System.out.printf("%-10s %-16s %-6s %14s %14s%n", cost.courseCode(),
-                cost.instanceId(), cost.periodName(), cost.plannedCostKSEK(),
-                cost.actualCostKSEK());
-    }
-
-    private void printAllocations(List<AllocationDTO> allocations) {
-        if (allocations.isEmpty()) {
-            System.out.println("no allocations");
-            return;
-        }
-        System.out.printf("%-8s %-16s %-15s %-14s %-24s %6s%n", "Course",
-                "Course Instance", "Activity", "Employment Id", "Teacher", "Hours");
-        for (AllocationDTO allocation : allocations) {
-            System.out.printf("%-8s %-16s %-15s %-14d %-24s %6d%n",
-                    allocation.courseCode(), allocation.instanceId(),
-                    allocation.activityName(), allocation.employmentId(),
-                    allocation.teacherName(), allocation.allocationHours());
-        }
     }
 
     private String readNextLine() {
