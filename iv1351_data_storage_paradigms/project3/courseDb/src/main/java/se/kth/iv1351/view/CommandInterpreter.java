@@ -1,5 +1,6 @@
 package se.kth.iv1351.view;
 
+import java.util.List;
 import java.util.Scanner;
 
 import se.kth.iv1351.controller.CourseDBController;
@@ -40,9 +41,10 @@ public class CommandInterpreter implements View {
     public void handleCmds() {
         try {
             CommandLine cmdLine = new CommandLine(readNextLine());
+            List<String> arguments = cmdLine.getArguments();
             switch (CommandType.fromString(cmdLine.getCommand())) {
                 case HELP:
-                    if (cmdLine.getArguments().size() != 0){
+                    if (arguments.size() != 0){
                         System.out.println("help command doesn't accept any arguments");
                         break;
                     }
@@ -52,6 +54,9 @@ public class CommandInterpreter implements View {
                         }
                         System.out.println(command.getCommand());
                     }
+                    break;
+                case ECHO:
+                    System.out.println(arguments);
                     break;
                 case QUIT:
                     stop();

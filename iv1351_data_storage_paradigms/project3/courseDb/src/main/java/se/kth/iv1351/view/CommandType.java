@@ -42,6 +42,12 @@ public enum CommandType {
     QUIT("quit"),
 
     /**
+     * Echo the values (for testing commandline itself)
+     */
+
+    ECHO("echo"),
+
+    /**
      * None of the valid commands above was specified.
      */
     ILLEGAL_COMMAND("illegalcommand");
